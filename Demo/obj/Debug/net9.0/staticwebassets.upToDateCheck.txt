@@ -1,0 +1,21 @@
+wwwroot\css\app.css
+wwwroot\css\pager.css
+wwwroot\images\favicon.png
+wwwroot\images\loader.gif
+wwwroot\images\photo.jpg
+wwwroot\js\app.js
+wwwroot\js\jquery.min.js
+wwwroot\js\jquery.unobtrusive-ajax.min.js
+wwwroot\js\jquery.validate.min.js
+wwwroot\js\jquery.validate.unobtrusive.min.js
+wwwroot\photos\admin.jpg
+wwwroot\photos\m1.jpg
+wwwroot\photos\m2.jpg
+wwwroot\photos\photo.jpg
+C:\Users\TARUC\Desktop\Practical 10\WMS-10\Demo\Demo\wwwroot\css\app.css
+C:\Users\TARUC\Desktop\Practical 10\WMS-10\Demo\Demo\wwwroot\css\pager.css
+C:\Users\TARUC\Desktop\Practical 10\WMS-10\Demo\Demo\wwwroot\js\app.js
+C:\Users\TARUC\Desktop\Practical 10\WMS-10\Demo\Demo\wwwroot\js\jquery.min.js
+C:\Users\TARUC\Desktop\Practical 10\WMS-10\Demo\Demo\wwwroot\js\jquery.unobtrusive-ajax.min.js
+C:\Users\TARUC\Desktop\Practical 10\WMS-10\Demo\Demo\wwwroot\js\jquery.validate.min.js
+C:\Users\TARUC\Desktop\Practical 10\WMS-10\Demo\Demo\wwwroot\js\jquery.validate.unobtrusive.min.js
