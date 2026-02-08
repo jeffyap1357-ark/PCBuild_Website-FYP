@@ -1,0 +1,35 @@
+@model Hardware
+
+@{
+    ViewBag.Title = "Hardware | " + Model.Name;
+}
+
+<div class="hardware-detail">
+    @if (!string.IsNullOrEmpty(Model.Picture))
+    {
+        <p>
+            <img src="/images/hardware/@Model.Picture" alt="@Model.Name" class="hardware-detail-picture">
+        </p>
+    }
+
+    <dl class="detail-list">
+        <dt>Name</dt>
+        <dd>@Model.Name</dd>
+
+        <dt>Category</dt>
+        <dd>@Model.Category?.Type</dd>
+
+        <dt>Brand</dt>
+        <dd>@(Model.Brand ?? "—")</dd>
+
+        <dt>Price</dt>
+        <dd>@Model.Price.ToString("C")</dd>
+
+        <dt>Description</dt>
+        <dd>@(Model.Detail ?? "No description available.")</dd>
+    </dl>
+
+    <p>
+        <a href="@Url.Action("List")" class="button">← Back to Hardware List</a>
+    </p>
+</div>

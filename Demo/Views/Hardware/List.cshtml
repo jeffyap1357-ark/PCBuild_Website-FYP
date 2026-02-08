@@ -1,0 +1,63 @@
+@model List<Hardware>
+
+@{
+    ViewBag.Title = "Hardware | List";
+    var categories = ViewBag.Categories as List<Category>;
+    var selectedCategoryId = ViewBag.SelectedCategoryId as int?;
+}
+
+<p>
+    <a href="@Url.Action("List")">All</a>
+    @if (categories != null)
+    {
+        @foreach (var c in categories)
+        {
+            <span> | </span>
+            <a href="@Url.Action("List", new { categoryId = c.CategoryId })" class="@(selectedCategoryId == c.CategoryId ? "active" : "")">@c.Type</a>
+        }
+    }
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Picture</th>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Brand</th>
+            <th>Price</th>
+            <th>Detail</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var h in Model)
+        {
+            <tr>
+                <td>
+                    @if (!string.IsNullOrEmpty(h.Picture))
+                    {
+                        <img src="/images/hardware/@h.Picture" alt="@h.Name" style="max-width: 80px; max-height: 80px; object-fit: contain;">
+                    }
+                    else
+                    {
+                        <span>—</span>
+                    }
+                </td>
+                <td>@h.Name</td>
+                <td>@h.Category?.Type</td>
+                <td>@(h.Brand ?? "—")</td>
+                <td>@h.Price.ToString("C")</td>
+                <td>@(h.Detail ?? "—")</td>
+                <td>
+                    <a href="@Url.Action("Detail", new { id = h.HardwareId })" class="button">View</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (!Model.Any())
+{
+    <p>No hardware found.</p>
+}

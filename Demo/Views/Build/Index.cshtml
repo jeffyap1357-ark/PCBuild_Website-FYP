@@ -1,0 +1,42 @@
+@model List<Build>
+
+@{
+    ViewBag.Title = "PC Build | My Builds";
+}
+
+<p>
+    <a href="@Url.Action("Configure")" class="button">+ New PC Build</a>
+</p>
+
+@if (!Model.Any())
+{
+    <p>You have no saved builds. <a href="@Url.Action("Configure")">Create one</a>.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Build Name</th>
+                <th>Total Price</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var b in Model)
+            {
+                <tr>
+                    <td><a href="@Url.Action("Detail", new { id = b.BuildId })">@b.BuildName</a></td>
+                    <td>@b.TotalPrice.ToString("C")</td>
+                    <td>
+                        <a href="@Url.Action("Detail", new { id = b.BuildId })" class="button">View</a>
+                        <a href="@Url.Action("Edit", new { id = b.BuildId })" class="button">Edit</a>
+                        <form method="post" action="@Url.Action("Delete", new { id = b.BuildId })" style="display:inline;" onsubmit="return confirm('Delete this build?');">
+                            <button type="submit" class="button">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

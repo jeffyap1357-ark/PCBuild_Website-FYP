@@ -1,0 +1,36 @@
+@model Build
+
+@{
+    ViewBag.Title = "PC Build | " + Model.BuildName;
+}
+
+<h2>@Model.BuildName</h2>
+<p><strong>Total: @Model.TotalPrice.ToString("C")</strong></p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Category</th>
+            <th>Component</th>
+            <th>Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var bd in Model.BuildDetails.OrderBy(bd => bd.Hardware?.Category?.Type))
+        {
+            <tr>
+                <td>@bd.Hardware?.Category?.Type</td>
+                <td><a href="/Hardware/Detail/@bd.HardwareId">@bd.Hardware?.Name</a></td>
+                <td>@((bd.Hardware?.Price ?? 0) * bd.Quantity).ToString("C")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<p>
+    <a href="@Url.Action("Edit", new { id = Model.BuildId })" class="button">Edit Build</a>
+    <a href="@Url.Action("Index")" class="button">← My Builds</a>
+    <form method="post" action="@Url.Action("Delete", new { id = Model.BuildId })" style="display:inline;" onsubmit="return confirm('Delete this build?');">
+        <button type="submit" class="button">Delete</button>
+    </form>
+</p>

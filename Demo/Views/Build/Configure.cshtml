@@ -1,0 +1,63 @@
+@model ConfigureBuildVM
+
+@{
+    ViewBag.Title = "PC Build | Configure";
+}
+
+<form method="post" id="configure-form">
+    <div asp-validation-summary="ModelOnly"></div>
+
+    <p>
+        <label asp-for="BuildName"></label>
+        <input asp-for="BuildName" placeholder="e.g. My Gaming PC">
+        <span asp-validation-for="BuildName"></span>
+    </p>
+
+    <p><strong>Select components by category:</strong></p>
+
+    @for (var i = 0; i < Model.Categories.Count; i++)
+    {
+        var cat = Model.Categories[i];
+        <p>
+            <label>@cat.Type</label>
+            <input type="hidden" asp-for="Categories[i].CategoryId" />
+            <input type="hidden" asp-for="Categories[i].Type" />
+            <select asp-for="Categories[i].SelectedHardwareId" class="hardware-select" data-category="@cat.Type">
+                <option value="">-- None --</option>
+                @foreach (var h in cat.Items)
+                {
+                    <option value="@h.HardwareId" data-price="@h.Price">@h.Name - @h.Price.ToString("C")</option>
+                }
+            </select>
+        </p>
+    }
+
+    <p class="total-row">
+        <strong>Total: </strong><span id="total-price">@Model.Categories.Sum(c => c.Items.FirstOrDefault(i => i.HardwareId == c.SelectedHardwareId)?.Price ?? 0).ToString("C")</span>
+    </p>
+
+    <p>
+        <button type="submit">Save Build</button>
+        <a href="@Url.Action("Index")" class="button">Cancel</a>
+    </p>
+</form>
+
+@section foot {
+    <script>
+        (function () {
+            var form = document.getElementById('configure-form');
+            var totalEl = document.getElementById('total-price');
+            var selects = form.querySelectorAll('.hardware-select');
+            function updateTotal() {
+                var total = 0;
+                selects.forEach(function (s) {
+                    var opt = s.options[s.selectedIndex];
+                    if (opt && opt.value) total += parseFloat(opt.getAttribute('data-price') || 0);
+                });
+                totalEl.textContent = '$' + total.toFixed(2);
+            }
+            selects.forEach(function (s) { s.addEventListener('change', updateTotal); });
+            updateTotal();
+        })();
+    </script>
+}
