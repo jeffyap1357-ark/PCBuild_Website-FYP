@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
 namespace Demo.Models;
@@ -23,24 +23,24 @@ public class LoginVM
 public class RegisterVM
 {
     [StringLength(100)]
+    [Remote("CheckUsername", "Account", ErrorMessage = "Duplicated {0}.")]
+    [Display(Name = "Username")]
+    public string Username { get; set; }
+
+    [StringLength(256)]
     [EmailAddress]
     [Remote("CheckEmail", "Account", ErrorMessage = "Duplicated {0}.")]
     public string Email { get; set; }
 
-    [StringLength(100, MinimumLength = 5)]
+    [StringLength(256, MinimumLength = 5)]
     [DataType(DataType.Password)]
     public string Password { get; set; }
 
-    [StringLength(100, MinimumLength = 5)]
+    [StringLength(256, MinimumLength = 5)]
     [Compare("Password")]
     [DataType(DataType.Password)]
     [Display(Name = "Confirm Password")]
     public string Confirm { get; set; }
-
-    [StringLength(100)]
-    public string Name { get; set; }
-
-    public IFormFile Photo { get; set; }
 }
 
 public class UpdatePasswordVM
@@ -64,35 +64,34 @@ public class UpdatePasswordVM
 
 public class UpdateProfileVM
 {
-    public string? Email { get; set; }
-
     [StringLength(100)]
-    public string Name { get; set; }
+    public string Username { get; set; }
 
-    public string? PhotoURL { get; set; }
-
-    public IFormFile? Photo { get; set; }
-}
-
-public class ResetPasswordVM
-{
-    [StringLength(100)]
+    [StringLength(256)]
     [EmailAddress]
     public string Email { get; set; }
 }
 
-// Reservation
-
-public class ReserveVM
+public class ResetPasswordVM
 {
-    [Display(Name = "Room Type")]
-    public string TypeId { get; set; }
+    [StringLength(256)]
+    [EmailAddress]
+    public string Email { get; set; }
+}
 
-    [Display(Name = "Check In Date")]
-    [DataType(DataType.Date)]
-    public DateOnly CheckIn { get; set; }
+// PC Build configuration
+public class ConfigureBuildVM
+{
+    [Required, StringLength(200), Display(Name = "Build Name")]
+    public string BuildName { get; set; }
 
-    [Display(Name = "Check Out Date")]
-    [DataType(DataType.Date)]
-    public DateOnly CheckOut { get; set; }
+    public List<CategoryOptionVM> Categories { get; set; } = [];
+}
+
+public class CategoryOptionVM
+{
+    public int CategoryId { get; set; }
+    public string Type { get; set; }
+    public List<Hardware> Items { get; set; } = [];
+    public int? SelectedHardwareId { get; set; }
 }

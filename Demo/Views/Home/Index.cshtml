@@ -1,58 +1,19 @@
-﻿@{
-    ViewBag.Title = "Home | Index";
+@{
+    ViewBag.Title = "PC Build | Home";
 }
 
-<table class="table">
-    <caption>Members</caption>
-    <tr>
-        <th>Email</th>
-        <th>Password</th>
-        <th>Name</th>
-        <th>PhotoURL</th>
-    </tr>
-    @foreach (Member m in ViewBag.Members)
+<h1>PC Build</h1>
+<p>Welcome to PC Build. Create and manage your PC builds.</p>
+<ul>
+    <li><a href="/Hardware/List">Hardware List</a> – Browse components (CPU, GPU, RAM, etc.)</li>
+    <li><a href="/Learning/Index">Learning & Guide</a> – PC building tutorials and tips</li>
+    @if (User.Identity!.IsAuthenticated)
     {
-        <tr>
-            <td>@m.Email</td>
-            <td>123456</td>
-            <td>@m.Name</td>
-            <td>@m.PhotoURL</td>
-        </tr>
+        <li><a href="/Build/Configure">PC Build Config</a> – Create a new build</li>
+        <li><a href="/Build/Index">My Builds</a> – Your saved builds</li>
     }
-</table>
-
-<br>
-
-<table class="table">
-    <caption>Types</caption>
-    <tr>
-        <th>Id</th>
-        <th>Name</th>
-        <th>Price</th>
-    </tr>
-    @foreach (Demo.Models.Type t in ViewBag.Types)
+    else
     {
-        <tr>
-            <td>@t.Id</td>
-            <td>@t.Name</td>
-            <td>@t.Price</td>
-        </tr>
+        <li><a href="/Account/Login">Login</a> or <a href="/Account/Register">Register</a> to create builds</li>
     }
-</table>
-
-<br>
-
-<table class="table">
-    <caption>Rooms</caption>
-    <tr>
-        <th>Id</th>
-        <th>TypeId</th>
-    </tr>
-    @foreach (Room r in ViewBag.Rooms)
-    {
-        <tr>
-            <td>@r.Id</td>
-            <td>@r.TypeId</td>
-        </tr>
-    }
-</table>
+</ul>

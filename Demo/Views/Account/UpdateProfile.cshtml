@@ -1,27 +1,19 @@
-﻿@model UpdateProfileVM
+@model UpdateProfileVM
 
 @{
-    ViewBag.Title = "Account | Update Profile";
+    ViewBag.Title = "PC Build | Update Profile";
 }
 
-<form class="form" method="post" enctype="multipart/form-data">
+<form class="form" method="post">
     <div asp-validation-summary="ModelOnly"></div>
 
+    <label asp-for="Username"></label>
+    <input asp-for="Username" autofocus>
+    <span asp-validation-for="Username"></span>
+
     <label asp-for="Email"></label>
-    <b>@Model.Email</b>
-    <br>
-
-    <label asp-for="Name"></label>
-    <input asp-for="Name" autofocus>
-    <span asp-validation-for="Name"></span>
-
-    <label asp-for="Photo"></label>
-    <label class="upload">
-        <small>Select Photo...</small>
-        <input asp-for="Photo" accept="image/jpeg,image/png" hidden>
-        <img src="/photos/@Model.PhotoURL">
-    </label>
-    <span asp-validation-for="Photo"></span>
+    <input asp-for="Email">
+    <span asp-validation-for="Email"></span>
 
     <section>
         <button>Update</button>

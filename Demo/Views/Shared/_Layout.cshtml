@@ -1,5 +1,3 @@
-﻿@inject DB db
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,29 +14,23 @@
     <div class="info">@Html.Raw(TempData["Info"])</div>
 
     <header>
-        <h1><a href="/">Simple Room Reservation</a></h1>
+        <h1><a href="/">PC Build</a></h1>
 
         @if (User.Identity!.IsAuthenticated)
         {
-            <div>
-                @User.Identity.Name |
-                @(User.IsInRole("Admin")  ? "Admin"  : "")
-                @(User.IsInRole("Member") ? "Member" : "")
-            </div>
-        }
-
-        @if (User.IsInRole("Member"))
-        {
-            var photoURL = db.Members.Find(User.Identity!.Name)!.PhotoURL;
-            <img src="/photos/@photoURL">
+            <div>@User.Identity.Name</div>
         }
     </header>
 
     <nav>
-        <a href="/">Index</a>
-        <a href="/Home/Reserve">Reserve</a>
-        <a href="/Home/List">List</a>
-        <a href="/Home/Status">Status</a>
+        <a href="/">Home</a>
+        <a href="/Hardware/List">Hardware List</a>
+        <a href="/Learning/Index">📚 Learning & Guide</a>
+        @if (User.Identity!.IsAuthenticated)
+        {
+            <a href="/Build/Configure">PC Build Config</a>
+            <a href="/Build/Index">My Builds</a>
+        }
 
         <div></div>
 
@@ -46,16 +38,13 @@
         {
             <a href="/Account/Logout">Logout</a>
             <a href="/Account/UpdatePassword">Update Password</a>
+            <a href="/Account/UpdateProfile">Update Profile</a>
         }
         else
         {
             <a href="/Account/Login">Login</a>
             <a href="/Account/Register">Register</a>
             <a href="/Account/ResetPassword">Reset Password</a>
-        }
-        @if (User.IsInRole("Member"))
-        {
-            <a href="/Account/UpdateProfile">Update Profile</a>
         }
     </nav>
 
@@ -65,8 +54,8 @@
     </main>
 
     <footer>
-        Developed by <b>BAE SUZY</b> &middot;
-        Copyrighted &copy; @DateTime.Today.Year
+        PC Build &middot;
+        Copyright &copy; @DateTime.Today.Year
     </footer>
 
     <script src="/js/jquery.min.js"></script>

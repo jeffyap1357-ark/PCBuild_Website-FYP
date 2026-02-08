@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -10,93 +10,165 @@ public class DB : DbContext
 {
     public DB(DbContextOptions options) : base(options) { }
 
-    // DB Sets
-    public DbSet<User> Users { get; set; }
-    public DbSet<Admin> Admins { get; set; }
-    public DbSet<Member> Members { get; set; }
+    protected override void OnModelCreating(ModelBuilder mb)
+    {
+        mb.Entity<UserInterest>().HasKey(x => new { x.UserId, x.MaterialId });
+        mb.Entity<UserProgress>().HasKey(x => new { x.UserId, x.MaterialId });
+    }
 
-    public DbSet<Type> Types { get; set; }
-    public DbSet<Room> Rooms { get; set; }
-    public DbSet<Reservation> Reservations { get; set; }
+    public DbSet<User> Users { get; set; }
+    public DbSet<Build> Builds { get; set; }
+    public DbSet<BuildDetail> BuildDetails { get; set; }
+    public DbSet<Category> Categories { get; set; }
+    public DbSet<Hardware> Hardware { get; set; }
+    public DbSet<LearningMaterial> LearningMaterials { get; set; }
+    public DbSet<UserInterest> UserInterests { get; set; }
+    public DbSet<UserProgress> UserProgresses { get; set; }
 }
 
-// Entity Classes -------------------------------------------------------------
-
+// User: PC Build website users
 public class User
 {
-    [Key, MaxLength(100)]
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int UserId { get; set; }
+
+    [Required, MaxLength(100)]
+    public string Username { get; set; }
+
+    [Required, MaxLength(256)]
+    public string Password { get; set; }
+
+    [Required, MaxLength(256)]
     public string Email { get; set; }
-    [MaxLength(100)]
-    public string Hash { get; set; }
-    [MaxLength(100)]
+
+    public List<Build> Builds { get; set; } = [];
+    public List<UserInterest> UserInterests { get; set; } = [];
+    public List<UserProgress> UserProgresses { get; set; } = [];
+}
+
+// Build: PC builds created by users
+public class Build
+{
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int BuildId { get; set; }
+
+    public int UserId { get; set; }
+
+    [Required, MaxLength(200)]
+    public string BuildName { get; set; }
+
+    [Precision(10, 2)]
+    public decimal TotalPrice { get; set; }
+
+    [ForeignKey(nameof(UserId))]
+    public User User { get; set; }
+
+    public List<BuildDetail> BuildDetails { get; set; } = [];
+}
+
+// BuildDetail: one hardware item in a build
+public class BuildDetail
+{
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int BuildDetailId { get; set; }
+
+    public int BuildId { get; set; }
+    public int HardwareId { get; set; }
+    public int Quantity { get; set; } = 1;
+
+    [ForeignKey(nameof(BuildId))]
+    public Build Build { get; set; }
+
+    [ForeignKey(nameof(HardwareId))]
+    public Hardware Hardware { get; set; }
+}
+
+// Category: hardware types (CPU, Motherboard, GPU, etc.)
+public class Category
+{
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int CategoryId { get; set; }
+
+    [Required, MaxLength(100)]
+    public string Type { get; set; }
+
+    public List<Hardware> Hardware { get; set; } = [];
+}
+
+// Hardware: individual components
+public class Hardware
+{
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int HardwareId { get; set; }
+
+    [Required, MaxLength(200)]
     public string Name { get; set; }
 
-    public string Role => GetType().Name;
-}
+    public int CategoryId { get; set; }
 
-public class Admin : User
-{
-
-}
-
-public class Member : User
-{
-    [MaxLength(100)]
-    public string PhotoURL { get; set; }
-
-    // Navigation Properties
-    public List<Reservation> Reservations { get; set; } = [];
-}
-
-// Type, Room, Reservation
-
-public class Type
-{
-    [Key, MaxLength(1)]
-    public string Id { get; set; }
-
-    [MaxLength(100)]
-    public string Name { get; set; }
-
-    [Precision(6, 2)]
+    [Precision(10, 2)]
     public decimal Price { get; set; }
 
-    // Navigation Properties
-    public List<Room> Rooms { get; set; } = [];
+    [MaxLength(2000)]
+    public string? Detail { get; set; }
+
+    [MaxLength(100)]
+    public string? Brand { get; set; }
+
+    [MaxLength(200)]
+    public string? Picture { get; set; }
+
+    [ForeignKey(nameof(CategoryId))]
+    public Category Category { get; set; }
 }
 
-public class Room
+// Learning & Guide
+public class LearningMaterial
 {
-    [Key, MaxLength(4)]
-    public string Id { get; set; }
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int MaterialId { get; set; }
 
-    // Foreign Keys
-    public string TypeId { get; set; }
+    [Required, MaxLength(200)]
+    public string Title { get; set; }
 
-    // Navigation Properties
-    public Type Type { get; set; }
-    public List<Reservation> Reservations { get; set; } = [];
+    [MaxLength(100)]
+    public string? Category { get; set; }
+
+    public string Content { get; set; } = "";
+
+    public int SortOrder { get; set; }
 }
 
-public class Reservation
+// User marked material as interested
+public class UserInterest
 {
-    [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int Id { get; set; }
+    public int UserId { get; set; }
+    public int MaterialId { get; set; }
+    public DateTime MarkedAt { get; set; } = DateTime.UtcNow;
 
-    public DateOnly CheckIn { get; set; }
+    [ForeignKey(nameof(UserId))]
+    public User User { get; set; }
 
-    public DateOnly CheckOut { get; set; }
+    [ForeignKey(nameof(MaterialId))]
+    public LearningMaterial Material { get; set; }
+}
 
-    [Precision(6, 2)]
-    public decimal Price { get; set; }
+// User viewed/opened material (for progress indicator)
+public class UserProgress
+{
+    public int UserId { get; set; }
+    public int MaterialId { get; set; }
+    public DateTime ViewedAt { get; set; } = DateTime.UtcNow;
 
-    public bool Paid { get; set; }
+    [ForeignKey(nameof(UserId))]
+    public User User { get; set; }
 
-    // Foreign Keys (MemberEmail, RoomId)
-    public string MemberEmail { get; set; }
-    public string RoomId { get; set; }
-
-    // Navigation Properties
-    public Member Member { get; set; }
-    public Room Room { get; set; }
+    [ForeignKey(nameof(MaterialId))]
+    public LearningMaterial Material { get; set; }
 }
