@@ -14,7 +14,7 @@
         <span asp-validation-for="BuildName"></span>
     </p>
 
-    <p><strong>Select components by category:</strong></p>
+    <p><strong>Select components by category:</strong> <em>Choose Motherboard first to filter compatible CPU and RAM.</em></p>
 
     @for (var i = 0; i < Model.Categories.Count; i++)
     {
@@ -23,11 +23,11 @@
             <label>@cat.Type</label>
             <input type="hidden" asp-for="Categories[i].CategoryId" />
             <input type="hidden" asp-for="Categories[i].Type" />
-            <select asp-for="Categories[i].SelectedHardwareId" class="hardware-select" data-category="@cat.Type">
+            <select asp-for="Categories[i].SelectedHardwareId" class="hardware-select" data-category="@cat.Type" data-category-id="@cat.CategoryId">
                 <option value="">-- None --</option>
                 @foreach (var h in cat.Items)
                 {
-                    <option value="@h.HardwareId" data-price="@h.Price">@h.Name - @h.Price.ToString("C")</option>
+                    <option value="@h.HardwareId" data-price="@h.Price" data-socket="@(h.Socket ?? "")" data-ddr="@(h.DdrType ?? "")">@h.Name - @h.Price.ToString("C")</option>
                 }
             </select>
         </p>
@@ -39,7 +39,7 @@
 
     <p>
         <button type="submit">Update Build</button>
-        <a href="@Url.Action("Detail", new { id = buildId })" class="button">Cancel</a>
+        <a href="@Url.Action("Detail", new { id = buildId })" class="button secondary">Cancel</a>
     </p>
 </form>
 
@@ -49,6 +49,10 @@
             var form = document.getElementById('configure-form');
             var totalEl = document.getElementById('total-price');
             var selects = form.querySelectorAll('.hardware-select');
+            var mbSelect = form.querySelector('.hardware-select[data-category="Motherboard"]');
+            var cpuSelect = form.querySelector('.hardware-select[data-category="CPU"]');
+            var ramSelect = form.querySelector('.hardware-select[data-category="RAM"]');
+
             function updateTotal() {
                 var total = 0;
                 selects.forEach(function (s) {
@@ -57,8 +61,31 @@
                 });
                 totalEl.textContent = '$' + total.toFixed(2);
             }
+
+            function filterByMotherboard() {
+                if (!mbSelect || !cpuSelect || !ramSelect) return;
+                var mbOpt = mbSelect.options[mbSelect.selectedIndex];
+                var socket = mbOpt ? (mbOpt.getAttribute('data-socket') || '') : '';
+                var ddr = mbOpt ? (mbOpt.getAttribute('data-ddr') || '') : '';
+                function filterSelect(sel, attr) {
+                    var val = sel.value;
+                    for (var i = 1; i < sel.options.length; i++) {
+                        var o = sel.options[i];
+                        var match = !attr || (attr === 'socket' && (!socket || o.getAttribute('data-socket') === socket)) || (attr === 'ddr' && (!ddr || o.getAttribute('data-ddr') === ddr));
+                        o.style.display = match ? '' : 'none';
+                        o.disabled = !match;
+                    }
+                    if (val && sel.options[sel.selectedIndex].disabled) sel.value = '';
+                }
+                filterSelect(cpuSelect, 'socket');
+                filterSelect(ramSelect, 'ddr');
+                updateTotal();
+            }
+
+            if (mbSelect) mbSelect.addEventListener('change', filterByMotherboard);
             selects.forEach(function (s) { s.addEventListener('change', updateTotal); });
             updateTotal();
+            filterByMotherboard();
         })();
     </script>
 }

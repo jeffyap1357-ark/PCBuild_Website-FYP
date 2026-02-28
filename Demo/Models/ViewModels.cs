@@ -95,3 +95,22 @@ public class CategoryOptionVM
     public List<Hardware> Items { get; set; } = [];
     public int? SelectedHardwareId { get; set; }
 }
+
+// Community
+public class ShareBuildVM
+{
+    public int BuildId { get; set; }
+    [StringLength(2000), Display(Name = "Comment (optional)")]
+    public string AuthorComment { get; set; }
+}
+
+// PC Recommend
+public class RecommendBuildVM
+{
+    [Required, Range(1000, 50000), Display(Name = "Budget (RM)")]
+    public decimal Budget { get; set; } = 5000;
+
+    [Display(Name = "Target tier (1-10, higher = better performance)")]
+    [Range(1, 10)]
+    public int TargetTier { get; set; } = 7;
+}

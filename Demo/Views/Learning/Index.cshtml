@@ -1,67 +1,26 @@
-@model List<LearningMaterial>
+@model List<Guide>
 
 @{
     ViewBag.Title = "PC Build | Learning & Guide";
-    var interestIds = ViewBag.InterestIds as HashSet<int> ?? new HashSet<int>();
-    var progressIds = ViewBag.ProgressIds as HashSet<int> ?? new HashSet<int>();
-    var interested = ViewBag.InterestedMaterials as List<LearningMaterial> ?? new List<LearningMaterial>();
-    var userId = ViewBag.UserId as int?;
+    var readIds = ViewBag.ReadIds as HashSet<int> ?? new HashSet<int>();
 }
 
-<p>Browse learning materials to build your PC knowledge. Click View to read, mark materials you're interested in, and track your progress.</p>
+<p>Browse learning materials. Select a guide to read. Items you have read will show in a different color. <a href="@Url.Action("Diagnose")">Diagnose DB</a></p>
 
-@if (userId.HasValue && interested.Any())
-{
-    <div class="learning-interest-bar">
-        <h3>📌 Your interests</h3>
-        <ul class="learning-list">
-            @foreach (var m in interested)
-            {
-                var opened = progressIds.Contains(m.MaterialId);
-                <li class="@(opened ? "learning-viewed" : "")">
-                    <span class="learning-icon">@(opened ? "✓" : "○")</span>
-                    <a href="@Url.Action("Detail", new { id = m.MaterialId })">@m.Title</a>
-                    @if (!string.IsNullOrEmpty(m.Category)) { <span style="color:#666; font-size:0.9em;">(@m.Category)</span> }
-                    <a href="@Url.Action("Detail", new { id = m.MaterialId })" class="button">View</a>
-                    <form method="post" action="@Url.Action("UnmarkInterest", new { id = m.MaterialId, returnTo = "index" })" style="display:inline;">
-                        <button type="submit" class="button">Unmark</button>
-                    </form>
-                </li>
-            }
-        </ul>
-    </div>
-}
-
-<h3>All learning materials</h3>
-<ul class="learning-list">
-    @foreach (var m in Model)
+<ul class="guide-list">
+    @foreach (var g in Model)
     {
-        var opened = progressIds.Contains(m.MaterialId);
-        var isInterested = interestIds.Contains(m.MaterialId);
-        <li class="@(opened ? "learning-viewed" : "")">
-            <span class="learning-icon" title="@(opened ? "Opened before" : "Not yet opened")">@(opened ? "✓" : "○")</span>
-            <a href="@Url.Action("Detail", new { id = m.MaterialId })">@m.Title</a>
-            @if (!string.IsNullOrEmpty(m.Category)) { <span style="color:#666; font-size:0.9em;">(@m.Category)</span> }
-            <a href="@Url.Action("Detail", new { id = m.MaterialId })" class="button">View</a>
-            @if (userId.HasValue)
-            {
-                if (isInterested)
+        var read = readIds.Contains(g.GuideId);
+        <li class="@(read ? "guide-read" : "")">
+            <span class="guide-status">@(read ? "✓" : "○")</span>
+            <div>
+                <a href="@Url.Action("Detail", new { id = g.GuideId })">@g.GuideName</a>
+                @if (!string.IsNullOrEmpty(g.GuideDesc))
                 {
-                    <form method="post" action="@Url.Action("UnmarkInterest", new { id = m.MaterialId, returnTo = "index" })" style="display:inline;">
-                        <button type="submit" class="button">Unmark interest</button>
-                    </form>
+                    <span class="guide-desc">@g.GuideDesc</span>
                 }
-                else
-                {
-                    <form method="post" action="@Url.Action("MarkInterest", new { id = m.MaterialId, returnTo = "index" })" style="display:inline;">
-                        <button type="submit" class="button">Mark interest</button>
-                    </form>
-                }
-            }
-            else
-            {
-                <span style="color:#999; font-size:0.9em;">Login to mark interest</span>
-            }
+            </div>
+            <a href="@Url.Action("Detail", new { id = g.GuideId })" class="button">View</a>
         </li>
     }
 </ul>

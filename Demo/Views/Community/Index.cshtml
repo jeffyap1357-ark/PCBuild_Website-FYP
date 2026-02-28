@@ -1,0 +1,28 @@
+@model List<Community>
+
+@{
+    ViewBag.Title = "PC Build | Community";
+}
+
+<p>Browse shared PC builds from the community.</p>
+
+@if (Model.Count == 0)
+{
+    <p>No shared builds yet. Share one of your builds from <a href="/Build/Index">My Builds</a>.</p>
+}
+else
+{
+    <ul class="community-list">
+        @foreach (var c in Model)
+        {
+            <li>
+                <a href="@Url.Action("Detail", new { id = c.CommunityId })">@c.BuildName</a>
+                <span class="community-meta">by @c.User.Username &middot; @c.TotalPrice.ToString("C") &middot; @c.SharedAt.ToString("yyyy-MM-dd")</span>
+                @if (c.AverageRating.HasValue)
+                {
+                    <span class="community-rating">★ @c.AverageRating.Value.ToString("F1") (@c.RatingCount)</span>
+                }
+            </li>
+        }
+    </ul>
+}

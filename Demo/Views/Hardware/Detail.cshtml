@@ -1,14 +1,18 @@
 @model Hardware
+@inject Demo.Helper Helper
 
 @{
     ViewBag.Title = "Hardware | " + Model.Name;
 }
 
 <div class="hardware-detail">
-    @if (!string.IsNullOrEmpty(Model.Picture))
+    @{
+        var imgFile = Helper.GetHardwareImagePath(Model.Picture, Model.Name);
+    }
+    @if (!string.IsNullOrEmpty(imgFile))
     {
         <p>
-            <img src="/images/hardware/@Model.Picture" alt="@Model.Name" class="hardware-detail-picture">
+            <img src="/hardware/@imgFile" alt="@Model.Name" class="hardware-detail-picture">
         </p>
     }
 

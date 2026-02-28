@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewBag.Title</title>
     <link rel="shortcut icon" href="/images/favicon.png">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Roboto:wght@400;700&display=swap">
     <link rel="stylesheet" href="/css/pager.css">
     <link rel="stylesheet" href="/css/app.css" asp-append-version="true">
     @RenderSection("head", false)
@@ -26,6 +26,8 @@
         <a href="/">Home</a>
         <a href="/Hardware/List">Hardware List</a>
         <a href="/Learning/Index">📚 Learning & Guide</a>
+        <a href="/Community/Index">👥 Community</a>
+        <a href="/Recommend">✨ Recommend Build</a>
         @if (User.Identity!.IsAuthenticated)
         {
             <a href="/Build/Configure">PC Build Config</a>

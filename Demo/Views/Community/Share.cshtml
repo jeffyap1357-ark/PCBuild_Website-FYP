@@ -1,0 +1,21 @@
+@model ShareBuildVM
+
+@{
+    ViewBag.Title = "PC Build | Share to Community";
+}
+
+<h2>Share build to Community</h2>
+<p>Your build will be visible to everyone. You can add an optional comment.</p>
+
+<form method="post" asp-action="Share">
+    <input type="hidden" asp-for="BuildId" />
+    <div>
+        <label asp-for="AuthorComment"></label>
+        <textarea asp-for="AuthorComment" rows="3" maxlength="2000"></textarea>
+        <span asp-validation-for="AuthorComment"></span>
+    </div>
+    <p>
+        <button type="submit" class="button">Share to Community</button>
+        <a href="@Url.Action("Detail", "Build", new { id = Model.BuildId })" class="button secondary">Cancel</a>
+    </p>
+</form>

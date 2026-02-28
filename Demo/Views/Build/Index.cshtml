@@ -19,6 +19,7 @@ else
             <tr>
                 <th>Build Name</th>
                 <th>Total Price</th>
+                <th>Status</th>
                 <th></th>
             </tr>
         </thead>
@@ -28,9 +29,18 @@ else
                 <tr>
                     <td><a href="@Url.Action("Detail", new { id = b.BuildId })">@b.BuildName</a></td>
                     <td>@b.TotalPrice.ToString("C")</td>
+                    <td>@(b.IsShared ? "✓ Shared" : "—")</td>
                     <td>
                         <a href="@Url.Action("Detail", new { id = b.BuildId })" class="button">View</a>
                         <a href="@Url.Action("Edit", new { id = b.BuildId })" class="button">Edit</a>
+                        @if (b.IsShared)
+                        {
+                            <a href="@Url.Action("Detail", "Community", new { id = b.Community?.CommunityId })" class="button">View in Community</a>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("Share", "Community", new { buildId = b.BuildId })" class="button">Share to Community</a>
+                        }
                         <form method="post" action="@Url.Action("Delete", new { id = b.BuildId })" style="display:inline;" onsubmit="return confirm('Delete this build?');">
                             <button type="submit" class="button">Delete</button>
                         </form>

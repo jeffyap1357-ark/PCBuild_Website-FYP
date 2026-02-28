@@ -25,13 +25,17 @@ public class BuildController : Controller
     {
         var vm = new ConfigureBuildVM();
         var categories = db.Categories.Include(c => c.Hardware).OrderBy(c => c.CategoryId).ToList();
-        vm.Categories = categories.Select(c => new CategoryOptionVM
-        {
-            CategoryId = c.CategoryId,
-            Type = c.Type,
-            Items = c.Hardware.OrderBy(h => h.Name).ToList(),
-            SelectedHardwareId = null
-        }).ToList();
+        var order = new[] { "Motherboard", "CPU", "RAM", "GPU", "Storage", "Power supply unit", "CPU cooler", "PC case" };
+        vm.Categories = categories
+            .OrderBy(c => Array.IndexOf(order, c.Type) >= 0 ? Array.IndexOf(order, c.Type) : 99)
+            .ThenBy(c => c.CategoryId)
+            .Select(c => new CategoryOptionVM
+            {
+                CategoryId = c.CategoryId,
+                Type = c.Type,
+                Items = c.Hardware.OrderBy(h => h.Name).ToList(),
+                SelectedHardwareId = null
+            }).ToList();
         return View(vm);
     }
 
@@ -41,14 +45,18 @@ public class BuildController : Controller
         var userId = GetCurrentUserId();
         if (userId == null) return RedirectToAction("Login", "Account");
 
+        var order = new[] { "Motherboard", "CPU", "RAM", "GPU", "Storage", "Power supply unit", "CPU cooler", "PC case" };
         var categories = db.Categories.Include(c => c.Hardware).OrderBy(c => c.CategoryId).ToList();
-        vm.Categories = categories.Select(c => new CategoryOptionVM
-        {
-            CategoryId = c.CategoryId,
-            Type = c.Type,
-            Items = c.Hardware.OrderBy(h => h.Name).ToList(),
-            SelectedHardwareId = vm.Categories?.FirstOrDefault(x => x.CategoryId == c.CategoryId)?.SelectedHardwareId
-        }).ToList();
+        vm.Categories = categories
+            .OrderBy(c => Array.IndexOf(order, c.Type) >= 0 ? Array.IndexOf(order, c.Type) : 99)
+            .ThenBy(c => c.CategoryId)
+            .Select(c => new CategoryOptionVM
+            {
+                CategoryId = c.CategoryId,
+                Type = c.Type,
+                Items = c.Hardware.OrderBy(h => h.Name).ToList(),
+                SelectedHardwareId = vm.Categories?.FirstOrDefault(x => x.CategoryId == c.CategoryId)?.SelectedHardwareId
+            }).ToList();
 
         if (string.IsNullOrWhiteSpace(vm.BuildName))
             ModelState.AddModelError("BuildName", "Build name is required.");
@@ -88,6 +96,7 @@ public class BuildController : Controller
         if (userId == null) return RedirectToAction("Login", "Account");
 
         var list = db.Builds
+            .Include(b => b.Community)
             .Where(b => b.UserId == userId)
             .OrderByDescending(b => b.BuildId)
             .ToList();
@@ -104,6 +113,7 @@ public class BuildController : Controller
             .Include(b => b.BuildDetails)
             .ThenInclude(bd => bd.Hardware)
             .ThenInclude(h => h.Category)
+            .Include(b => b.Community)
             .FirstOrDefault(b => b.BuildId == id && b.UserId == userId);
 
         if (build == null) return RedirectToAction(nameof(Index));
@@ -123,17 +133,21 @@ public class BuildController : Controller
 
         if (build == null) return RedirectToAction(nameof(Index));
 
+        var order = new[] { "Motherboard", "CPU", "RAM", "GPU", "Storage", "Power supply unit", "CPU cooler", "PC case" };
         var categories = db.Categories.Include(c => c.Hardware).OrderBy(c => c.CategoryId).ToList();
         var vm = new ConfigureBuildVM
         {
             BuildName = build.BuildName,
-            Categories = categories.Select(c => new CategoryOptionVM
-            {
-                CategoryId = c.CategoryId,
-                Type = c.Type,
-                Items = c.Hardware.OrderBy(h => h.Name).ToList(),
-                SelectedHardwareId = build.BuildDetails.Where(bd => bd.Hardware.CategoryId == c.CategoryId).Select(bd => (int?)bd.HardwareId).FirstOrDefault()
-            }).ToList()
+            Categories = categories
+                .OrderBy(c => Array.IndexOf(order, c.Type) >= 0 ? Array.IndexOf(order, c.Type) : 99)
+                .ThenBy(c => c.CategoryId)
+                .Select(c => new CategoryOptionVM
+                {
+                    CategoryId = c.CategoryId,
+                    Type = c.Type,
+                    Items = c.Hardware.OrderBy(h => h.Name).ToList(),
+                    SelectedHardwareId = build.BuildDetails.Where(bd => bd.Hardware.CategoryId == c.CategoryId).Select(bd => (int?)bd.HardwareId).FirstOrDefault()
+                }).ToList()
         };
         ViewBag.BuildId = id;
         return View(vm);
@@ -148,14 +162,18 @@ public class BuildController : Controller
         var build = db.Builds.Include(b => b.BuildDetails).FirstOrDefault(b => b.BuildId == id && b.UserId == userId);
         if (build == null) return RedirectToAction(nameof(Index));
 
+        var order = new[] { "Motherboard", "CPU", "RAM", "GPU", "Storage", "Power supply unit", "CPU cooler", "PC case" };
         var categories = db.Categories.Include(c => c.Hardware).OrderBy(c => c.CategoryId).ToList();
-        vm.Categories = categories.Select(c => new CategoryOptionVM
-        {
-            CategoryId = c.CategoryId,
-            Type = c.Type,
-            Items = c.Hardware.OrderBy(h => h.Name).ToList(),
-            SelectedHardwareId = vm.Categories?.FirstOrDefault(x => x.CategoryId == c.CategoryId)?.SelectedHardwareId
-        }).ToList();
+        vm.Categories = categories
+            .OrderBy(c => Array.IndexOf(order, c.Type) >= 0 ? Array.IndexOf(order, c.Type) : 99)
+            .ThenBy(c => c.CategoryId)
+            .Select(c => new CategoryOptionVM
+            {
+                CategoryId = c.CategoryId,
+                Type = c.Type,
+                Items = c.Hardware.OrderBy(h => h.Name).ToList(),
+                SelectedHardwareId = vm.Categories?.FirstOrDefault(x => x.CategoryId == c.CategoryId)?.SelectedHardwareId
+            }).ToList();
 
         if (string.IsNullOrWhiteSpace(vm.BuildName))
             ModelState.AddModelError("BuildName", "Build name is required.");
@@ -193,9 +211,17 @@ public class BuildController : Controller
         var build = db.Builds.FirstOrDefault(b => b.BuildId == id && b.UserId == userId);
         if (build != null)
         {
+            // Remove from Community first (comments, ratings, then community) so it disappears from Community page
+            var community = db.Communities.FirstOrDefault(c => c.BuildId == id);
+            if (community != null)
+            {
+                db.CommunityComments.RemoveRange(db.CommunityComments.Where(cc => cc.CommunityId == community.CommunityId));
+                db.CommunityRatings.RemoveRange(db.CommunityRatings.Where(r => r.CommunityId == community.CommunityId));
+                db.Communities.Remove(community);
+            }
             db.Builds.Remove(build);
             db.SaveChanges();
-            TempData["Info"] = "Build deleted.";
+            TempData["Info"] = "Build deleted" + (community != null ? " and removed from Community." : ".");
         }
 
         return RedirectToAction(nameof(Index));

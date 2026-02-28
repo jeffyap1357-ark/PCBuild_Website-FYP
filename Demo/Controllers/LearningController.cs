@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,6 +12,31 @@ public class LearningController : Controller
         this.db = db;
     }
 
+    /// <summary>Diagnostic: lists tables in the database to verify Guide exists.</summary>
+    public async Task<IActionResult> Diagnose(CancellationToken ct = default)
+    {
+        List<string> tables;
+        try
+        {
+            tables = await db.Database
+                .SqlQueryRaw<string>("SELECT TABLE_SCHEMA + '.' + TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' ORDER BY TABLE_NAME")
+                .ToListAsync(ct);
+        }
+        catch (Exception ex)
+        {
+            return Content($"<h2>Database error</h2><pre>{ex.Message}</pre>", "text/html");
+        }
+
+        var hasGuide = tables.Any(t => t.EndsWith(".Guide", StringComparison.OrdinalIgnoreCase));
+        var html = $@"
+<h2>Database diagnostic</h2>
+<p><b>Guide table exists:</b> {(hasGuide ? "Yes" : "No")}</p>
+<h3>Tables ({tables.Count})</h3>
+<ul>{string.Join("", tables.Select(t => $"<li>{t}</li>"))}</ul>
+<p><a href='/Learning'>Back to Learning</a></p>";
+        return Content(html, "text/html");
+    }
+
     private int? GetCurrentUserId()
     {
         var name = User.Identity?.Name;
@@ -23,86 +47,33 @@ public class LearningController : Controller
     public IActionResult Index()
     {
         var userId = GetCurrentUserId();
-        var materials = db.LearningMaterials.OrderBy(m => m.SortOrder).ToList();
+        var guides = db.Guides.OrderBy(g => g.SortOrder).ToList();
 
-        var interestIds = userId.HasValue
-            ? db.UserInterests.Where(ui => ui.UserId == userId).Select(ui => ui.MaterialId).ToHashSet()
+        var readIds = userId.HasValue
+            ? db.UserGuideProgresses.Where(up => up.UserId == userId).Select(up => up.GuideId).ToHashSet()
             : new HashSet<int>();
 
-        var progressIds = userId.HasValue
-            ? db.UserProgresses.Where(up => up.UserId == userId).Select(up => up.MaterialId).ToHashSet()
-            : new HashSet<int>();
-
-        var interested = materials.Where(m => interestIds.Contains(m.MaterialId)).ToList();
-        var all = materials;
-
-        ViewBag.InterestIds = interestIds;
-        ViewBag.ProgressIds = progressIds;
-        ViewBag.InterestedMaterials = interested;
+        ViewBag.ReadIds = readIds;
         ViewBag.UserId = userId;
 
-        return View(all);
+        return View(guides);
     }
 
     public IActionResult Detail(int id)
     {
-        var userId = GetCurrentUserId();
-        var material = db.LearningMaterials.FirstOrDefault(m => m.MaterialId == id);
-        if (material == null) return RedirectToAction(nameof(Index));
+        var guide = db.Guides.FirstOrDefault(g => g.GuideId == id);
+        if (guide == null) return RedirectToAction(nameof(Index));
 
-        // Record progress when user opens (if logged in)
+        var userId = GetCurrentUserId();
         if (userId.HasValue)
         {
-            var existing = db.UserProgresses.FirstOrDefault(up => up.UserId == userId && up.MaterialId == id);
-            if (existing == null)
+            if (!db.UserGuideProgresses.Any(up => up.UserId == userId && up.GuideId == id))
             {
-                db.UserProgresses.Add(new UserProgress { UserId = userId.Value, MaterialId = id });
+                db.UserGuideProgresses.Add(new UserGuideProgress { UserId = userId.Value, GuideId = id });
                 db.SaveChanges();
             }
         }
 
-        var isInterested = userId.HasValue && db.UserInterests.Any(ui => ui.UserId == userId && ui.MaterialId == id);
-        ViewBag.IsInterested = isInterested;
-        ViewBag.UserId = userId;
-
-        return View(material);
-    }
-
-    [Authorize]
-    [HttpPost]
-    public IActionResult MarkInterest(int id, string? returnTo = null)
-    {
-        var userId = GetCurrentUserId();
-        if (userId == null) return RedirectToAction("Login", "Account");
-
-        var material = db.LearningMaterials.FirstOrDefault(m => m.MaterialId == id);
-        if (material == null) return RedirectToAction(nameof(Index));
-
-        if (!db.UserInterests.Any(ui => ui.UserId == userId && ui.MaterialId == id))
-        {
-            db.UserInterests.Add(new UserInterest { UserId = userId.Value, MaterialId = id });
-            db.SaveChanges();
-            TempData["Info"] = "Added to your interests.";
-        }
-
-        return returnTo == "index" ? RedirectToAction(nameof(Index)) : RedirectToAction(nameof(Detail), new { id });
-    }
-
-    [Authorize]
-    [HttpPost]
-    public IActionResult UnmarkInterest(int id, string? returnTo = null)
-    {
-        var userId = GetCurrentUserId();
-        if (userId == null) return RedirectToAction("Login", "Account");
-
-        var ui = db.UserInterests.FirstOrDefault(x => x.UserId == userId && x.MaterialId == id);
-        if (ui != null)
-        {
-            db.UserInterests.Remove(ui);
-            db.SaveChanges();
-            TempData["Info"] = "Removed from interests.";
-        }
-
-        return returnTo == "index" ? RedirectToAction(nameof(Index)) : RedirectToAction(nameof(Detail), new { id });
+        return View(guide);
     }
 }

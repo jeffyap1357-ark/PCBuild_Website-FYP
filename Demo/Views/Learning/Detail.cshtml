@@ -1,36 +1,19 @@
-@model LearningMaterial
+@model Guide
 
 @{
-    ViewBag.Title = "PC Build | " + Model.Title;
-    var isInterested = ViewBag.IsInterested as bool? ?? false;
-    var userId = ViewBag.UserId as int?;
+    ViewBag.Title = "PC Build | " + Model.GuideName;
 }
 
-<h2>@Model.Title</h2>
-@if (!string.IsNullOrEmpty(Model.Category))
+<h2>@Model.GuideName</h2>
+@if (!string.IsNullOrEmpty(Model.GuideDesc))
 {
-    <p style="color:#666; margin-top:-8px;">Category: @Model.Category</p>
+    <p class="guide-desc">@Model.GuideDesc</p>
 }
 
-<div class="learning-content">
+<div class="guide-content">
     @Html.Raw(Model.Content)
 </div>
 
 <p style="margin-top: 24px;">
-    <a href="@Url.Action("Index")" class="button">← Back to materials</a>
-    @if (userId.HasValue)
-    {
-        if (isInterested)
-        {
-            <form method="post" action="@Url.Action("UnmarkInterest", new { id = Model.MaterialId })" style="display:inline;">
-                <button type="submit" class="button">Unmark interest</button>
-            </form>
-        }
-        else
-        {
-            <form method="post" action="@Url.Action("MarkInterest", new { id = Model.MaterialId })" style="display:inline;">
-                <button type="submit" class="button">Mark as interested</button>
-            </form>
-        }
-    }
+    <a href="@Url.Action("Index")" class="button">← Back to list</a>
 </p>

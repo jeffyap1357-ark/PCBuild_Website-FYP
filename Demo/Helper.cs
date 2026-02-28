@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
@@ -72,7 +72,35 @@ public class Helper
         File.Delete(path);
     }
 
+    // ------------------------------------------------------------------------
+    // Hardware Image Helper
+    // ------------------------------------------------------------------------
 
+    private static readonly Dictionary<string, string> HardwareImageMap = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["ASUS B760-PLUS WIFI"] = "b760.png", ["MSI PRO B760M-A WIFI"] = "b760m.png", ["MSI B550-A PRO"] = "b550a.png",
+        ["ASRock B650M Pro RS"] = "b650mpro.png", ["Intel Core i5-13400F"] = "intel5134.png", ["Intel Core i7-13700K"] = "intel5134.png",
+        ["Ryzen 5 5600"] = "r55600.png", ["Ryzen 7 7700X"] = "r77700x.png", ["RTX 4060"] = "rtx4060.png", ["RTX 4070"] = "rtx4070.png",
+        ["RX 6600"] = "rx660.png", ["RX 7800 XT"] = "rx780.png", ["Corsair 16GB DDR4 3200MHz"] = "consair16.png",
+        ["Kingston 16GB DDR5 5200MHz"] = "kingston16.png", ["Corsair 32GB DDR4 3600MHz"] = "consair32.png",
+        ["Kingston 32GB DDR5 6000MHz"] = "kingston32.png", ["Samsung 970 EVO 1TB"] = "samsung970.png",
+        ["WD SN770 1TB"] = "wdsn850x.png", ["Samsung 980 PRO 2TB"] = "980pro.png",
+        ["Corsair 650W 80+ Bronze"] = "650consair.png", ["Cooler Master 750W 80+ Gold"] = "cm750.png",
+        ["Seasonic 850W 80+ Gold"] = "sea850.png", ["NZXT H5 Flow"] = "h5flow.png", ["Cooler Master TD300"] = "cttd300.png"
+    };
+
+    public string GetHardwareImagePath(string? picture, string name)
+    {
+        var folder = Path.Combine(en.WebRootPath, "hardware");
+        if (!string.IsNullOrEmpty(picture) && File.Exists(Path.Combine(folder, picture)))
+            return picture;
+        if (HardwareImageMap.TryGetValue(name.Trim(), out var mapped))
+            return mapped;
+        foreach (var kv in HardwareImageMap)
+            if (name.Contains(kv.Key, StringComparison.OrdinalIgnoreCase))
+                return kv.Value;
+        return picture ?? "";
+    }
 
     // ------------------------------------------------------------------------
     // Security Helper Functions

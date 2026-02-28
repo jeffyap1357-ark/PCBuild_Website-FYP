@@ -1,0 +1,97 @@
+@model RecommendBuildVM
+@using Demo.Services
+
+@{
+    ViewBag.Title = "PC Build | Recommend Build";
+    var result = ViewBag.Result as RecommendResult;
+    var budget = ViewBag.Budget as decimal? ?? Model.Budget;
+}
+
+<p>Enter your budget and target performance tier. The system will recommend a compatible PC build using the best hardware within your budget.</p>
+
+<form method="post">
+    <div asp-validation-summary="ModelOnly"></div>
+    <p>
+        <label asp-for="Budget"></label>
+        <input asp-for="Budget" type="number" min="1000" max="50000" step="100" />
+        <span asp-validation-for="Budget"></span>
+    </p>
+    <p>
+        <label asp-for="TargetTier"></label>
+        <select asp-for="TargetTier">
+            <option value="6">6 - Budget</option>
+            <option value="7">7 - Mid-range</option>
+            <option value="8">8 - Performance</option>
+            <option value="9">9 - High-end</option>
+            <option value="10">10 - Enthusiast</option>
+        </select>
+        <span class="hint">Higher = better components (uses Special score)</span>
+    </p>
+    <p>
+        <button type="submit" class="button">Get Recommendation</button>
+    </p>
+</form>
+
+@if (result != null)
+{
+    <hr />
+    @if (result.Success)
+    {
+        <h2>Recommended Build</h2>
+        @if (result.Warnings.Any())
+        {
+            <div class="recommend-warnings">
+                @foreach (var w in result.Warnings)
+                {
+                    <p class="warning">@w</p>
+                }
+            </div>
+        }
+        <p><strong>Total: @result.TotalPrice.ToString("C")</strong> @(result.TotalPrice > budget ? "(over budget)" : "")</p>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Component</th>
+                    <th>Part</th>
+                    <th>Price</th>
+                    <th>Tier</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in result.Parts.OrderBy(p => p.Category?.Type))
+                {
+                    <tr>
+                        <td>@p.Category?.Type</td>
+                        <td><a href="/Hardware/Detail/@p.HardwareId">@p.Name</a></td>
+                        <td>@p.Price.ToString("C")</td>
+                        <td>@(p.Special?.ToString() ?? "—")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <p>
+                <a href="/Build/Configure" class="button">Build This PC</a>
+                <em>Select the same parts manually in PC Build Config.</em>
+            </p>
+        }
+    }
+    else
+    {
+        <h2>Could not build</h2>
+        <div class="recommend-warnings">
+            @foreach (var w in result.Warnings)
+            {
+                <p class="warning">@w</p>
+            }
+        </div>
+        <p>Try increasing your budget or check that hardware data is loaded from the CSV.</p>
+    }
+}
+
+<style>
+    .recommend-warnings { background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; padding: 0.5em 1em; margin: 1em 0; }
+    .recommend-warnings .warning { margin: 0.25em 0; }
+    .hint { font-size: 0.9em; color: #666; margin-left: 0.5em; }
+</style>

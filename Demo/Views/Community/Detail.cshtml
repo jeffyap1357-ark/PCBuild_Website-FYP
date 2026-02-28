@@ -1,0 +1,83 @@
+@model Community
+
+@{
+    ViewBag.Title = "PC Build | Community | " + Model.BuildName;
+    var userId = ViewBag.UserId as int?;
+    var userRating = ViewBag.UserRating as int?;
+}
+
+<h2>@Model.BuildName</h2>
+<p class="community-meta">Shared by <strong>@Model.User.Username</strong> on @Model.SharedAt.ToString("yyyy-MM-dd") &middot; <strong>@Model.TotalPrice.ToString("C")</strong></p>
+@if (Model.AverageRating.HasValue)
+{
+    <p>★ @Model.AverageRating.Value.ToString("F1") (@Model.RatingCount rating@(Model.RatingCount == 1 ? "" : "s"))</p>
+}
+@if (!string.IsNullOrWhiteSpace(Model.AuthorComment))
+{
+    <p class="community-author-comment">@Model.AuthorComment</p>
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Category</th>
+            <th>Component</th>
+            <th>Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var bd in (Model.Build?.BuildDetails ?? Enumerable.Empty<BuildDetail>()).OrderBy(bd => bd.Hardware?.Category?.Type))
+        {
+            <tr>
+                <td>@bd.Hardware?.Category?.Type</td>
+                <td><a href="/Hardware/Detail/@bd.HardwareId">@bd.Hardware?.Name</a></td>
+                <td>@((bd.Hardware?.Price ?? 0) * bd.Quantity).ToString("C")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (User.Identity?.IsAuthenticated == true && userId.HasValue)
+{
+    <div class="community-rate">
+        <form method="post" action="@Url.Action("Rate", new { communityId = Model.CommunityId })" style="display:inline;">
+            <label>Your rating:</label>
+            <select name="rating">
+                @for (var i = 1; i <= 5; i++)
+                {
+                    <option value="@i" selected="@(userRating == i)">@i ★</option>
+                }
+            </select>
+            <button type="submit" class="button">Rate</button>
+        </form>
+    </div>
+}
+
+<h3>Comments</h3>
+@if (Model.CommunityComments?.Any() == true)
+{
+    <ul class="community-comments">
+        @foreach (var cc in Model.CommunityComments)
+        {
+            <li>
+                <strong>@cc.User?.Username</strong> <span class="comment-date">@cc.CreatedAt.ToString("yyyy-MM-dd HH:mm")</span>
+                <p>@cc.CommentText</p>
+            </li>
+        }
+    </ul>
+}
+else
+{
+    <p>No comments yet.</p>
+}
+
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <form method="post" action="@Url.Action("Comment", new { communityId = Model.CommunityId })" class="community-add-comment">
+        <label for="commentText">Add comment:</label>
+        <textarea name="commentText" id="commentText" rows="2" maxlength="1000" required></textarea>
+        <button type="submit" class="button">Post Comment</button>
+    </form>
+}
+
+<p><a href="@Url.Action("Index")" class="button">← Back to Community</a></p>

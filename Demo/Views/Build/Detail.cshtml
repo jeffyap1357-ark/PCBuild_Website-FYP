@@ -28,6 +28,14 @@
 </table>
 
 <p>
+    @if (!Model.IsShared)
+    {
+        <a href="@Url.Action("Share", "Community", new { buildId = Model.BuildId })" class="button">Share to Community</a>
+    }
+    else
+    {
+        <a href="@Url.Action("Detail", "Community", new { id = Model.Community?.CommunityId })" class="button">View in Community</a>
+    }
     <a href="@Url.Action("Edit", new { id = Model.BuildId })" class="button">Edit Build</a>
     <a href="@Url.Action("Index")" class="button">← My Builds</a>
     <form method="post" action="@Url.Action("Delete", new { id = Model.BuildId })" style="display:inline;" onsubmit="return confirm('Delete this build?');">

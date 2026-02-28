@@ -333,7 +333,6 @@ C:\Users\User\Desktop\original\Demo\Demo\obj\Debug\net9.0\rjimswa.dswa.cache.jso
 C:\Users\User\Desktop\original\Demo\Demo\obj\Debug\net9.0\rjsmrazor.dswa.cache.json
 C:\Users\User\Desktop\original\Demo\Demo\obj\Debug\net9.0\rjsmcshtml.dswa.cache.json
 C:\Users\User\Desktop\original\Demo\Demo\obj\Debug\net9.0\scopedcss\bundle\Demo.styles.css
-C:\Users\User\Desktop\original\Demo\Demo\obj\Debug\net9.0\compressed\22a9juuqxd-azd544o43i.gz
 C:\Users\User\Desktop\original\Demo\Demo\obj\Debug\net9.0\compressed\ch7szu10ds-getg8mlsvl.gz
 C:\Users\User\Desktop\original\Demo\Demo\obj\Debug\net9.0\compressed\lmksg1up3f-o1o13a6vjx.gz
 C:\Users\User\Desktop\original\Demo\Demo\obj\Debug\net9.0\compressed\asv6xhgs9u-8ve2wm9mbw.gz
@@ -349,4 +348,6 @@ C:\Users\User\Desktop\original\Demo\Demo\obj\Debug\net9.0\refint\Demo.dll
 C:\Users\User\Desktop\original\Demo\Demo\obj\Debug\net9.0\Demo.pdb
 C:\Users\User\Desktop\original\Demo\Demo\obj\Debug\net9.0\Demo.genruntimeconfig.cache
 C:\Users\User\Desktop\original\Demo\Demo\obj\Debug\net9.0\ref\Demo.dll
-C:\Users\User\Desktop\original\Demo\Demo\obj\Debug\net9.0\compressed\moxlhvdfuc-fw51pcste8.gz
+C:\Users\User\Desktop\original\Demo\Demo\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt
+C:\Users\User\Desktop\original\Demo\Demo\obj\Debug\net9.0\compressed\22a9juuqxd-b46dqcu98o.gz
+C:\Users\User\Desktop\original\Demo\Demo\obj\Debug\net9.0\compressed\moxlhvdfuc-rax1nv2jtt.gz
