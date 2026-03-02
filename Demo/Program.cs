@@ -98,6 +98,71 @@ catch (Exception ex)
     logger.LogWarning(ex, "Could not ensure PerformanceReport tables exist.");
 }
 
+// Ensure Quiz tables exist and seed sample questions (fallback)
+try
+{
+    using var scope3 = app.Services.CreateScope();
+    var db3 = scope3.ServiceProvider.GetRequiredService<DB>();
+    db3.Database.ExecuteSqlRaw(@"
+        IF NOT EXISTS (SELECT 1 FROM sys.tables t JOIN sys.schemas s ON t.schema_id = s.schema_id WHERE s.name = N'dbo' AND t.name = N'QuizQuestions')
+        BEGIN
+            CREATE TABLE [dbo].[QuizQuestions](
+                [QuizQuestionId] int IDENTITY NOT NULL,
+                [QuestionText] nvarchar(500) NOT NULL,
+                [OptionA] nvarchar(200) NOT NULL,
+                [OptionB] nvarchar(200) NOT NULL,
+                [OptionC] nvarchar(200) NOT NULL,
+                [OptionD] nvarchar(200) NOT NULL,
+                [CorrectOption] nvarchar(1) NOT NULL,
+                [IsActive] bit NOT NULL,
+                CONSTRAINT [PK_QuizQuestions] PRIMARY KEY ([QuizQuestionId])
+            );
+            INSERT INTO [dbo].[QuizQuestions]([QuestionText],[OptionA],[OptionB],[OptionC],[OptionD],[CorrectOption],[IsActive]) VALUES
+            (N'Which component is considered the ""brain"" of the computer?', N'GPU', N'CPU', N'SSD', N'Power supply', N'B', 1),
+            (N'Which part stores your operating system and files permanently?', N'RAM', N'CPU', N'SSD/HDD', N'GPU', N'C', 1),
+            (N'Which socket type do most recent AMD desktop CPUs use?', N'LGA1700', N'AM4/AM5', N'LGA1200', N'TR4', N'B', 1),
+            (N'If you buy a DDR5 motherboard, which RAM should you choose?', N'DDR3', N'DDR4', N'DDR5', N'Any type', N'C', 1),
+            (N'Which component mainly affects gaming performance at 1440p resolution?', N'CPU', N'GPU', N'Case', N'Power cable', N'B', 1),
+            (N'What is the recommended minimum RAM size for modern gaming PCs?', N'4GB', N'8GB', N'16GB', N'64GB', N'C', 1),
+            (N'Which component supplies power to all PC parts?', N'Power supply unit (PSU)', N'GPU', N'Motherboard', N'CPU cooler', N'A', 1),
+            (N'What does an SSD generally provide compared to an HDD?', N'Slower boot times', N'Faster boot and load times', N'Lower capacity only', N'No difference', N'B', 1),
+            (N'Which factor ensures a motherboard physically fits inside a PC case?', N'CPU brand', N'RAM speed', N'Form factor (ATX, mATX, ITX)', N'Number of USB ports', N'C', 1),
+            (N'Which cooling option is usually quieter but more complex to install?', N'Air cooler', N'Passive heatsink', N'All-in-one (AIO) liquid cooler', N'No cooler needed', N'C', 1);
+        END;
+        IF NOT EXISTS (SELECT 1 FROM sys.tables t JOIN sys.schemas s ON t.schema_id = s.schema_id WHERE s.name = N'dbo' AND t.name = N'QuizAttempts')
+        BEGIN
+            CREATE TABLE [dbo].[QuizAttempts](
+                [QuizAttemptId] int IDENTITY NOT NULL,
+                [UserId] int NOT NULL,
+                [TakenAt] datetime2 NOT NULL,
+                [TotalQuestions] int NOT NULL,
+                [CorrectCount] int NOT NULL,
+                CONSTRAINT [PK_QuizAttempts] PRIMARY KEY ([QuizAttemptId]),
+                CONSTRAINT [FK_QuizAttempts_Users_UserId] FOREIGN KEY ([UserId]) REFERENCES [dbo].[Users]([UserId]) ON DELETE CASCADE
+            );
+        END;
+        IF NOT EXISTS (SELECT 1 FROM sys.tables t JOIN sys.schemas s ON t.schema_id = s.schema_id WHERE s.name = N'dbo' AND t.name = N'QuizAttemptDetails')
+        BEGIN
+            CREATE TABLE [dbo].[QuizAttemptDetails](
+                [QuizAttemptDetailId] int IDENTITY NOT NULL,
+                [QuizAttemptId] int NOT NULL,
+                [QuizQuestionId] int NOT NULL,
+                [SelectedOption] nvarchar(1) NULL,
+                [IsCorrect] bit NOT NULL,
+                CONSTRAINT [PK_QuizAttemptDetails] PRIMARY KEY ([QuizAttemptDetailId]),
+                CONSTRAINT [FK_QuizAttemptDetails_QuizAttempts_QuizAttemptId] FOREIGN KEY ([QuizAttemptId]) REFERENCES [dbo].[QuizAttempts]([QuizAttemptId]) ON DELETE CASCADE,
+                CONSTRAINT [FK_QuizAttemptDetails_QuizQuestions_QuizQuestionId] FOREIGN KEY ([QuizQuestionId]) REFERENCES [dbo].[QuizQuestions]([QuizQuestionId]) ON DELETE CASCADE
+            );
+            CREATE INDEX [IX_QuizAttemptDetails_QuizAttemptId] ON [dbo].[QuizAttemptDetails]([QuizAttemptId]);
+            CREATE INDEX [IX_QuizAttemptDetails_QuizQuestionId] ON [dbo].[QuizAttemptDetails]([QuizQuestionId]);
+        END
+    ");
+}
+catch (Exception ex)
+{
+    logger.LogWarning(ex, "Could not ensure Quiz tables exist.");
+}
+
 // Import hardware from CSV if file exists (run AddHardwareCompatibility.sql first for Socket/DdrType columns)
 try
 {

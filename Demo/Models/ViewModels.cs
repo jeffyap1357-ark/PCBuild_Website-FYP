@@ -130,3 +130,34 @@ public class PerformanceBuildVM
     // Whether result (price/score) is calculated
     public bool HasResult { get; set; }
 }
+
+// Quiz: user takes PC build knowledge test
+public class QuizQuestionAnswerVM
+{
+    public int QuizQuestionId { get; set; }
+
+    public string QuestionText { get; set; }
+
+    public string OptionA { get; set; }
+    public string OptionB { get; set; }
+    public string OptionC { get; set; }
+    public string OptionD { get; set; }
+
+    // User selected answer: "A", "B", "C", or "D"
+    public string? SelectedOption { get; set; }
+
+    // Filled after grading
+    public string CorrectOption { get; set; }
+    public bool IsCorrect { get; set; }
+}
+
+public class QuizTakeVM
+{
+    public List<QuizQuestionAnswerVM> Questions { get; set; } = [];
+
+    public int TotalQuestions => Questions.Count;
+
+    public int CorrectCount { get; set; }
+
+    public bool IsSubmitted { get; set; }
+}

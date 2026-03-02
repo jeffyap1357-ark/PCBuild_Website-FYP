@@ -1,0 +1,46 @@
+@model List<QuizQuestion>
+
+@{
+    ViewBag.Title = "PC Build | Manage Quiz Questions";
+}
+
+<p>Manage quiz questions used in the PC Knowledge Test.</p>
+
+<p>
+    <a href="@Url.Action("Create")" class="button">Add New Question</a>
+</p>
+
+@if (!Model.Any())
+{
+    <p>No questions yet.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Question</th>
+                <th>Correct</th>
+                <th>Active</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var q in Model)
+            {
+                <tr>
+                    <td>@q.QuizQuestionId</td>
+                    <td>@q.QuestionText</td>
+                    <td>@q.CorrectOption</td>
+                    <td>@(q.IsActive ? "Yes" : "No")</td>
+                    <td>
+                        <a href="@Url.Action("Edit", new { id = q.QuizQuestionId })">Edit</a> |
+                        <a href="@Url.Action("Delete", new { id = q.QuizQuestionId })">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+

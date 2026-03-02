@@ -1,0 +1,37 @@
+@model List<QuizAttempt>
+
+@{
+    ViewBag.Title = "PC Build | Quiz History";
+}
+
+<p>Your past quiz attempts.</p>
+
+@if (!Model.Any())
+{
+    <p>No quiz history yet. Try the <a href="@Url.Action("Index")">PC Knowledge Quiz</a>.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Attempt</th>
+                <th>Date</th>
+                <th>Score</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var a in Model)
+            {
+                <tr>
+                    <td>#@a.QuizAttemptId</td>
+                    <td>@a.TakenAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@a.CorrectCount / @a.TotalQuestions</td>
+                    <td><a href="@Url.Action("Detail", new { id = a.QuizAttemptId })">View</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+

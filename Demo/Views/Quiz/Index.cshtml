@@ -1,0 +1,98 @@
+@model QuizTakeVM
+
+@{
+    ViewBag.Title = "PC Build | Knowledge Quiz";
+}
+
+@if (!Model.IsSubmitted)
+{
+    <p>Answer the following 10 multiple-choice questions to test your PC build knowledge. Each question has options A–D.</p>
+
+    <form method="post">
+        <div asp-validation-summary="ModelOnly"></div>
+
+        @for (var i = 0; i < Model.Questions.Count; i++)
+        {
+            var q = Model.Questions[i];
+            <fieldset class="quiz-question">
+                <legend>@(i + 1). @q.QuestionText</legend>
+                <input type="hidden" asp-for="Questions[i].QuizQuestionId" />
+                <input type="hidden" asp-for="Questions[i].QuestionText" />
+                <input type="hidden" asp-for="Questions[i].OptionA" />
+                <input type="hidden" asp-for="Questions[i].OptionB" />
+                <input type="hidden" asp-for="Questions[i].OptionC" />
+                <input type="hidden" asp-for="Questions[i].OptionD" />
+                <div>
+                    <label>
+                        <input type="radio" asp-for="Questions[i].SelectedOption" value="A" />
+                        A) @q.OptionA
+                    </label>
+                </div>
+                <div>
+                    <label>
+                        <input type="radio" asp-for="Questions[i].SelectedOption" value="B" />
+                        B) @q.OptionB
+                    </label>
+                </div>
+                <div>
+                    <label>
+                        <input type="radio" asp-for="Questions[i].SelectedOption" value="C" />
+                        C) @q.OptionC
+                    </label>
+                </div>
+                <div>
+                    <label>
+                        <input type="radio" asp-for="Questions[i].SelectedOption" value="D" />
+                        D) @q.OptionD
+                    </label>
+                </div>
+            </fieldset>
+        }
+
+        <p>
+            <button type="submit" class="button">Submit Answers</button>
+            <a href="@Url.Action("History")" class="button secondary">View History</a>
+        </p>
+    </form>
+}
+else
+{
+    <h2>Quiz Result</h2>
+    <p>
+        <strong>Score:</strong> @Model.CorrectCount / @Model.TotalQuestions
+    </p>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Question</th>
+                <th>Your Answer</th>
+                <th>Correct Answer</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (var i = 0; i < Model.Questions.Count; i++)
+            {
+                var q = Model.Questions[i];
+                <tr class="@(q.IsCorrect ? "quiz-correct" : "quiz-wrong")">
+                    <td>@(i + 1)</td>
+                    <td>@q.QuestionText</td>
+                    <td>@(string.IsNullOrEmpty(q.SelectedOption) ? "-" : q.SelectedOption)</td>
+                    <td>@q.CorrectOption</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @if (ViewBag.SavedAttemptId != null)
+    {
+        <p><em>Result saved. You can review it later in <a href="@Url.Action("History")">History</a>.</em></p>
+    }
+
+    <p>
+        <a href="@Url.Action("Index")" class="button">Retry Quiz</a>
+        <a href="@Url.Action("History")" class="button secondary">View History</a>
+    </p>
+}
+

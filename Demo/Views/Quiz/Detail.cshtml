@@ -1,0 +1,44 @@
+@model QuizAttempt
+
+@{
+    ViewBag.Title = "PC Build | Quiz Attempt Detail";
+}
+
+<p>
+    <strong>Attempt #@Model.QuizAttemptId</strong><br />
+    <strong>Date:</strong> @Model.TakenAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")<br />
+    <strong>Score:</strong> @Model.CorrectCount / @Model.TotalQuestions
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Question</th>
+            <th>Your Answer</th>
+            <th>Correct Answer</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            var index = 1;
+        }
+        @foreach (var d in Model.Details)
+        {
+            var q = d.Question;
+            <tr class="@(d.IsCorrect ? "quiz-correct" : "quiz-wrong")">
+                <td>@index</td>
+                <td>@q?.QuestionText</td>
+                <td>@(string.IsNullOrEmpty(d.SelectedOption) ? "-" : d.SelectedOption)</td>
+                <td>@q?.CorrectOption</td>
+            </tr>
+            index++;
+        }
+    </tbody>
+</table>
+
+<p>
+    <a href="@Url.Action("History")" class="button secondary">Back to History</a>
+    <a href="@Url.Action("Index")" class="button">New Quiz</a>
+</p>
+
