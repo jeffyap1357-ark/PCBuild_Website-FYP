@@ -114,3 +114,19 @@ public class RecommendBuildVM
     [Range(1, 10)]
     public int TargetTier { get; set; } = 7;
 }
+
+// Performance evaluation (user-selected build with budget and score)
+public class PerformanceBuildVM
+{
+    [Required, Range(1000, 50000), Display(Name = "Budget (RM)")]
+    public decimal Budget { get; set; } = 5000;
+
+    public List<CategoryOptionVM> Categories { get; set; } = [];
+
+    public decimal TotalPrice { get; set; }
+
+    public int TotalScore { get; set; }
+
+    // Whether result (price/score) is calculated
+    public bool HasResult { get; set; }
+}

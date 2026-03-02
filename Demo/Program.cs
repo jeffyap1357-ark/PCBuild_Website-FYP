@@ -55,6 +55,49 @@ catch (Exception ex)
     logger.LogWarning(ex, "Could not ensure Guide table exists. Visit /Learning/Diagnose to see tables in DB.");
 }
 
+// Ensure PerformanceReport tables exist (fallback if migrations failed)
+try
+{
+    using var scope2 = app.Services.CreateScope();
+    var db2 = scope2.ServiceProvider.GetRequiredService<DB>();
+    db2.Database.ExecuteSqlRaw(@"
+        IF NOT EXISTS (SELECT 1 FROM sys.tables t JOIN sys.schemas s ON t.schema_id = s.schema_id WHERE s.name = N'dbo' AND t.name = N'PerformanceReports')
+        BEGIN
+            CREATE TABLE [dbo].[PerformanceReports](
+                [PerformanceReportId] int IDENTITY NOT NULL,
+                [UserId] int NOT NULL,
+                [ReportName] nvarchar(200) NULL,
+                [CreatedAt] datetime2 NOT NULL,
+                [Budget] decimal(10,2) NOT NULL,
+                [TotalPrice] decimal(10,2) NOT NULL,
+                [TotalScore] int NOT NULL,
+                CONSTRAINT [PK_PerformanceReports] PRIMARY KEY ([PerformanceReportId]),
+                CONSTRAINT [FK_PerformanceReports_Users_UserId] FOREIGN KEY ([UserId]) REFERENCES [dbo].[Users]([UserId]) ON DELETE CASCADE
+            );
+        END;
+        IF NOT EXISTS (SELECT 1 FROM sys.tables t JOIN sys.schemas s ON t.schema_id = s.schema_id WHERE s.name = N'dbo' AND t.name = N'PerformanceReportItems')
+        BEGIN
+            CREATE TABLE [dbo].[PerformanceReportItems](
+                [PerformanceReportItemId] int IDENTITY NOT NULL,
+                [PerformanceReportId] int NOT NULL,
+                [HardwareId] int NOT NULL,
+                [CategoryName] nvarchar(100) NOT NULL,
+                [Price] decimal(10,2) NOT NULL,
+                [Score] int NOT NULL,
+                CONSTRAINT [PK_PerformanceReportItems] PRIMARY KEY ([PerformanceReportItemId]),
+                CONSTRAINT [FK_PerformanceReportItems_PerformanceReports_PerformanceReportId] FOREIGN KEY ([PerformanceReportId]) REFERENCES [dbo].[PerformanceReports]([PerformanceReportId]) ON DELETE CASCADE,
+                CONSTRAINT [FK_PerformanceReportItems_Hardware_HardwareId] FOREIGN KEY ([HardwareId]) REFERENCES [dbo].[Hardware]([HardwareId]) ON DELETE CASCADE
+            );
+            CREATE INDEX [IX_PerformanceReportItems_PerformanceReportId] ON [dbo].[PerformanceReportItems]([PerformanceReportId]);
+            CREATE INDEX [IX_PerformanceReportItems_HardwareId] ON [dbo].[PerformanceReportItems]([HardwareId]);
+        END
+    ");
+}
+catch (Exception ex)
+{
+    logger.LogWarning(ex, "Could not ensure PerformanceReport tables exist.");
+}
+
 // Import hardware from CSV if file exists (run AddHardwareCompatibility.sql first for Socket/DdrType columns)
 try
 {

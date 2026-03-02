@@ -1,0 +1,50 @@
+@model PerformanceReport
+
+@{
+    ViewBag.Title = "PC Build | Performance Report Detail";
+}
+
+<p>
+    <strong>Report:</strong> @(string.IsNullOrEmpty(Model.ReportName) ? ("Report #" + Model.PerformanceReportId) : Model.ReportName)<br />
+    <strong>Created:</strong> @Model.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")<br />
+    <strong>Budget:</strong> @Model.Budget.ToString("C")<br />
+    <strong>Total Price:</strong> @Model.TotalPrice.ToString("C")<br />
+    <strong>Total Score:</strong> @Model.TotalScore
+    </p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Component</th>
+            <th>Part</th>
+            <th>Price</th>
+            <th>Score</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Items.OrderBy(i => i.CategoryName))
+        {
+            <tr>
+                <td>@item.CategoryName</td>
+                <td>
+                    @if (item.Hardware != null)
+                    {
+                        <a href="/Hardware/Detail/@item.HardwareId">@item.Hardware.Name</a>
+                    }
+                    else
+                    {
+                        @("Hardware #" + item.HardwareId)
+                    }
+                </td>
+                <td>@item.Price.ToString("C")</td>
+                <td>@item.Score</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<p>
+    <a href="@Url.Action("History")" class="button secondary">Back to History</a>
+    <a href="@Url.Action("Index")" class="button">New Performance Test</a>
+</p>
+

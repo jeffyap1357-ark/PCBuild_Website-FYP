@@ -28,6 +28,8 @@ public class DB : DbContext
     public DbSet<QuizQuestion> QuizQuestions { get; set; }
     public DbSet<QuizAttempt> QuizAttempts { get; set; }
     public DbSet<QuizAttemptDetail> QuizAttemptDetails { get; set; }
+    public DbSet<PerformanceReport> PerformanceReports { get; set; }
+    public DbSet<PerformanceReportItem> PerformanceReportItems { get; set; }
 }
 
 // User: PC Build website users
@@ -329,4 +331,58 @@ public class QuizAttemptDetail
 
     [ForeignKey(nameof(QuizQuestionId))]
     public QuizQuestion Question { get; set; }
+}
+
+// PerformanceReport: saved performance evaluation summary per user
+public class PerformanceReport
+{
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int PerformanceReportId { get; set; }
+
+    public int UserId { get; set; }
+
+    [MaxLength(200)]
+    public string? ReportName { get; set; }
+
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    [Precision(10, 2)]
+    public decimal Budget { get; set; }
+
+    [Precision(10, 2)]
+    public decimal TotalPrice { get; set; }
+
+    public int TotalScore { get; set; }
+
+    [ForeignKey(nameof(UserId))]
+    public User User { get; set; }
+
+    public List<PerformanceReportItem> Items { get; set; } = [];
+}
+
+// PerformanceReportItem: hardware items in a performance report
+public class PerformanceReportItem
+{
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int PerformanceReportItemId { get; set; }
+
+    public int PerformanceReportId { get; set; }
+
+    public int HardwareId { get; set; }
+
+    [MaxLength(100)]
+    public string CategoryName { get; set; }
+
+    [Precision(10, 2)]
+    public decimal Price { get; set; }
+
+    public int Score { get; set; }
+
+    [ForeignKey(nameof(PerformanceReportId))]
+    public PerformanceReport Report { get; set; }
+
+    [ForeignKey(nameof(HardwareId))]
+    public Hardware Hardware { get; set; }
 }
