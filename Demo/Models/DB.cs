@@ -25,6 +25,9 @@ public class DB : DbContext
     public DbSet<Community> Communities { get; set; }
     public DbSet<CommunityComment> CommunityComments { get; set; }
     public DbSet<CommunityRating> CommunityRatings { get; set; }
+    public DbSet<QuizQuestion> QuizQuestions { get; set; }
+    public DbSet<QuizAttempt> QuizAttempts { get; set; }
+    public DbSet<QuizAttemptDetail> QuizAttemptDetails { get; set; }
 }
 
 // User: PC Build website users
@@ -253,4 +256,77 @@ public class CommunityRating
 
     [ForeignKey(nameof(UserId))]
     public User User { get; set; }
+}
+
+// Quiz: PC build knowledge test questions (MCQ with options A–D)
+public class QuizQuestion
+{
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int QuizQuestionId { get; set; }
+
+    [Required, MaxLength(500)]
+    public string QuestionText { get; set; }
+
+    [Required, MaxLength(200)]
+    public string OptionA { get; set; }
+
+    [Required, MaxLength(200)]
+    public string OptionB { get; set; }
+
+    [Required, MaxLength(200)]
+    public string OptionC { get; set; }
+
+    [Required, MaxLength(200)]
+    public string OptionD { get; set; }
+
+    /// <summary>A, B, C, or D.</summary>
+    [Required, MaxLength(1)]
+    public string CorrectOption { get; set; }
+
+    public bool IsActive { get; set; } = true;
+}
+
+// QuizAttempt: one completed test by a user
+public class QuizAttempt
+{
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int QuizAttemptId { get; set; }
+
+    public int UserId { get; set; }
+
+    public DateTime TakenAt { get; set; } = DateTime.UtcNow;
+
+    public int TotalQuestions { get; set; }
+
+    public int CorrectCount { get; set; }
+
+    [ForeignKey(nameof(UserId))]
+    public User User { get; set; }
+
+    public List<QuizAttemptDetail> Details { get; set; } = [];
+}
+
+// QuizAttemptDetail: per-question answer for an attempt
+public class QuizAttemptDetail
+{
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int QuizAttemptDetailId { get; set; }
+
+    public int QuizAttemptId { get; set; }
+
+    public int QuizQuestionId { get; set; }
+
+    [MaxLength(1)]
+    public string? SelectedOption { get; set; }
+
+    public bool IsCorrect { get; set; }
+
+    [ForeignKey(nameof(QuizAttemptId))]
+    public QuizAttempt Attempt { get; set; }
+
+    [ForeignKey(nameof(QuizQuestionId))]
+    public QuizQuestion Question { get; set; }
 }
