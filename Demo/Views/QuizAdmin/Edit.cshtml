@@ -1,0 +1,53 @@
+@model QuizQuestion
+
+@{
+    ViewBag.Title = "PC Build | Edit Quiz Question";
+}
+
+<form method="post">
+    <div asp-validation-summary="ModelOnly"></div>
+
+    <p>
+        <label asp-for="QuestionText"></label><br />
+        <textarea asp-for="QuestionText" rows="3"></textarea>
+        <span asp-validation-for="QuestionText"></span>
+    </p>
+
+    <p>
+        <label asp-for="OptionA"></label><br />
+        <input asp-for="OptionA" />
+        <span asp-validation-for="OptionA"></span>
+    </p>
+    <p>
+        <label asp-for="OptionB"></label><br />
+        <input asp-for="OptionB" />
+        <span asp-validation-for="OptionB"></span>
+    </p>
+    <p>
+        <label asp-for="OptionC"></label><br />
+        <input asp-for="OptionC" />
+        <span asp-validation-for="OptionC"></span>
+    </p>
+    <p>
+        <label asp-for="OptionD"></label><br />
+        <input asp-for="OptionD" />
+        <span asp-validation-for="OptionD"></span>
+    </p>
+
+    <p>
+        <label asp-for="CorrectOption"></label><br />
+        <input asp-for="CorrectOption" maxlength="1" placeholder="A/B/C/D" />
+        <span asp-validation-for="CorrectOption"></span>
+    </p>
+
+    <p>
+        <label asp-for="IsActive"></label>
+        <input asp-for="IsActive" type="checkbox" />
+    </p>
+
+    <p>
+        <button type="submit" class="button">Save</button>
+        <a href="@Url.Action("Index")" class="button secondary">Cancel</a>
+    </p>
+</form>
+

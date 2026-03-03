@@ -1,0 +1,41 @@
+@model List<PerformanceReport>
+
+@{
+    ViewBag.Title = "PC Build | Performance History";
+}
+
+<p>These are your saved performance test reports.</p>
+
+@if (!Model.Any())
+{
+    <p>No performance reports yet. Run a test from <a href="@Url.Action("Index")">Performance Test</a>.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Report</th>
+                <th>Created</th>
+                <th>Budget</th>
+                <th>Total Price</th>
+                <th>Total Score</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var r in Model)
+            {
+                <tr>
+                    <td>@(string.IsNullOrEmpty(r.ReportName) ? ("Report #" + r.PerformanceReportId) : r.ReportName)</td>
+                    <td>@r.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@r.Budget.ToString("C")</td>
+                    <td>@r.TotalPrice.ToString("C")</td>
+                    <td>@r.TotalScore</td>
+                    <td><a href="@Url.Action("Detail", new { id = r.PerformanceReportId })">View</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+

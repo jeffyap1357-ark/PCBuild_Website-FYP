@@ -1,0 +1,66 @@
+@model FeedbackReportVM
+
+@{
+    ViewBag.Title = "PC Build | Feedback Report";
+}
+
+<h2>Overview</h2>
+
+@if (Model.TotalCount == 0)
+{
+    <p>No feedback yet.</p>
+}
+else
+{
+    <p>
+        <strong>Average rating:</strong> @Model.AverageRating.ToString("0.0") / 5<br />
+        <strong>Total feedback:</strong> @Model.TotalCount
+    </p>
+
+    <h3>Rating distribution</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Rating</th>
+                <th>Count</th>
+                <th>Percentage</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var d in Model.Distribution.OrderByDescending(d => d.Rating))
+            {
+                <tr>
+                    <td>@d.Rating</td>
+                    <td>@d.Count</td>
+                    <td>@d.Percentage.ToString("0.0")%</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <h3>Recent feedback</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Rating</th>
+                <th>Module</th>
+                <th>User</th>
+                <th>Comment</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var f in Model.Feedbacks)
+            {
+                <tr>
+                    <td>@f.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@f.Rating</td>
+                    <td>@(string.IsNullOrEmpty(f.ModuleName) ? "-" : f.ModuleName)</td>
+                    <td>@(f.User?.Username ?? "-")</td>
+                    <td>@(string.IsNullOrEmpty(f.Comment) ? "-" : f.Comment)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+

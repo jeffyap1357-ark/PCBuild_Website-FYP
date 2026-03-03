@@ -133,3 +133,82 @@ public class RecommendBuildVM
     [Display(Name = "Optimization type")]
     public OptimizationType OptimizationType { get; set; } = OptimizationType.Balanced;
 }
+
+// Performance evaluation (user-selected build with budget and score)
+public class PerformanceBuildVM
+{
+    [Required, Range(1000, 50000), Display(Name = "Budget (RM)")]
+    public decimal Budget { get; set; } = 5000;
+
+    public List<CategoryOptionVM> Categories { get; set; } = [];
+
+    public decimal TotalPrice { get; set; }
+
+    public int TotalScore { get; set; }
+
+    // Whether result (price/score) is calculated
+    public bool HasResult { get; set; }
+}
+
+// Quiz: user takes PC build knowledge test
+public class QuizQuestionAnswerVM
+{
+    public int QuizQuestionId { get; set; }
+
+    public string QuestionText { get; set; }
+
+    public string OptionA { get; set; }
+    public string OptionB { get; set; }
+    public string OptionC { get; set; }
+    public string OptionD { get; set; }
+
+    // User selected answer: "A", "B", "C", or "D"
+    public string? SelectedOption { get; set; }
+
+    // Filled after grading
+    public string CorrectOption { get; set; }
+    public bool IsCorrect { get; set; }
+}
+
+public class QuizTakeVM
+{
+    public List<QuizQuestionAnswerVM> Questions { get; set; } = [];
+
+    public int TotalQuestions => Questions.Count;
+
+    public int CorrectCount { get; set; }
+
+    public bool IsSubmitted { get; set; }
+}
+
+// Feedback: user rating and comment submission
+public class FeedbackCreateVM
+{
+    [Required, Range(1, 5)]
+    [Display(Name = "Rating (1-5)")]
+    public int Rating { get; set; }
+
+    [StringLength(1000)]
+    [Display(Name = "More feedback (optional)")]
+    public string? Comment { get; set; }
+
+    public string? ModuleName { get; set; }
+    public string? PageUrl { get; set; }
+
+    public string? ReturnUrl { get; set; }
+}
+
+public class FeedbackDistributionItemVM
+{
+    public int Rating { get; set; }
+    public int Count { get; set; }
+    public double Percentage { get; set; }
+}
+
+public class FeedbackReportVM
+{
+    public double AverageRating { get; set; }
+    public int TotalCount { get; set; }
+    public List<FeedbackDistributionItemVM> Distribution { get; set; } = [];
+    public List<Feedback> Feedbacks { get; set; } = [];
+}

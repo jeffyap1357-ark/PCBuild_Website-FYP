@@ -25,6 +25,12 @@ public class DB : DbContext
     public DbSet<Community> Communities { get; set; }
     public DbSet<CommunityComment> CommunityComments { get; set; }
     public DbSet<CommunityRating> CommunityRatings { get; set; }
+    public DbSet<QuizQuestion> QuizQuestions { get; set; }
+    public DbSet<QuizAttempt> QuizAttempts { get; set; }
+    public DbSet<QuizAttemptDetail> QuizAttemptDetails { get; set; }
+    public DbSet<PerformanceReport> PerformanceReports { get; set; }
+    public DbSet<PerformanceReportItem> PerformanceReportItems { get; set; }
+    public DbSet<Feedback> Feedbacks { get; set; }
     public DbSet<DraftBuild> DraftBuilds { get; set; }
     public DbSet<DraftBuildDetail> DraftBuildDetails { get; set; }
 }
@@ -306,4 +312,158 @@ public class CommunityRating
 
     [ForeignKey(nameof(UserId))]
     public User User { get; set; }
+}
+
+// Quiz: PC build knowledge test questions (MCQ with options A–D)
+public class QuizQuestion
+{
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int QuizQuestionId { get; set; }
+
+    [Required, MaxLength(500)]
+    public string QuestionText { get; set; }
+
+    [Required, MaxLength(200)]
+    public string OptionA { get; set; }
+
+    [Required, MaxLength(200)]
+    public string OptionB { get; set; }
+
+    [Required, MaxLength(200)]
+    public string OptionC { get; set; }
+
+    [Required, MaxLength(200)]
+    public string OptionD { get; set; }
+
+    /// <summary>A, B, C, or D.</summary>
+    [Required, MaxLength(1)]
+    public string CorrectOption { get; set; }
+
+    public bool IsActive { get; set; } = true;
+}
+
+// QuizAttempt: one completed test by a user
+public class QuizAttempt
+{
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int QuizAttemptId { get; set; }
+
+    public int UserId { get; set; }
+
+    public DateTime TakenAt { get; set; } = DateTime.UtcNow;
+
+    public int TotalQuestions { get; set; }
+
+    public int CorrectCount { get; set; }
+
+    [ForeignKey(nameof(UserId))]
+    public User User { get; set; }
+
+    public List<QuizAttemptDetail> Details { get; set; } = [];
+}
+
+// QuizAttemptDetail: per-question answer for an attempt
+public class QuizAttemptDetail
+{
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int QuizAttemptDetailId { get; set; }
+
+    public int QuizAttemptId { get; set; }
+
+    public int QuizQuestionId { get; set; }
+
+    [MaxLength(1)]
+    public string? SelectedOption { get; set; }
+
+    public bool IsCorrect { get; set; }
+
+    [ForeignKey(nameof(QuizAttemptId))]
+    public QuizAttempt Attempt { get; set; }
+
+    [ForeignKey(nameof(QuizQuestionId))]
+    public QuizQuestion Question { get; set; }
+}
+
+// PerformanceReport: saved performance evaluation summary per user
+public class PerformanceReport
+{
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int PerformanceReportId { get; set; }
+
+    public int UserId { get; set; }
+
+    [MaxLength(200)]
+    public string? ReportName { get; set; }
+
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    [Precision(10, 2)]
+    public decimal Budget { get; set; }
+
+    [Precision(10, 2)]
+    public decimal TotalPrice { get; set; }
+
+    public int TotalScore { get; set; }
+
+    [ForeignKey(nameof(UserId))]
+    public User User { get; set; }
+
+    public List<PerformanceReportItem> Items { get; set; } = [];
+}
+
+// PerformanceReportItem: hardware items in a performance report
+public class PerformanceReportItem
+{
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int PerformanceReportItemId { get; set; }
+
+    public int PerformanceReportId { get; set; }
+
+    public int HardwareId { get; set; }
+
+    [MaxLength(100)]
+    public string CategoryName { get; set; }
+
+    [Precision(10, 2)]
+    public decimal Price { get; set; }
+
+    public int Score { get; set; }
+
+    [ForeignKey(nameof(PerformanceReportId))]
+    public PerformanceReport Report { get; set; }
+
+    [ForeignKey(nameof(HardwareId))]
+    public Hardware Hardware { get; set; }
+}
+
+// Feedback: overall experience rating and comments
+public class Feedback
+{
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int FeedbackId { get; set; }
+
+    public int? UserId { get; set; }
+
+    [Required, Range(1, 5)]
+    public int Rating { get; set; }
+
+    [MaxLength(1000)]
+    public string? Comment { get; set; }
+
+    [MaxLength(200)]
+    public string? ModuleName { get; set; }
+
+    [MaxLength(500)]
+    public string? PageUrl { get; set; }
+
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    [ForeignKey(nameof(UserId))]
+    public User? User { get; set; }
 }
