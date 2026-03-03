@@ -2,27 +2,77 @@
 
 @{
     ViewBag.Title = "PC Build | Community";
+    var search = ViewBag.Search as string ?? "";
+    var sortBy = ViewBag.SortBy as string ?? "";
 }
+
+<div class="community-header">
+    <form method="get" class="community-search-form">
+        <input type="text" name="search" value="@search" placeholder="Search by build name or username..." class="community-search-input">
+        <select name="sortBy" class="community-sort-select" onchange="this.form.submit()">
+            @if (sortBy == "")
+            {
+                <option value="" selected>Newest first</option>
+            }
+            else
+            {
+                <option value="">Newest first</option>
+            }
+            @if (sortBy == "rating-high")
+            {
+                <option value="rating-high" selected>Rating: High to Low</option>
+            }
+            else
+            {
+                <option value="rating-high">Rating: High to Low</option>
+            }
+            @if (sortBy == "rating-low")
+            {
+                <option value="rating-low" selected>Rating: Low to High</option>
+            }
+            else
+            {
+                <option value="rating-low">Rating: Low to High</option>
+            }
+        </select>
+        <button type="submit" class="button">Search</button>
+    </form>
+</div>
 
 <p>Browse shared PC builds from the community.</p>
 
 @if (Model.Count == 0)
 {
-    <p>No shared builds yet. Share one of your builds from <a href="/Build/Index">My Builds</a>.</p>
+    @if (string.IsNullOrWhiteSpace(search))
+    {
+        <p>No shared builds yet. Share one of your builds from <a href="/Build/Index">My Builds</a>.</p>
+    }
+    else
+    {
+        <p>No results found. Try a different search or filter.</p>
+    }
 }
 else
 {
-    <ul class="community-list">
+    <div class="community-card-grid">
         @foreach (var c in Model)
         {
-            <li>
-                <a href="@Url.Action("Detail", new { id = c.CommunityId })">@c.BuildName</a>
-                <span class="community-meta">by @c.User.Username &middot; @c.TotalPrice.ToString("C") &middot; @c.SharedAt.ToString("yyyy-MM-dd")</span>
-                @if (c.AverageRating.HasValue)
-                {
-                    <span class="community-rating">★ @c.AverageRating.Value.ToString("F1") (@c.RatingCount)</span>
-                }
-            </li>
+            var imgSrc = !string.IsNullOrEmpty(c.Image) ? "/images/community/" + c.Image : "/images/default.png";
+            <a href="@Url.Action("Detail", new { id = c.CommunityId })" class="community-card">
+                <div class="community-card-image">
+                    <img src="@imgSrc" alt="@c.BuildName" onerror="this.onerror=null;this.src='/images/default.png';">
+                </div>
+                <div class="community-card-body">
+                    <div class="community-card-name">@c.BuildName</div>
+                    <div class="community-card-meta">by @c.User.Username</div>
+                    <div class="community-card-price">@c.TotalPrice.ToString("C")</div>
+                    @if (c.AverageRating.HasValue)
+                    {
+                        <div class="community-card-rating">★ @c.AverageRating.Value.ToString("F1") (@c.RatingCount)</div>
+                    }
+                    <div class="community-card-date">@c.SharedAt.ToString("yyyy-MM-dd")</div>
+                </div>
+            </a>
         }
-    </ul>
+    </div>
 }

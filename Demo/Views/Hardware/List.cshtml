@@ -4,69 +4,70 @@
 @{
     ViewBag.Title = "Hardware | List";
     var categories = ViewBag.Categories as List<Category>;
+    var brands = ViewBag.Brands as List<string>;
     var selectedCategoryId = ViewBag.SelectedCategoryId as int?;
+    var selectedBrand = ViewBag.SelectedBrand as string ?? "";
 }
 
 <div class="hardware-list-page">
     <aside class="hardware-filter-sidebar" id="filter-sidebar">
-        <div class="hardware-filter-title">Components</div>
-        <nav class="hardware-filter-nav">
-            <a href="@Url.Action("List")" class="hardware-filter-link @(selectedCategoryId == null ? "active" : "")">All</a>
-            @if (categories != null)
-            {
-                @foreach (var c in categories)
+        <div class="hardware-filter-title">Filter</div>
+        <div class="hardware-filter-search">
+            <input type="text" id="hardware-search" class="hardware-search" placeholder="Search hardware..." autocomplete="off">
+        </div>
+        <div class="hardware-filter-group">
+            <label class="hardware-filter-label">Component</label>
+            <select id="hardware-category" class="hardware-filter-select">
+                <option value="">All</option>
+                @if (categories != null)
                 {
-                    <a href="@Url.Action("List", new { categoryId = c.CategoryId })" class="hardware-filter-link @(selectedCategoryId == c.CategoryId ? "active" : "")">@c.Type</a>
+                    @foreach (var c in categories)
+                    {
+                        @if (selectedCategoryId == c.CategoryId)
+                        {
+                            <option value="@c.CategoryId" selected>@c.Type</option>
+                        }
+                        else
+                        {
+                            <option value="@c.CategoryId">@c.Type</option>
+                        }
+                    }
                 }
-            }
-        </nav>
+            </select>
+        </div>
+        <div class="hardware-filter-group">
+            <label class="hardware-filter-label">Brand</label>
+            <select id="hardware-brand" class="hardware-filter-select">
+                <option value="">All</option>
+                @if (brands != null)
+                {
+                    @foreach (var b in brands)
+                    {
+                        @if (selectedBrand == b)
+                        {
+                            <option value="@b" selected>@b</option>
+                        }
+                        else
+                        {
+                            <option value="@b">@b</option>
+                        }
+                    }
+                }
+            </select>
+        </div>
     </aside>
 
     <div class="hardware-list-main">
         <div class="hardware-list-header">
-            <div class="hardware-search-wrap">
-                <input type="text" id="hardware-search" class="hardware-search" placeholder="Search hardware..." autocomplete="off">
-            </div>
             <button type="button" class="hardware-filter-toggle" id="filter-toggle" title="Show/Hide filter bar">
                 <span class="filter-icon" aria-hidden="true">≡</span>
                 <span class="filter-label" id="filter-label">Filter</span>
             </button>
         </div>
 
-        @if (!Model.Any())
-        {
-            <p class="hardware-empty">No hardware found.</p>
-        }
-        else
-        {
-            <p class="hardware-no-results" id="hardware-no-results" style="display:none">No results found.</p>
-            <div class="hardware-card-grid">
-                @foreach (var h in Model)
-                {
-                    <a href="@Url.Action("Detail", new { id = h.HardwareId })" class="hardware-card" data-search="@((h.Name + " " + (h.Category?.Type ?? "") + " " + (h.Brand ?? "")).ToLowerInvariant())">
-                        <div class="hardware-card-image">
-                            @{
-                                var imgFile = Helper.GetHardwareImagePath(h.Picture, h.Name);
-                            }
-                            @if (!string.IsNullOrEmpty(imgFile))
-                            {
-                                <img src="/hardware/@imgFile" alt="@h.Name" onerror="this.onerror=null;this.style.display='none';var p=this.nextElementSibling;if(p)p.style.display='flex';">
-                                <span class="hardware-card-placeholder" style="display:none">No image</span>
-                            }
-                            else
-                            {
-                                <span class="hardware-card-placeholder">No image</span>
-                            }
-                        </div>
-                        <div class="hardware-card-body">
-                            <div class="hardware-card-name">@h.Name</div>
-                            <div class="hardware-card-meta">@(h.Category?.Type) @(h.Brand != null ? "· " + h.Brand : "")</div>
-                            <div class="hardware-card-price">@h.Price.ToString("C")</div>
-                        </div>
-                    </a>
-                }
-            </div>
-        }
+        <div id="hardware-list-content">
+            @await Html.PartialAsync("_HardwareCardGrid", Model)
+        </div>
     </div>
 </div>
 
@@ -96,25 +97,36 @@
 
     applyState();
 
-    // Search
-    var searchInput = document.getElementById('hardware-search');
-    var cards = document.querySelectorAll('.hardware-card');
-    var grid = document.querySelector('.hardware-card-grid');
-    var noResults = document.getElementById('hardware-no-results');
+    var searchTimer;
+    var contentEl = document.getElementById('hardware-list-content');
 
-    if (searchInput && grid) {
-        searchInput.addEventListener('input', function() {
-            var q = (this.value || '').trim().toLowerCase();
-            var visible = 0;
-            cards.forEach(function(card) {
-                var text = (card.getAttribute('data-search') || '');
-                var match = !q || text.indexOf(q) !== -1;
-                card.style.display = match ? '' : 'none';
-                if (match) visible++;
+    function fetchHardware() {
+        var cat = document.getElementById('hardware-category')?.value || '';
+        var brand = document.getElementById('hardware-brand')?.value || '';
+        var search = document.getElementById('hardware-search')?.value?.trim() || '';
+        var params = new URLSearchParams();
+        if (cat) params.set('categoryId', cat);
+        if (brand) params.set('brand', brand);
+        if (search) params.set('search', search);
+
+        var url = '/Hardware/ListPartial' + (params.toString() ? '?' + params.toString() : '');
+        fetch(url)
+            .then(function(r) { return r.text(); })
+            .then(function(html) {
+                if (contentEl) contentEl.innerHTML = html;
+            })
+            .catch(function() {
+                if (contentEl) contentEl.innerHTML = '<p class="hardware-empty">Error loading hardware.</p>';
             });
-            if (noResults) noResults.style.display = q && visible === 0 ? 'block' : 'none';
-        });
     }
+
+    document.getElementById('hardware-category')?.addEventListener('change', fetchHardware);
+    document.getElementById('hardware-brand')?.addEventListener('change', fetchHardware);
+
+    document.getElementById('hardware-search')?.addEventListener('input', function() {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(fetchHardware, 350);
+    });
 })();
 </script>
 }

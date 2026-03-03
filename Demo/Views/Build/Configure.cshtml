@@ -1,90 +1,399 @@
 @model ConfigureBuildVM
+@inject Demo.Helper Helper
 
 @{
     ViewBag.Title = "PC Build | Configure";
+    var draftId = ViewBag.DraftId as int?;
 }
 
 <form method="post" id="configure-form">
-    <div asp-validation-summary="ModelOnly"></div>
-
-    <p>
-        <label asp-for="BuildName"></label>
-        <input asp-for="BuildName" placeholder="e.g. My Gaming PC">
-        <span asp-validation-for="BuildName"></span>
-    </p>
-
-    <p><strong>Select components by category:</strong> <em>Choose Motherboard first to filter compatible CPU and RAM.</em></p>
-
-    @for (var i = 0; i < Model.Categories.Count; i++)
+    @if (draftId.HasValue)
     {
-        var cat = Model.Categories[i];
-        <p>
-            <label>@cat.Type</label>
-            <input type="hidden" asp-for="Categories[i].CategoryId" />
-            <input type="hidden" asp-for="Categories[i].Type" />
-            <select asp-for="Categories[i].SelectedHardwareId" class="hardware-select" data-category="@cat.Type" data-category-id="@cat.CategoryId">
-                <option value="">-- None --</option>
-                @foreach (var h in cat.Items)
-                {
-                    <option value="@h.HardwareId" data-price="@h.Price" data-socket="@(h.Socket ?? "")" data-ddr="@(h.DdrType ?? "")">@h.Name - @h.Price.ToString("C")</option>
-                }
-            </select>
-        </p>
+        <input type="hidden" name="draftId" value="@draftId" />
     }
+    <div asp-validation-summary="ModelOnly" class="build-validation"></div>
 
-    <p class="total-row">
-        <strong>Total: </strong><span id="total-price">@Model.Categories.Sum(c => c.Items.FirstOrDefault(i => i.HardwareId == c.SelectedHardwareId)?.Price ?? 0).ToString("C")</span>
-    </p>
+    <div class="build-page">
+        <div class="build-main">
+            <h2 class="build-page-title">Build Your PC</h2>
+            <section class="build-section">
+                <h2 class="build-section-title"><span class="build-accent"></span>Build Name</h2>
+                <input asp-for="BuildName" class="build-name-input" placeholder="Enter a name for your build (e.g., Gaming Beast 2025)">
+                <span asp-validation-for="BuildName"></span>
+            </section>
 
-    <p>
-        <button type="submit">Save Build</button>
-        <a href="@Url.Action("Index")" class="button secondary">Cancel</a>
-    </p>
+            <section class="build-section">
+                <h2 class="build-section-title"><span class="build-accent"></span>Component Categories</h2>
+                <p class="build-hint">All components are shown. Incompatible choices will show a warning but you can still select them to learn.</p>
+                <div class="build-category-tabs">
+                    @for (var i = 0; i < Model.Categories.Count; i++)
+                    {
+                        var cat = Model.Categories[i];
+                        <button type="button" class="build-category-tab @(i == 0 ? "active" : "")" data-index="@i" data-category="@cat.Type">@cat.Type</button>
+                    }
+                </div>
+            </section>
+
+            @for (var i = 0; i < Model.Categories.Count; i++)
+            {
+                var cat = Model.Categories[i];
+                var isRam = cat.Type == "RAM";
+                <section class="build-section build-component-section @(i == 0 ? "active" : "")" data-category-index="@i" data-is-ram="@(isRam ? "true" : "false")">
+                    <h2 class="build-section-title"><span class="build-accent"></span>Choose @cat.Type</h2>
+                    @if (isRam)
+                    {
+                        <p class="build-hint">Select RAM for each slot. DDR type must match motherboard; mismatches will show a warning.</p>
+                        <div class="build-ram-slots" id="build-ram-slots">
+                            @for (var slot = 0; slot < 4; slot++)
+                            {
+                                var sel = cat.RamSlotSelections != null && slot < cat.RamSlotSelections.Count ? cat.RamSlotSelections[slot] : null;
+                                <div class="build-ram-slot" data-slot="@slot">
+                                    <h3 class="build-ram-slot-title">Slot @(slot + 1)</h3>
+                                    <div class="build-component-list build-ram-slot-list">
+                                        <label class="build-component-card @(sel == null ? "selected" : "")">
+                                            <input type="radio" name="Categories[@i].RamSlotSelections[@slot]" value="" @(sel == null ? "checked" : "") data-price="0" data-ddr="">
+                                            <div class="build-card-image"><span class="build-card-noimg">—</span></div>
+                                            <div class="build-card-body">
+                                                <div class="build-card-name">None</div>
+                                                <div class="build-card-price">—</div>
+                                            </div>
+                                        </label>
+                                        @foreach (var h in cat.Items)
+                                        {
+                                            var imgFile = Helper.GetHardwareImagePath(h.Picture, h.Name);
+                                            var specStr = !string.IsNullOrEmpty(h.DdrType) ? h.DdrType : "";
+                                            <label class="build-component-card @(h.HardwareId == sel ? "selected" : "")" data-category-type="RAM">
+                                                <input type="radio" name="Categories[@i].RamSlotSelections[@slot]" value="@h.HardwareId" @(h.HardwareId == sel ? "checked" : "")
+                                                       data-price="@h.Price" data-ddr="@(h.DdrType ?? "")" data-img="@Helper.GetHardwareImagePath(h.Picture, h.Name)">
+                                                <div class="build-card-image">
+                                                    @if (!string.IsNullOrEmpty(imgFile))
+                                                    {
+                                                        <img src="/hardware/@imgFile" alt="@h.Name">
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="build-card-noimg">No image</span>
+                                                    }
+                                                </div>
+                                                <div class="build-card-body">
+                                                    <div class="build-card-name">@h.Name</div>
+                                                    @if (!string.IsNullOrEmpty(specStr))
+                                                    {
+                                                        <div class="build-card-specs">@specStr</div>
+                                                    }
+                                                    <div class="build-card-price">@h.Price.ToString("C")</div>
+                                                </div>
+                                            </label>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <input type="hidden" name="Categories[@i].CategoryId" value="@cat.CategoryId" />
+                        <input type="hidden" name="Categories[@i].Type" value="@cat.Type" />
+                    }
+                    else
+                    {
+                        <div class="build-component-list">
+                            <label class="build-component-card @(cat.SelectedHardwareId == null ? "selected" : "")">
+                                <input type="radio" name="Categories[@i].SelectedHardwareId" value="" @(cat.SelectedHardwareId == null ? "checked" : "")
+                                       data-category-id="@cat.CategoryId" data-price="0" data-socket="" data-ddr="">
+                                <input type="hidden" name="Categories[@i].CategoryId" value="@cat.CategoryId" />
+                                <input type="hidden" name="Categories[@i].Type" value="@cat.Type" />
+                                <div class="build-card-image"><span class="build-card-noimg">—</span></div>
+                                <div class="build-card-body">
+                                    <div class="build-card-name">None</div>
+                                    <div class="build-card-brand"></div>
+                                    <div class="build-card-price">—</div>
+                                </div>
+                            </label>
+                            @foreach (var h in cat.Items)
+                            {
+                                var imgFile = Helper.GetHardwareImagePath(h.Picture, h.Name);
+                                var specs = new List<string>();
+                                if (!string.IsNullOrEmpty(h.Socket)) specs.Add(h.Socket);
+                                if (!string.IsNullOrEmpty(h.DdrType)) specs.Add(h.DdrType);
+                                if (!string.IsNullOrEmpty(h.FormFactor)) specs.Add(h.FormFactor);
+                                var specStr = string.Join(" · ", specs.Take(2));
+                                <label class="build-component-card @(h.HardwareId == cat.SelectedHardwareId ? "selected" : "")" data-category-type="@cat.Type" @(cat.Type == "Motherboard" ? "data-ram-slots=\"" + (h.RamSlots ?? 4) + "\"" : "")>
+                                    <input type="radio" name="Categories[@i].SelectedHardwareId" value="@h.HardwareId" @(h.HardwareId == cat.SelectedHardwareId ? "checked" : "")
+                                           data-category-id="@cat.CategoryId" data-price="@h.Price" data-socket="@(h.Socket ?? "")" data-ddr="@(h.DdrType ?? "")" data-form-factor="@(h.FormFactor ?? "")" data-img="@Helper.GetHardwareImagePath(h.Picture, h.Name)" @(cat.Type == "Motherboard" ? "data-ram-slots=\"" + (h.RamSlots ?? 4) + "\"" : "")>
+                                    <div class="build-card-image">
+                                        @if (!string.IsNullOrEmpty(imgFile))
+                                        {
+                                            <img src="/hardware/@imgFile" alt="@h.Name">
+                                        }
+                                        else
+                                        {
+                                            <span class="build-card-noimg">No image</span>
+                                        }
+                                    </div>
+                                    <div class="build-card-body">
+                                        <div class="build-card-name">@h.Name</div>
+                                        <div class="build-card-brand">@(h.Brand ?? "")</div>
+                                        @if (!string.IsNullOrEmpty(specStr))
+                                        {
+                                            <div class="build-card-specs">@specStr</div>
+                                        }
+                                        <div class="build-card-price">@h.Price.ToString("C")</div>
+                                    </div>
+                                </label>
+                            }
+                        </div>
+                    }
+                </section>
+            }
+
+            <div class="build-actions">
+                <button type="submit">Save Build</button>
+                <button type="button" id="build-clean-btn" class="button secondary">Clean</button>
+                <a href="@Url.Action("Index")" class="button secondary">Cancel</a>
+            </div>
+        </div>
+
+        <aside class="build-sidebar">
+            <div class="build-sidebar-section">
+                <h3 class="build-sidebar-title"><span class="build-accent"></span>Hardware Chosen</h3>
+                <div class="build-progress" id="build-progress">0/@Model.Categories.Count</div>
+                <div class="build-info-box" id="build-info-box">
+                    <span class="build-info-icon">!</span>
+                    Select all required components to complete your build
+                </div>
+                <div id="build-compat-warnings" class="build-compat-warnings" style="display:none;"></div>
+                <div class="build-selected-list" id="build-selected-list">
+                    <p class="build-placeholder" id="build-placeholder">No components selected yet. Choose from the left panel.</p>
+                    <div id="build-selected-items"></div>
+                </div>
+            </div>
+            <div class="build-sidebar-section">
+                <h3 class="build-sidebar-title"><span class="build-accent"></span>Estimated Total</h3>
+                <div class="build-total" id="build-total">@Model.Categories.Sum(c => c.Items.FirstOrDefault(i => i.HardwareId == c.SelectedHardwareId)?.Price ?? 0).ToString("C")</div>
+            </div>
+        </aside>
+    </div>
 </form>
 
 @section foot {
-    <script>
-        (function () {
-            var form = document.getElementById('configure-form');
-            var totalEl = document.getElementById('total-price');
-            var selects = form.querySelectorAll('.hardware-select');
-            var mbSelect = form.querySelector('.hardware-select[data-category="Motherboard"]');
-            var cpuSelect = form.querySelector('.hardware-select[data-category="CPU"]');
-            var ramSelect = form.querySelector('.hardware-select[data-category="RAM"]');
+<script>
+(function() {
+    var form = document.getElementById('configure-form');
+    var categoryTabs = form.querySelectorAll('.build-category-tab');
+    var sections = form.querySelectorAll('.build-component-section');
+    var totalEl = document.getElementById('build-total');
+    var progressEl = document.getElementById('build-progress');
+    var infoBox = document.getElementById('build-info-box');
+    var placeholder = document.getElementById('build-placeholder');
+    var selectedItems = document.getElementById('build-selected-items');
+    var compatWarnings = document.getElementById('build-compat-warnings');
+    var totalCategories = form.querySelectorAll('.build-component-section').length;
 
-            function updateTotal() {
-                var total = 0;
-                selects.forEach(function (s) {
-                    var opt = s.options[s.selectedIndex];
-                    if (opt && opt.value) total += parseFloat(opt.getAttribute('data-price') || 0);
-                });
-                totalEl.textContent = '$' + total.toFixed(2);
+    var mbSection = form.querySelector('.build-component-section[data-category-index="0"]');
+    var cpuSection = form.querySelector('.build-component-section[data-category-index="1"]');
+    var ramSection = form.querySelector('.build-component-section[data-category-index="2"]');
+
+    function getMbSocket() {
+        var checked = mbSection && mbSection.querySelector('input[type="radio"]:checked');
+        return checked ? (checked.getAttribute('data-socket') || '') : '';
+    }
+    function getMbDdr() {
+        var checked = mbSection && mbSection.querySelector('input[type="radio"]:checked');
+        return checked ? (checked.getAttribute('data-ddr') || '') : '';
+    }
+    function getMbFormFactor() {
+        var checked = mbSection && mbSection.querySelector('.build-component-list input[type="radio"]:checked');
+        return checked ? (checked.getAttribute('data-form-factor') || '') : '';
+    }
+
+    function showCompatibilityWarnings() {
+        var socket = getMbSocket();
+        var ddr = getMbDdr();
+        var mbForm = getMbFormFactor() || '';
+        var isMicro = mbForm.toLowerCase().indexOf('micro') !== -1;
+
+        form.querySelectorAll('.build-component-card').forEach(function(card) {
+            card.classList.remove('incompatible');
+            var inp = card.querySelector('input[type="radio"]');
+            if (!inp || inp.value === '') return;
+            inp.disabled = false;
+            card.style.display = '';
+
+            var catType = card.getAttribute('data-category-type') || '';
+            var cardSocket = inp.getAttribute('data-socket') || '';
+            var cardDdr = inp.getAttribute('data-ddr') || '';
+            var cardForm = inp.getAttribute('data-form-factor') || '';
+
+            var incompatible = false;
+            if (catType === 'CPU' && socket && cardSocket && cardSocket !== socket) incompatible = true;
+            if (catType === 'RAM' && ddr && cardDdr && cardDdr !== ddr) incompatible = true;
+            if (catType === 'PC case' && isMicro && cardForm) {
+                var cf = cardForm.toLowerCase();
+                if (cf.indexOf('micro') === -1 && cf.indexOf('atx') === -1) incompatible = true;
             }
 
-            function filterByMotherboard() {
-                if (!mbSelect || !cpuSelect || !ramSelect) return;
-                var mbOpt = mbSelect.options[mbSelect.selectedIndex];
-                var socket = mbOpt ? (mbOpt.getAttribute('data-socket') || '') : '';
-                var ddr = mbOpt ? (mbOpt.getAttribute('data-ddr') || '') : '';
-                function filterSelect(sel, attr) {
-                    var val = sel.value;
-                    for (var i = 1; i < sel.options.length; i++) {
-                        var o = sel.options[i];
-                        var match = !attr || (attr === 'socket' && (!socket || o.getAttribute('data-socket') === socket)) || (attr === 'ddr' && (!ddr || o.getAttribute('data-ddr') === ddr));
-                        o.style.display = match ? '' : 'none';
-                        o.disabled = !match;
+            if (incompatible) card.classList.add('incompatible');
+        });
+
+        if (ramSection && mbSection) {
+            var ramSlots = mbSection.querySelector('input[type="radio"]:checked')?.getAttribute('data-ram-slots') || '4';
+            var slotCount = parseInt(ramSlots, 10) || 4;
+            ramSection.querySelectorAll('.build-ram-slot').forEach(function(slotEl, idx) {
+                slotEl.style.display = idx < slotCount ? '' : 'none';
+            });
+        }
+    }
+
+    function getCompatibilityWarning(card, catType, catLabel) {
+        var inp = card.querySelector('input[type="radio"]');
+        if (!inp || !inp.checked || !inp.value) return null;
+        var socket = getMbSocket();
+        var ddr = getMbDdr();
+        var mbForm = getMbFormFactor() || '';
+        var isMicro = mbForm.toLowerCase().indexOf('micro') !== -1;
+        var cardSocket = inp.getAttribute('data-socket') || '';
+        var cardDdr = inp.getAttribute('data-ddr') || '';
+        var cardForm = inp.getAttribute('data-form-factor') || '';
+        if (catType === 'CPU' && socket && cardSocket && cardSocket !== socket)
+            return catLabel + ' socket (' + cardSocket + ') does not match motherboard (' + socket + ').';
+        if (catType === 'RAM' && ddr && cardDdr && cardDdr !== ddr)
+            return catLabel + ' DDR type (' + cardDdr + ') does not match motherboard (' + ddr + ').';
+        if (catType === 'PC case' && isMicro && cardForm) {
+            var cf = cardForm.toLowerCase();
+            if (cf.indexOf('micro') === -1 && cf.indexOf('atx') === -1)
+                return catLabel + ' may not fit Micro-ATX motherboard.';
+        }
+        return null;
+    }
+
+    function updateUI() {
+        var total = 0;
+        var count = 0;
+        var items = [];
+        var warnings = [];
+
+        sections.forEach(function(section) {
+            var isRam = section.getAttribute('data-is-ram') === 'true';
+            var catLabel = section.querySelector('.build-section-title') ? section.querySelector('.build-section-title').textContent.replace('Choose ', '').trim() : '';
+            if (isRam) {
+                var ramHasAny = false;
+                section.querySelectorAll('.build-ram-slot').forEach(function(slotEl) {
+                    if (slotEl.style.display === 'none') return;
+                    var checked = slotEl.querySelector('input[type="radio"]:checked');
+                    if (checked && checked.value) {
+                        var card = checked.closest('.build-component-card');
+                        var name = card ? card.querySelector('.build-card-name') : null;
+                        var price = parseFloat(checked.getAttribute('data-price') || 0);
+                        var img = checked.getAttribute('data-img') || '';
+                        var warn = getCompatibilityWarning(card, 'RAM', 'RAM');
+                        if (warn) warnings.push(warn);
+                        total += price;
+                        ramHasAny = true;
+                        items.push({ name: name ? name.textContent.trim() : '', price: price, img: img, warning: warn, catLabel: 'RAM' });
                     }
-                    if (val && sel.options[sel.selectedIndex].disabled) sel.value = '';
+                });
+                if (ramHasAny) count++;
+            } else {
+                var checked = section.querySelector('input[type="radio"]:checked');
+                if (checked && checked.value) {
+                    var card = checked.closest('.build-component-card');
+                    var name = card ? card.querySelector('.build-card-name') : null;
+                    var price = parseFloat(checked.getAttribute('data-price') || 0);
+                    var img = checked.getAttribute('data-img') || '';
+                    var catType = card ? card.getAttribute('data-category-type') : '';
+                    var warn = card ? getCompatibilityWarning(card, catType, catLabel) : null;
+                    if (warn) warnings.push(warn);
+                    total += price;
+                    count++;
+                    items.push({ name: name ? name.textContent.trim() : '', price: price, img: img, warning: warn, catLabel: catLabel });
                 }
-                filterSelect(cpuSelect, 'socket');
-                filterSelect(ramSelect, 'ddr');
-                updateTotal();
             }
+        });
 
-            if (mbSelect) mbSelect.addEventListener('change', filterByMotherboard);
-            selects.forEach(function (s) { s.addEventListener('change', updateTotal); });
-            updateTotal();
-            filterByMotherboard();
-        })();
-    </script>
+        totalEl.textContent = total.toLocaleString('en-US', { style: 'currency', currency: 'MYR' });
+        progressEl.textContent = count + '/' + totalCategories;
+        infoBox.style.display = count >= totalCategories ? 'none' : 'flex';
+        placeholder.style.display = items.length > 0 ? 'none' : 'block';
+
+        if (warnings.length > 0) {
+            compatWarnings.style.display = 'block';
+            compatWarnings.innerHTML = '<strong>⚠ Compatibility warnings (you can still save):</strong><ul>' + warnings.map(function(w) { return '<li>' + w.replace(/</g,'&lt;') + '</li>'; }).join('') + '</ul>';
+        } else {
+            compatWarnings.style.display = 'none';
+            compatWarnings.innerHTML = '';
+        }
+
+        selectedItems.innerHTML = items.map(function(i) {
+            var imgHtml = i.img ? '<img src="/hardware/' + i.img.replace(/"/g,'&quot;') + '" alt="">' : '<span class="build-card-noimg">—</span>';
+            var warnHtml = i.warning ? '<div class="build-selected-warning">⚠ ' + i.warning.replace(/</g,'&lt;') + '</div>' : '';
+            var cls = 'build-selected-item' + (i.warning ? ' incompatible' : '');
+            return '<div class="' + cls + '"><div class="build-card-image">' + imgHtml + '</div><div class="build-card-body"><span class="build-selected-name">' + (i.catLabel ? '[' + i.catLabel + '] ' : '') + (i.name || '').replace(/</g,'&lt;') + '</span>' + warnHtml + '</div><span class="build-selected-price">' + i.price.toLocaleString('en-US', { style: 'currency', currency: 'MYR' }) + '</span></div>';
+        }).join('');
+    }
+
+    categoryTabs.forEach(function(tab) {
+        tab.addEventListener('click', function() {
+            var idx = parseInt(this.getAttribute('data-index'), 10);
+            categoryTabs.forEach(function(t) { t.classList.remove('active'); });
+            sections.forEach(function(s) { s.classList.remove('active'); });
+            this.classList.add('active');
+            var target = form.querySelector('.build-component-section[data-category-index="' + idx + '"]');
+            if (target) target.classList.add('active');
+        });
+    });
+
+    form.querySelectorAll('input[type="radio"]').forEach(function(inp) {
+        inp.addEventListener('change', function() {
+            var card = this.closest('.build-component-card');
+            var slotList = card ? card.closest('.build-ram-slot-list') : null;
+            if (slotList) {
+                slotList.querySelectorAll('.build-component-card').forEach(function(c) { c.classList.remove('selected'); });
+                if (card) card.classList.add('selected');
+            } else {
+                var section = card ? card.closest('.build-component-section') : null;
+                if (section) {
+                    section.querySelectorAll('.build-component-list .build-component-card').forEach(function(c) { c.classList.remove('selected'); });
+                    if (card) card.classList.add('selected');
+                }
+            }
+            showCompatibilityWarnings();
+            updateUI();
+        });
+    });
+
+    form.querySelectorAll('.build-component-card').forEach(function(card) {
+        var inp = card.querySelector('input[type="radio"]');
+        if (inp && inp.checked) card.classList.add('selected');
+    });
+
+    var cleanBtn = document.getElementById('build-clean-btn');
+    if (cleanBtn) {
+        cleanBtn.addEventListener('click', function() {
+            form.querySelectorAll('input[type="radio"]').forEach(function(inp) {
+                if (inp.value === '') inp.checked = true;
+                else inp.checked = false;
+            });
+            form.querySelectorAll('.build-component-card').forEach(function(card) {
+                var inp = card.querySelector('input[type="radio"]');
+                card.classList.toggle('selected', inp && inp.checked);
+            });
+            showCompatibilityWarnings();
+            updateUI();
+        });
+    }
+
+    mbSection && mbSection.querySelectorAll('input[type="radio"]').forEach(function(inp) {
+        inp.addEventListener('change', showCompatibilityWarnings);
+    });
+
+    if (ramSection) {
+        var mbChecked = mbSection && mbSection.querySelector('input[type="radio"]:checked');
+        var slots = mbChecked ? parseInt(mbChecked.getAttribute('data-ram-slots') || '4', 10) : 4;
+        ramSection.querySelectorAll('.build-ram-slot').forEach(function(slotEl, idx) {
+            slotEl.style.display = idx < slots ? '' : 'none';
+        });
+    }
+
+    showCompatibilityWarnings();
+    updateUI();
+})();
+</script>
 }

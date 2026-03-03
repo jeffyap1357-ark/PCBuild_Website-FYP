@@ -348,6 +348,6 @@ C:\Users\User\Desktop\original\Demo\Demo\obj\Debug\net9.0\refint\Demo.dll
 C:\Users\User\Desktop\original\Demo\Demo\obj\Debug\net9.0\Demo.pdb
 C:\Users\User\Desktop\original\Demo\Demo\obj\Debug\net9.0\Demo.genruntimeconfig.cache
 C:\Users\User\Desktop\original\Demo\Demo\obj\Debug\net9.0\ref\Demo.dll
-C:\Users\User\Desktop\original\Demo\Demo\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt
 C:\Users\User\Desktop\original\Demo\Demo\obj\Debug\net9.0\compressed\22a9juuqxd-b46dqcu98o.gz
-C:\Users\User\Desktop\original\Demo\Demo\obj\Debug\net9.0\compressed\moxlhvdfuc-rax1nv2jtt.gz
+C:\Users\User\Desktop\original\Demo\Demo\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt
+C:\Users\User\Desktop\original\Demo\Demo\obj\Debug\net9.0\compressed\moxlhvdfuc-02wrjalpnp.gz

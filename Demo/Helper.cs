@@ -50,6 +50,7 @@ public class Helper
     {
         var file = Guid.NewGuid().ToString("n") + ".jpg";
         var path = Path.Combine(en.WebRootPath, folder, file);
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
 
         var options = new ResizeOptions
         {

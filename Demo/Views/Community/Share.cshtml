@@ -7,8 +7,13 @@
 <h2>Share build to Community</h2>
 <p>Your build will be visible to everyone. You can add an optional comment.</p>
 
-<form method="post" asp-action="Share">
+<form method="post" asp-action="Share" enctype="multipart/form-data">
     <input type="hidden" asp-for="BuildId" />
+    <div>
+        <label asp-for="BuildImage"></label>
+        <input type="file" asp-for="BuildImage" accept="image/jpeg,image/png" />
+        <span class="hint">JPG or PNG, max 1MB. Leave blank to use default image.</span>
+    </div>
     <div>
         <label asp-for="AuthorComment"></label>
         <textarea asp-for="AuthorComment" rows="3" maxlength="2000"></textarea>

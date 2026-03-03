@@ -52,6 +52,8 @@ public class CsvHardwareImport
             var specialStr = GetByHeader(parts, headerParts, "Special");
             int? special = int.TryParse(specialStr, out var s) && s >= 1 && s <= 10 ? s : null;
 
+            var ramSlots = catType == "Motherboard" ? 4 : (int?)null;
+
             var existing = await db.Hardware.FirstOrDefaultAsync(h => h.Name == name && h.CategoryId == cat.CategoryId);
             if (existing != null)
             {
@@ -63,6 +65,7 @@ public class CsvHardwareImport
                 existing.DdrType = ddrType;
                 existing.FormFactor = formFactor;
                 existing.Special = special;
+                if (ramSlots.HasValue) existing.RamSlots = ramSlots;
             }
             else
             {
@@ -77,7 +80,8 @@ public class CsvHardwareImport
                     Socket = string.IsNullOrEmpty(socket) ? null : socket,
                     DdrType = ddrType,
                     FormFactor = formFactor,
-                    Special = special
+                    Special = special,
+                    RamSlots = ramSlots
                 });
             }
         }

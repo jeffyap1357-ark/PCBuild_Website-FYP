@@ -25,6 +25,8 @@ public class DB : DbContext
     public DbSet<Community> Communities { get; set; }
     public DbSet<CommunityComment> CommunityComments { get; set; }
     public DbSet<CommunityRating> CommunityRatings { get; set; }
+    public DbSet<DraftBuild> DraftBuilds { get; set; }
+    public DbSet<DraftBuildDetail> DraftBuildDetails { get; set; }
 }
 
 // User: PC Build website users
@@ -138,6 +140,9 @@ public class Hardware
 
     public int? Special { get; set; }
 
+    /// <summary>Number of RAM slots (Motherboard only). Typically 2 or 4.</summary>
+    public int? RamSlots { get; set; }
+
     [ForeignKey(nameof(CategoryId))]
     public Category Category { get; set; }
 }
@@ -202,6 +207,9 @@ public class Community
     [MaxLength(2000)]
     public string? AuthorComment { get; set; }
 
+    [MaxLength(200)]
+    public string? Image { get; set; }
+
     [ForeignKey(nameof(BuildId))]
     public Build Build { get; set; }
 
@@ -233,6 +241,51 @@ public class CommunityComment
 
     [ForeignKey(nameof(UserId))]
     public User User { get; set; }
+}
+
+// DraftBuild: temporary build from recommendation (avoids losing work before user finishes)
+[Table("DraftBuilds", Schema = "dbo")]
+public class DraftBuild
+{
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int DraftBuildId { get; set; }
+
+    public int UserId { get; set; }
+
+    [Required, MaxLength(200)]
+    public string BuildName { get; set; } = "Recommended Build";
+
+    [Precision(10, 2)]
+    public decimal TotalPrice { get; set; }
+
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    [ForeignKey(nameof(UserId))]
+    public User User { get; set; }
+
+    public List<DraftBuildDetail> Details { get; set; } = [];
+}
+
+// DraftBuildDetail: one hardware item in a draft build
+[Table("DraftBuildDetails", Schema = "dbo")]
+public class DraftBuildDetail
+{
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int DraftBuildDetailId { get; set; }
+
+    public int DraftBuildId { get; set; }
+
+    public int HardwareId { get; set; }
+
+    public int Quantity { get; set; } = 1;
+
+    [ForeignKey(nameof(DraftBuildId))]
+    public DraftBuild DraftBuild { get; set; }
+
+    [ForeignKey(nameof(HardwareId))]
+    public Hardware Hardware { get; set; }
 }
 
 // CommunityRating: user rating (1–5) on a shared build

@@ -7,10 +7,12 @@ namespace Demo.Controllers;
 public class CommunityController : Controller
 {
     private readonly DB db;
+    private readonly Helper helper;
 
-    public CommunityController(DB db)
+    public CommunityController(DB db, Helper helper)
     {
         this.db = db;
+        this.helper = helper;
     }
 
     private int? GetCurrentUserId()
@@ -20,12 +22,28 @@ public class CommunityController : Controller
         return db.Users.Where(u => u.Username == name).Select(u => u.UserId).FirstOrDefault();
     }
 
-    public IActionResult Index()
+    public IActionResult Index(string search, string sortBy)
     {
-        var list = db.Communities
-            .Include(c => c.User)
-            .OrderByDescending(c => c.SharedAt)
-            .ToList();
+        var query = db.Communities.Include(c => c.User).AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var q = search.Trim().ToLower();
+            query = query.Where(c =>
+                c.BuildName.ToLower().Contains(q) ||
+                (c.User.Username != null && c.User.Username.ToLower().Contains(q)));
+        }
+
+        query = sortBy switch
+        {
+            "rating-high" => query.OrderByDescending(c => c.AverageRating ?? 0).ThenByDescending(c => c.SharedAt),
+            "rating-low" => query.OrderBy(c => c.AverageRating ?? 0).ThenByDescending(c => c.SharedAt),
+            _ => query.OrderByDescending(c => c.SharedAt)
+        };
+
+        var list = query.ToList();
+        ViewBag.Search = search;
+        ViewBag.SortBy = sortBy ?? "";
         return View(list);
     }
 
@@ -80,6 +98,14 @@ public class CommunityController : Controller
         if (build == null) return RedirectToAction(nameof(Index), "Build");
         if (build.IsShared) return RedirectToAction(nameof(Index));
 
+        string imageFile = null;
+        if (vm.BuildImage != null && vm.BuildImage.Length > 0)
+        {
+            var err = helper.ValidatePhoto(vm.BuildImage);
+            if (string.IsNullOrEmpty(err))
+                imageFile = helper.SavePhoto(vm.BuildImage, "images/community");
+        }
+
         var community = new Community
         {
             BuildId = build.BuildId,
@@ -88,7 +114,8 @@ public class CommunityController : Controller
             TotalPrice = build.TotalPrice,
             SharedAt = DateTime.UtcNow,
             RatingCount = 0,
-            AuthorComment = vm.AuthorComment?.Trim()
+            AuthorComment = vm.AuthorComment?.Trim(),
+            Image = imageFile
         };
         db.Communities.Add(community);
         build.IsShared = true;

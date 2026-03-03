@@ -4,21 +4,32 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewBag.Title</title>
-    <link rel="shortcut icon" href="/images/favicon.png">
+    <link rel="shortcut icon" href="/logo/logo.png">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Roboto:wght@400;700&display=swap">
     <link rel="stylesheet" href="/css/pager.css">
     <link rel="stylesheet" href="/css/app.css" asp-append-version="true">
     @RenderSection("head", false)
 </head>
 <body>
-    <div class="info">@Html.Raw(TempData["Info"])</div>
+    @if (TempData["Info"] != null) { <div class="info">@Html.Raw(TempData["Info"])</div> }
+    @if (TempData["Error"] != null) { <div class="error">@Html.Raw(TempData["Error"])</div> }
 
     <header>
         <h1><a href="/">PC Build</a></h1>
 
         @if (User.Identity!.IsAuthenticated)
         {
-            <div>@User.Identity.Name</div>
+            <div class="user-menu-wrap">
+                <button type="button" class="user-avatar" id="user-menu-btn" title="@User.Identity.Name">
+                    <span class="user-avatar-inner">@(User.Identity.Name?.Length > 0 ? User.Identity.Name[0].ToString().ToUpperInvariant() : "?")</span>
+                </button>
+                <div class="user-dropdown" id="user-dropdown">
+                    <div class="user-dropdown-name">@User.Identity.Name</div>
+                    <a href="/Account/UpdateProfile">Update Profile</a>
+                    <a href="/Account/UpdatePassword">Update Password</a>
+                    <a href="/Account/Logout">Logout</a>
+                </div>
+            </div>
         }
     </header>
 
@@ -36,13 +47,7 @@
 
         <div></div>
 
-        @if (User.Identity.IsAuthenticated)
-        {
-            <a href="/Account/Logout">Logout</a>
-            <a href="/Account/UpdatePassword">Update Password</a>
-            <a href="/Account/UpdateProfile">Update Profile</a>
-        }
-        else
+        @if (!User.Identity.IsAuthenticated)
         {
             <a href="/Account/Login">Login</a>
             <a href="/Account/Register">Register</a>
@@ -60,6 +65,21 @@
         Copyright &copy; @DateTime.Today.Year
     </footer>
 
+    <script>
+        (function() {
+            var btn = document.getElementById('user-menu-btn');
+            var dropdown = document.getElementById('user-dropdown');
+            if (btn && dropdown) {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    dropdown.classList.toggle('open');
+                });
+                document.addEventListener('click', function() {
+                    dropdown.classList.remove('open');
+                });
+            }
+        })();
+    </script>
     <script src="/js/jquery.min.js"></script>
     <script src="/js/jquery.unobtrusive-ajax.min.js"></script>
     <script src="/js/jquery.validate.min.js"></script>

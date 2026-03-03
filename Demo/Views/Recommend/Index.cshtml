@@ -1,4 +1,5 @@
 @model RecommendBuildVM
+@using Demo.Models
 @using Demo.Services
 
 @{
@@ -7,7 +8,7 @@
     var budget = ViewBag.Budget as decimal? ?? Model.Budget;
 }
 
-<p>Enter your budget and target performance tier. The system will recommend a compatible PC build using the best hardware within your budget.</p>
+<p>Enter your budget and target performance tier. The system filters components by budget and compatibility, then applies a weighted scoring formula based on your optimization preference.</p>
 
 <form method="post">
     <div asp-validation-summary="ModelOnly"></div>
@@ -26,6 +27,14 @@
             <option value="10">10 - Enthusiast</option>
         </select>
         <span class="hint">Higher = better components (uses Special score)</span>
+    </p>
+    <p>
+        <label asp-for="OptimizationType"></label>
+        <select asp-for="OptimizationType">
+            <option value="@OptimizationType.Performance">Performance-focused — prioritizes CPU/GPU performance</option>
+            <option value="@OptimizationType.Budget">Budget-focused — prioritizes value-for-money</option>
+            <option value="@OptimizationType.Balanced">Balanced — mix of performance and value</option>
+        </select>
     </p>
     <p>
         <button type="submit" class="button">Get Recommendation</button>
@@ -71,10 +80,32 @@
         </table>
         @if (User.Identity?.IsAuthenticated == true)
         {
-            <p>
-                <a href="/Build/Configure" class="button">Build This PC</a>
-                <em>Select the same parts manually in PC Build Config.</em>
+            <div class="recommend-actions">
+                <form method="post" action="@Url.Action("SaveBuild")" style="display:inline;">
+                    @foreach (var p in result.Parts)
+                    {
+                        <input type="hidden" name="hardwareIds" value="@p.HardwareId" />
+                    }
+                    <input type="hidden" name="buildName" value="Recommended Build" />
+                    <button type="submit" class="button">Save Build</button>
+                </form>
+                <form method="post" action="@Url.Action("ConfigureBuild")" style="display:inline;">
+                    @foreach (var p in result.Parts)
+                    {
+                        <input type="hidden" name="hardwareIds" value="@p.HardwareId" />
+                    }
+                    <input type="hidden" name="buildName" value="Recommended Build" />
+                    <button type="submit" class="button secondary">Configure Build</button>
+                </form>
+            </div>
+            <p class="recommend-hint">
+                <strong>Save Build</strong> — saves directly to My Builds and goes to your build store. 
+                <strong>Configure Build</strong> — opens the configuration page with this build pre-selected so you can edit before saving.
             </p>
+        }
+        else
+        {
+            <p><a href="@Url.Action("Login", "Account")">Log in</a> to save or configure this build.</p>
         }
     }
     else
@@ -94,4 +125,7 @@
     .recommend-warnings { background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; padding: 0.5em 1em; margin: 1em 0; }
     .recommend-warnings .warning { margin: 0.25em 0; }
     .hint { font-size: 0.9em; color: #666; margin-left: 0.5em; }
+    .recommend-actions { display: flex; gap: 0.5em; margin: 1em 0; flex-wrap: wrap; }
+    .recommend-actions form { margin: 0; }
+    .recommend-hint { font-size: 0.9em; color: #666; margin-top: 0.5em; }
 </style>

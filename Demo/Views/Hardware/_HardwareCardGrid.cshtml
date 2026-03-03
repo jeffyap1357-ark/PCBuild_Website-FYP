@@ -1,0 +1,37 @@
+@model List<Hardware>
+@inject Demo.Helper Helper
+
+@if (!Model.Any())
+{
+    <p class="hardware-empty">No hardware found.</p>
+}
+else
+{
+    <p class="hardware-no-results" id="hardware-no-results" style="display:none">No results found.</p>
+    <div class="hardware-card-grid" id="hardware-card-grid">
+        @foreach (var h in Model)
+        {
+            <a href="@Url.Action("Detail", new { id = h.HardwareId })" class="hardware-card" data-search="@((h.Name + " " + (h.Category?.Type ?? "") + " " + (h.Brand ?? "")).ToLowerInvariant())">
+                <div class="hardware-card-image">
+                    @{
+                        var imgFile = Helper.GetHardwareImagePath(h.Picture, h.Name);
+                    }
+                    @if (!string.IsNullOrEmpty(imgFile))
+                    {
+                        <img src="/hardware/@imgFile" alt="@h.Name" onerror="this.onerror=null;this.style.display='none';var p=this.nextElementSibling;if(p)p.style.display='flex';">
+                        <span class="hardware-card-placeholder" style="display:none">No image</span>
+                    }
+                    else
+                    {
+                        <span class="hardware-card-placeholder">No image</span>
+                    }
+                </div>
+                <div class="hardware-card-body">
+                    <div class="hardware-card-name">@h.Name</div>
+                    <div class="hardware-card-meta">@(h.Category?.Type) @(h.Brand != null ? "· " + h.Brand : "")</div>
+                    <div class="hardware-card-price">@h.Price.ToString("C")</div>
+                </div>
+            </a>
+        }
+    </div>
+}
