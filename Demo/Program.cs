@@ -163,6 +163,33 @@ catch (Exception ex)
     logger.LogWarning(ex, "Could not ensure Quiz tables exist.");
 }
 
+// Ensure Feedback table exists (fallback)
+try
+{
+    using var scope4 = app.Services.CreateScope();
+    var db4 = scope4.ServiceProvider.GetRequiredService<DB>();
+    db4.Database.ExecuteSqlRaw(@"
+        IF NOT EXISTS (SELECT 1 FROM sys.tables t JOIN sys.schemas s ON t.schema_id = s.schema_id WHERE s.name = N'dbo' AND t.name = N'Feedbacks')
+        BEGIN
+            CREATE TABLE [dbo].[Feedbacks](
+                [FeedbackId] int IDENTITY NOT NULL,
+                [UserId] int NULL,
+                [Rating] int NOT NULL,
+                [Comment] nvarchar(1000) NULL,
+                [ModuleName] nvarchar(200) NULL,
+                [PageUrl] nvarchar(500) NULL,
+                [CreatedAt] datetime2 NOT NULL,
+                CONSTRAINT [PK_Feedbacks] PRIMARY KEY ([FeedbackId]),
+                CONSTRAINT [FK_Feedbacks_Users_UserId] FOREIGN KEY ([UserId]) REFERENCES [dbo].[Users]([UserId]) ON DELETE SET NULL
+            );
+        END
+    ");
+}
+catch (Exception ex)
+{
+    logger.LogWarning(ex, "Could not ensure Feedback table exists.");
+}
+
 // Import hardware from CSV if file exists (run AddHardwareCompatibility.sql first for Socket/DdrType columns)
 try
 {

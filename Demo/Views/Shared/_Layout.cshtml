@@ -34,6 +34,7 @@
             <a href="/Quiz">🧪 PC Knowledge Test</a>
             <a href="/Build/Configure">PC Build Config</a>
             <a href="/Build/Index">My Builds</a>
+            <a href="/FeedbackAdmin">📊 Feedback Report</a>
         }
 
         <div></div>
@@ -61,6 +62,11 @@
         PC Build &middot;
         Copyright &copy; @DateTime.Today.Year
     </footer>
+
+    @if (User.Identity!.IsAuthenticated)
+    {
+        @await Html.PartialAsync("_FeedbackPrompt", new FeedbackCreateVM())
+    }
 
     <script src="/js/jquery.min.js"></script>
     <script src="/js/jquery.unobtrusive-ajax.min.js"></script>

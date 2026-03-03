@@ -30,6 +30,7 @@ public class DB : DbContext
     public DbSet<QuizAttemptDetail> QuizAttemptDetails { get; set; }
     public DbSet<PerformanceReport> PerformanceReports { get; set; }
     public DbSet<PerformanceReportItem> PerformanceReportItems { get; set; }
+    public DbSet<Feedback> Feedbacks { get; set; }
 }
 
 // User: PC Build website users
@@ -385,4 +386,31 @@ public class PerformanceReportItem
 
     [ForeignKey(nameof(HardwareId))]
     public Hardware Hardware { get; set; }
+}
+
+// Feedback: overall experience rating and comments
+public class Feedback
+{
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int FeedbackId { get; set; }
+
+    public int? UserId { get; set; }
+
+    [Required, Range(1, 5)]
+    public int Rating { get; set; }
+
+    [MaxLength(1000)]
+    public string? Comment { get; set; }
+
+    [MaxLength(200)]
+    public string? ModuleName { get; set; }
+
+    [MaxLength(500)]
+    public string? PageUrl { get; set; }
+
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    [ForeignKey(nameof(UserId))]
+    public User? User { get; set; }
 }

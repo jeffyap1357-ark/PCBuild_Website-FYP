@@ -161,3 +161,35 @@ public class QuizTakeVM
 
     public bool IsSubmitted { get; set; }
 }
+
+// Feedback: user rating and comment submission
+public class FeedbackCreateVM
+{
+    [Required, Range(1, 5)]
+    [Display(Name = "Rating (1-5)")]
+    public int Rating { get; set; }
+
+    [StringLength(1000)]
+    [Display(Name = "More feedback (optional)")]
+    public string? Comment { get; set; }
+
+    public string? ModuleName { get; set; }
+    public string? PageUrl { get; set; }
+
+    public string? ReturnUrl { get; set; }
+}
+
+public class FeedbackDistributionItemVM
+{
+    public int Rating { get; set; }
+    public int Count { get; set; }
+    public double Percentage { get; set; }
+}
+
+public class FeedbackReportVM
+{
+    public double AverageRating { get; set; }
+    public int TotalCount { get; set; }
+    public List<FeedbackDistributionItemVM> Distribution { get; set; } = [];
+    public List<Feedback> Feedbacks { get; set; } = [];
+}

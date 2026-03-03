@@ -1,0 +1,59 @@
+@model FeedbackCreateVM
+
+@{
+    // Only show once per session via JS; this is the inline form.
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    var moduleName = $"{controller}/{action}";
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+}
+
+<div id="feedback-panel" class="feedback-panel" style="display:none;">
+    <form asp-controller="Feedback" asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="ModuleName" value="@moduleName" />
+        <input type="hidden" asp-for="PageUrl" value="@returnUrl" />
+        <input type="hidden" asp-for="ReturnUrl" value="@returnUrl" />
+
+        <p><strong>Rate your experience (1–5):</strong></p>
+        <div class="feedback-rating-options">
+            @for (int r = 1; r <= 5; r++)
+            {
+                <label>
+                    <input type="radio" asp-for="Rating" value="@r" />
+                    @r
+                </label>
+            }
+        </div>
+
+        <p>
+            <label asp-for="Comment"></label><br />
+            <textarea asp-for="Comment" rows="2" cols="40" placeholder="Describe your experience or any issues you faced (optional)"></textarea>
+        </p>
+
+        <p class="feedback-actions">
+            <button type="submit" class="button">Submit</button>
+            <button type="button" id="feedback-later" class="button secondary">I will do it later</button>
+        </p>
+    </form>
+</div>
+
+@section foot {
+    <script>
+        (function () {
+            if (!window.sessionStorage) return;
+            var panel = document.getElementById('feedback-panel');
+            if (!panel) return;
+            if (sessionStorage.getItem('feedbackLater') === '1') return;
+            panel.style.display = 'block';
+            var laterBtn = document.getElementById('feedback-later');
+            if (laterBtn) {
+                laterBtn.addEventListener('click', function () {
+                    sessionStorage.setItem('feedbackLater', '1');
+                    panel.style.display = 'none';
+                });
+            }
+        })();
+    </script>
+}
+
