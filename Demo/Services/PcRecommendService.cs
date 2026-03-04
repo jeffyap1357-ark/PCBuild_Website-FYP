@@ -10,8 +10,8 @@ public record RecommendResult(
     List<string> Warnings
 );
 
-/// <summary>Weights for performance, value-for-money, and power efficiency (0–1 each, sum = 1).</summary>
-internal record ScoringWeights(double Performance, double Value, double Power);
+/// <summary>Weights for performance, value-for-money, power efficiency, and purpose-specific scores (0–1 each, sum = 1).</summary>
+internal record ScoringWeights(double Performance, double Value, double Power, double PurposeScore);
 
 public class PcRecommendService
 {
@@ -19,7 +19,7 @@ public class PcRecommendService
 
     public PcRecommendService(Models.DB db) => _db = db;
 
-    public async Task<RecommendResult> RecommendAsync(decimal budget, int targetTier, OptimizationType optimizationType = OptimizationType.Balanced)
+    public async Task<RecommendResult> RecommendAsync(decimal budget, OptimizationType optimizationType = OptimizationType.Balanced)
     {
         var warnings = new List<string>();
         var cats = await _db.Categories.Include(c => c.Hardware).ToDictionaryAsync(c => c.Type, StringComparer.OrdinalIgnoreCase);
@@ -27,7 +27,7 @@ public class PcRecommendService
         if (!cats.TryGetValue("Motherboard", out var mbCat) || !mbCat.Hardware.Any())
             return new RecommendResult([], 0, false, ["No motherboard available in database."]);
 
-        var mbList = mbCat.Hardware.Where(h => h.Socket != null).OrderByDescending(h => h.Special ?? 0).ToList();
+        var mbList = mbCat.Hardware.Where(h => h.Socket != null).OrderByDescending(h => h.PerformanceScore ?? h.Special ?? 0).ToList();
         var cpuCat = cats.GetValueOrDefault("CPU")?.Hardware.ToList() ?? [];
         var ramCat = cats.GetValueOrDefault("RAM")?.Hardware.ToList() ?? [];
         var gpuCat = cats.GetValueOrDefault("GPU")?.Hardware.ToList() ?? [];
@@ -55,12 +55,12 @@ public class PcRecommendService
             if (!cpus.Any() || !rams.Any())
                 continue;
 
-            var gpu = PickBest(gpuCat, "GPU", null, weights, targetTier);
-            var cpu = PickBest(cpus, "CPU", gpu, weights, targetTier);
-            var ram = PickBest(rams, "RAM", null, weights, targetTier);
-            var storage = PickBest(storageCat, "Storage", null, weights, targetTier);
-            var psu = PickBest(psuCat, "Power supply unit", null, weights, targetTier);
-            var pcCase = PickBest(cases, "PC case", null, weights, targetTier);
+            var gpu = PickBest(gpuCat, "GPU", null, weights, optimizationType);
+            var cpu = PickBest(cpus, "CPU", gpu, weights, optimizationType);
+            var ram = PickBest(rams, "RAM", null, weights, optimizationType);
+            var storage = PickBest(storageCat, "Storage", null, weights, optimizationType);
+            var psu = PickBest(psuCat, "Power supply unit", null, weights, optimizationType);
+            var pcCase = PickBest(cases, "PC case", null, weights, optimizationType);
 
             if (cpu == null || ram == null || gpu == null || storage == null || psu == null || pcCase == null)
                 continue;
@@ -71,23 +71,23 @@ public class PcRecommendService
             {
                 var remaining = budget - mb.Price - cpu.Price - ram.Price;
                 if (remaining < 500) continue;
-                gpu = PickBest(gpuCat.Where(g => g.Price <= remaining).ToList(), "GPU", null, weights, targetTier);
+                gpu = PickBest(gpuCat.Where(g => g.Price <= remaining).ToList(), "GPU", null, weights, optimizationType);
                 if (gpu == null) continue;
                 remaining -= gpu.Price;
-                storage = PickBest(storageCat.Where(s => s.Price <= remaining).ToList(), "Storage", null, weights, targetTier);
+                storage = PickBest(storageCat.Where(s => s.Price <= remaining).ToList(), "Storage", null, weights, optimizationType);
                 if (storage == null) continue;
                 remaining -= storage.Price;
-                psu = PickBest(psuCat.Where(p => p.Price <= remaining).ToList(), "Power supply unit", null, weights, targetTier);
+                psu = PickBest(psuCat.Where(p => p.Price <= remaining).ToList(), "Power supply unit", null, weights, optimizationType);
                 if (psu == null) continue;
                 remaining -= psu.Price;
-                pcCase = PickBest(cases.Where(c => c.Price <= Math.Max(remaining, 0)).ToList(), "PC case", null, weights, targetTier);
+                pcCase = PickBest(cases.Where(c => c.Price <= Math.Max(remaining, 0)).ToList(), "PC case", null, weights, optimizationType);
                 if (pcCase == null) continue;
                 parts = [mb, cpu, ram, gpu, storage, psu, pcCase];
                 total = parts.Sum(p => p.Price);
             }
 
-            var score = ComputeBuildScore(parts, weights);
-            var bestScore = best != null ? ComputeBuildScore(best.Parts, weights) : double.NegativeInfinity;
+            var score = ComputeBuildScore(parts, weights, optimizationType);
+            var bestScore = best != null ? ComputeBuildScore(best.Parts, weights, optimizationType) : double.NegativeInfinity;
             if (best == null || score > bestScore)
             {
                 var resultWarnings = new List<string>(warnings);
@@ -115,6 +115,8 @@ public class PcRecommendService
 
     private static int EstimatePower(Hardware cpu, Hardware gpu)
     {
+        if (cpu.PowerConsumption.HasValue && gpu.PowerConsumption.HasValue)
+            return cpu.PowerConsumption.Value + gpu.PowerConsumption.Value + 80;
         var cpuW = (cpu.Special ?? 5) switch { >= 9 => 200, >= 8 => 150, >= 7 => 100, _ => 65 };
         var gpuW = (gpu.Special ?? 5) switch { >= 9 => 350, >= 8 => 200, >= 7 => 130, _ => 100 };
         return cpuW + gpuW + 80;
@@ -122,16 +124,37 @@ public class PcRecommendService
 
     private static ScoringWeights GetWeights(OptimizationType type) => type switch
     {
-        OptimizationType.Performance => new ScoringWeights(0.70, 0.15, 0.15),
-        OptimizationType.Budget => new ScoringWeights(0.20, 0.70, 0.10),
-        OptimizationType.Balanced => new ScoringWeights(0.50, 0.45, 0.05),
-        _ => new ScoringWeights(0.50, 0.45, 0.05)
+        OptimizationType.Performance => new ScoringWeights(0.70, 0.15, 0.15, 0),
+        OptimizationType.Budget => new ScoringWeights(0.20, 0.70, 0.10, 0),
+        OptimizationType.Balanced => new ScoringWeights(0.50, 0.45, 0.05, 0),
+        OptimizationType.Gaming => new ScoringWeights(0.20, 0.20, 0.10, 0.50),
+        OptimizationType.Office => new ScoringWeights(0.15, 0.35, 0.10, 0.40),
+        OptimizationType.Editing => new ScoringWeights(0.25, 0.25, 0.10, 0.40),
+        _ => new ScoringWeights(0.50, 0.45, 0.05, 0)
     };
 
-    private static double ComponentScore(Hardware h, string categoryType, ScoringWeights w, Hardware? gpuForPower = null)
+    private static double GetPurposeScore(Hardware h, OptimizationType type)
     {
-        var perf = (h.Special ?? 0) / 10.0;
-        var value = 50.0 * (h.Special ?? 0) / Math.Max((double)h.Price, 1);
+        return type switch
+        {
+            OptimizationType.Gaming => (h.GamingScore ?? h.Special ?? 0) / 10.0,
+            OptimizationType.Office => (h.OfficeScore ?? h.Special ?? 0) / 10.0,
+            OptimizationType.Editing => (h.EditingScore ?? h.Special ?? 0) / 10.0,
+            _ => (h.Special ?? 0) / 10.0
+        };
+    }
+
+    private static double GetEffectiveScore(Hardware h, OptimizationType? type)
+    {
+        if (type.HasValue && (type == OptimizationType.Gaming || type == OptimizationType.Office || type == OptimizationType.Editing))
+            return GetPurposeScore(h, type.Value);
+        return (h.PerformanceScore ?? (h.Special ?? 0) * 10) / 100.0;
+    }
+
+    private static double ComponentScore(Hardware h, string categoryType, ScoringWeights w, Hardware? gpuForPower, OptimizationType optType)
+    {
+        var perf = (h.PerformanceScore ?? (h.Special ?? 0) * 10) / 100.0;
+        var value = 50.0 * (h.Special ?? h.PerformanceScore ?? 0) / Math.Max((double)h.Price, 1);
         value = Math.Min(1, value);
 
         double power = 0.5;
@@ -142,26 +165,24 @@ public class PcRecommendService
         }
         else if (categoryType.Equals("GPU", StringComparison.OrdinalIgnoreCase))
         {
-            var gpuW = (h.Special ?? 5) switch { >= 9 => 350, >= 8 => 200, >= 7 => 130, _ => 100 };
+            var gpuW = h.PowerConsumption ?? ((h.Special ?? 5) switch { >= 9 => 350, >= 8 => 200, >= 7 => 130, _ => 100 });
             power = 1 - Math.Min(gpuW / 400.0, 1);
         }
 
+        var purposeScore = GetPurposeScore(h, optType);
         var componentMultiplier = (categoryType.Equals("CPU", StringComparison.OrdinalIgnoreCase) ||
                                    categoryType.Equals("GPU", StringComparison.OrdinalIgnoreCase)) ? 1.3 : 1.0;
 
-        return componentMultiplier * (w.Performance * perf + w.Value * value + w.Power * power);
+        return componentMultiplier * (w.Performance * perf + w.Value * value + w.Power * power + w.PurposeScore * purposeScore);
     }
 
-    private static Hardware? PickBest(List<Hardware> items, string categoryType, Hardware? gpuForPower, ScoringWeights weights, int targetTier)
+    private static Hardware? PickBest(List<Hardware> items, string categoryType, Hardware? gpuForPower, ScoringWeights weights, OptimizationType optType)
     {
         if (items.Count == 0) return null;
-
-        var meetsTier = items.Where(i => (i.Special ?? 0) >= targetTier - 1).ToList();
-        var pool = meetsTier.Count > 0 ? meetsTier : items;
-        return pool.OrderByDescending(h => ComponentScore(h, categoryType, weights, gpuForPower)).FirstOrDefault();
+        return items.OrderByDescending(h => ComponentScore(h, categoryType, weights, gpuForPower, optType)).FirstOrDefault();
     }
 
-    private static double ComputeBuildScore(List<Hardware> parts, ScoringWeights weights)
+    private static double ComputeBuildScore(List<Hardware> parts, ScoringWeights weights, OptimizationType optType)
     {
         var cpu = parts.FirstOrDefault(p => p.Category?.Type?.Equals("CPU", StringComparison.OrdinalIgnoreCase) == true);
         var gpu = parts.FirstOrDefault(p => p.Category?.Type?.Equals("GPU", StringComparison.OrdinalIgnoreCase) == true);
@@ -169,7 +190,7 @@ public class PcRecommendService
         return parts.Sum(p =>
         {
             var cat = p.Category?.Type ?? "";
-            return ComponentScore(p, cat, weights, gpu);
+            return ComponentScore(p, cat, weights, gpu, optType);
         });
     }
 }

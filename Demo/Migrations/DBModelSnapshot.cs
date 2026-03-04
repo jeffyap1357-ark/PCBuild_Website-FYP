@@ -169,6 +169,30 @@ namespace Demo.Migrations
                     b.Property<int?>("Special")
                         .HasColumnType("int");
 
+                    b.Property<int?>("RamSlots")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ReleaseYear")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("PerformanceScore")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("PowerConsumption")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("GamingScore")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("OfficeScore")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("EditingScore")
+                        .HasColumnType("int");
+
                     b.HasKey("HardwareId");
 
                     b.HasIndex("CategoryId");
@@ -189,10 +213,18 @@ namespace Demo.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
+                    b.Property<bool>("IsRootAdmin")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("Username")
                         .IsRequired()

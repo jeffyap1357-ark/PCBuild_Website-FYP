@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Demo.Services;
 
-/// <summary>Imports hardware from pc_hardware_dataset_v2.csv with Socket, DdrType for compatibility.</summary>
+/// <summary>Imports hardware from CSV with full attributes: Socket, DdrType, FormFactor, ReleaseYear, Rating, PerformanceScore, PowerConsumption, GamingScore, OfficeScore, EditingScore.</summary>
 public class CsvHardwareImport
 {
     private static readonly Dictionary<string, string> CategoryMap = new(StringComparer.OrdinalIgnoreCase)
@@ -47,12 +47,27 @@ public class CsvHardwareImport
             var brand = GetByHeader(parts, headerParts, "Brand");
             var picture = GetByHeader(parts, headerParts, "Picture");
             var socket = GetByHeader(parts, headerParts, "Socket");
-            var ddrType = ParseDdrType(detail, name, catType);
-            var formFactor = ParseFormFactor(detail, catType);
+            var ddrType = GetByHeader(parts, headerParts, "DdrType");
+            if (string.IsNullOrEmpty(ddrType)) ddrType = ParseDdrType(detail, name, catType);
+            var formFactor = GetByHeader(parts, headerParts, "FormFactor");
+            if (string.IsNullOrEmpty(formFactor)) formFactor = ParseFormFactor(detail, catType);
             var specialStr = GetByHeader(parts, headerParts, "Special");
             int? special = int.TryParse(specialStr, out var s) && s >= 1 && s <= 10 ? s : null;
 
-            var ramSlots = catType == "Motherboard" ? 4 : (int?)null;
+            int? ramSlots = null;
+            if (catType == "Motherboard")
+            {
+                var rs = GetByHeader(parts, headerParts, "RamSlots");
+                ramSlots = int.TryParse(rs, out var r) && r >= 2 ? r : 4;
+            }
+
+            var releaseYear = ParseInt(GetByHeader(parts, headerParts, "ReleaseYear"), 1990, 2030);
+            var rating = ParseInt(GetByHeader(parts, headerParts, "Rating"), 1, 5);
+            var performanceScore = ParseInt(GetByHeader(parts, headerParts, "PerformanceScore"), 0, 100);
+            var powerConsumption = ParseInt(GetByHeader(parts, headerParts, "PowerConsumption"), 0, 1000);
+            var gamingScore = ParseInt(GetByHeader(parts, headerParts, "GamingScore"), 1, 10);
+            var officeScore = ParseInt(GetByHeader(parts, headerParts, "OfficeScore"), 1, 10);
+            var editingScore = ParseInt(GetByHeader(parts, headerParts, "EditingScore"), 1, 10);
 
             var existing = await db.Hardware.FirstOrDefaultAsync(h => h.Name == name && h.CategoryId == cat.CategoryId);
             if (existing != null)
@@ -62,10 +77,17 @@ public class CsvHardwareImport
                 existing.Brand = brand;
                 existing.Picture = string.IsNullOrEmpty(picture) ? null : picture;
                 existing.Socket = string.IsNullOrEmpty(socket) ? null : socket;
-                existing.DdrType = ddrType;
-                existing.FormFactor = formFactor;
+                existing.DdrType = string.IsNullOrEmpty(ddrType) ? null : ddrType;
+                existing.FormFactor = string.IsNullOrEmpty(formFactor) ? null : formFactor;
                 existing.Special = special;
-                if (ramSlots.HasValue) existing.RamSlots = ramSlots;
+                existing.RamSlots = ramSlots;
+                existing.ReleaseYear = releaseYear;
+                existing.Rating = rating;
+                existing.PerformanceScore = performanceScore;
+                existing.PowerConsumption = powerConsumption;
+                existing.GamingScore = gamingScore;
+                existing.OfficeScore = officeScore;
+                existing.EditingScore = editingScore;
             }
             else
             {
@@ -78,16 +100,29 @@ public class CsvHardwareImport
                     Brand = brand,
                     Picture = string.IsNullOrEmpty(picture) ? null : picture,
                     Socket = string.IsNullOrEmpty(socket) ? null : socket,
-                    DdrType = ddrType,
-                    FormFactor = formFactor,
+                    DdrType = string.IsNullOrEmpty(ddrType) ? null : ddrType,
+                    FormFactor = string.IsNullOrEmpty(formFactor) ? null : formFactor,
                     Special = special,
-                    RamSlots = ramSlots
+                    RamSlots = ramSlots,
+                    ReleaseYear = releaseYear,
+                    Rating = rating,
+                    PerformanceScore = performanceScore,
+                    PowerConsumption = powerConsumption,
+                    GamingScore = gamingScore,
+                    OfficeScore = officeScore,
+                    EditingScore = editingScore
                 });
             }
         }
 
         await db.SaveChangesAsync();
         log?.LogInformation("CSV hardware import completed from {Path}", csvPath);
+    }
+
+    private static int? ParseInt(string s, int min, int max)
+    {
+        if (!int.TryParse(s, out var v)) return null;
+        return v >= min && v <= max ? v : null;
     }
 
     private static List<string> ParseCsvLine(string line)

@@ -8,124 +8,120 @@
     var budget = ViewBag.Budget as decimal? ?? Model.Budget;
 }
 
-<p>Enter your budget and target performance tier. The system filters components by budget and compatibility, then applies a weighted scoring formula based on your optimization preference.</p>
+<div class="recommend-page">
+    <div class="recommend-intro">
+        <p>Enter your budget and optimization preference. The system filters components by compatibility and applies a weighted scoring formula to recommend the best build for your needs.</p>
+    </div>
 
-<form method="post">
-    <div asp-validation-summary="ModelOnly"></div>
-    <p>
-        <label asp-for="Budget"></label>
-        <input asp-for="Budget" type="number" min="1000" max="50000" step="100" />
-        <span asp-validation-for="Budget"></span>
-    </p>
-    <p>
-        <label asp-for="TargetTier"></label>
-        <select asp-for="TargetTier">
-            <option value="6">6 - Budget</option>
-            <option value="7">7 - Mid-range</option>
-            <option value="8">8 - Performance</option>
-            <option value="9">9 - High-end</option>
-            <option value="10">10 - Enthusiast</option>
-        </select>
-        <span class="hint">Higher = better components (uses Special score)</span>
-    </p>
-    <p>
-        <label asp-for="OptimizationType"></label>
-        <select asp-for="OptimizationType">
-            <option value="@OptimizationType.Performance">Performance-focused — prioritizes CPU/GPU performance</option>
-            <option value="@OptimizationType.Budget">Budget-focused — prioritizes value-for-money</option>
-            <option value="@OptimizationType.Balanced">Balanced — mix of performance and value</option>
-        </select>
-    </p>
-    <p>
-        <button type="submit" class="button">Get Recommendation</button>
-    </p>
-</form>
+    <div class="recommend-form-card">
+        <form method="post" class="recommend-form">
+            <div asp-validation-summary="ModelOnly" class="recommend-validation"></div>
+            <div class="recommend-form-row">
+                <label asp-for="Budget"></label>
+                <input asp-for="Budget" type="number" min="1000" max="50000" step="100" class="recommend-input" />
+                <span asp-validation-for="Budget" class="recommend-error"></span>
+            </div>
+            <div class="recommend-form-row">
+                <label asp-for="OptimizationType"></label>
+                <select asp-for="OptimizationType" class="recommend-select">
+                    <option value="@OptimizationType.Performance">Performance-focused — prioritizes CPU/GPU performance</option>
+                    <option value="@OptimizationType.Budget">Budget-focused — prioritizes value-for-money</option>
+                    <option value="@OptimizationType.Balanced">Balanced — mix of performance and value</option>
+                    <option value="@OptimizationType.Gaming">Gaming-focused — uses gaming suitability score</option>
+                    <option value="@OptimizationType.Office">Office-focused — uses office/productivity score</option>
+                    <option value="@OptimizationType.Editing">Editing-focused — uses content editing score</option>
+                </select>
+            </div>
+            <div class="recommend-form-actions">
+                <button type="submit" class="button">Get Recommendation</button>
+            </div>
+        </form>
+    </div>
 
-@if (result != null)
-{
-    <hr />
-    @if (result.Success)
+    @if (result != null)
     {
-        <h2>Recommended Build</h2>
-        @if (result.Warnings.Any())
-        {
-            <div class="recommend-warnings">
-                @foreach (var w in result.Warnings)
-                {
-                    <p class="warning">@w</p>
-                }
-            </div>
-        }
-        <p><strong>Total: @result.TotalPrice.ToString("C")</strong> @(result.TotalPrice > budget ? "(over budget)" : "")</p>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Component</th>
-                    <th>Part</th>
-                    <th>Price</th>
-                    <th>Tier</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var p in result.Parts.OrderBy(p => p.Category?.Type))
-                {
-                    <tr>
-                        <td>@p.Category?.Type</td>
-                        <td><a href="/Hardware/Detail/@p.HardwareId">@p.Name</a></td>
-                        <td>@p.Price.ToString("C")</td>
-                        <td>@(p.Special?.ToString() ?? "—")</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-        @if (User.Identity?.IsAuthenticated == true)
-        {
-            <div class="recommend-actions">
-                <form method="post" action="@Url.Action("SaveBuild")" style="display:inline;">
-                    @foreach (var p in result.Parts)
-                    {
-                        <input type="hidden" name="hardwareIds" value="@p.HardwareId" />
-                    }
-                    <input type="hidden" name="buildName" value="Recommended Build" />
-                    <button type="submit" class="button">Save Build</button>
-                </form>
-                <form method="post" action="@Url.Action("ConfigureBuild")" style="display:inline;">
-                    @foreach (var p in result.Parts)
-                    {
-                        <input type="hidden" name="hardwareIds" value="@p.HardwareId" />
-                    }
-                    <input type="hidden" name="buildName" value="Recommended Build" />
-                    <button type="submit" class="button secondary">Configure Build</button>
-                </form>
-            </div>
-            <p class="recommend-hint">
-                <strong>Save Build</strong> — saves directly to My Builds and goes to your build store. 
-                <strong>Configure Build</strong> — opens the configuration page with this build pre-selected so you can edit before saving.
-            </p>
-        }
-        else
-        {
-            <p><a href="@Url.Action("Login", "Account")">Log in</a> to save or configure this build.</p>
-        }
-    }
-    else
-    {
-        <h2>Could not build</h2>
-        <div class="recommend-warnings">
-            @foreach (var w in result.Warnings)
+        <div class="recommend-result">
+            @if (result.Success)
             {
-                <p class="warning">@w</p>
+                @if (result.Warnings.Any())
+                {
+                    <div class="recommend-warnings">
+                        @foreach (var w in result.Warnings)
+                        {
+                            <p class="warning">@w</p>
+                        }
+                    </div>
+                }
+                <div class="recommend-summary">
+                    <span class="recommend-total">Total: @result.TotalPrice.ToString("C")</span>
+                    @if (result.TotalPrice > budget)
+                    {
+                        <span class="recommend-over">(over budget)</span>
+                    }
+                </div>
+                <div class="recommend-parts-card">
+                    <table class="recommend-table">
+                        <thead>
+                            <tr>
+                                <th>Component</th>
+                                <th>Part</th>
+                                <th>Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var p in result.Parts.OrderBy(p => p.Category?.Type))
+                            {
+                                <tr>
+                                    <td class="recommend-component">@p.Category?.Type</td>
+                                    <td><a href="/Hardware/Detail/@p.HardwareId">@p.Name</a></td>
+                                    <td class="recommend-price">@p.Price.ToString("C")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <div class="recommend-actions">
+                        <form method="post" action="@Url.Action("SaveBuild")">
+                            @foreach (var p in result.Parts)
+                            {
+                                <input type="hidden" name="hardwareIds" value="@p.HardwareId" />
+                            }
+                            <input type="hidden" name="buildName" value="Recommended Build" />
+                            <button type="submit" class="button">Save Build</button>
+                        </form>
+                        <form method="post" action="@Url.Action("ConfigureBuild")">
+                            @foreach (var p in result.Parts)
+                            {
+                                <input type="hidden" name="hardwareIds" value="@p.HardwareId" />
+                            }
+                            <input type="hidden" name="buildName" value="Recommended Build" />
+                            <button type="submit" class="button secondary">Configure Build</button>
+                        </form>
+                    </div>
+                    <p class="recommend-hint">
+                        <strong>Save Build</strong> — saves directly to My Builds. <strong>Configure Build</strong> — opens the configuration page so you can edit before saving.
+                    </p>
+                }
+                else
+                {
+                    <p class="recommend-login"><a href="@Url.Action("Login", "Account")">Log in</a> to save or configure this build.</p>
+                }
+            }
+            else
+            {
+                <div class="recommend-fail">
+                    <h3>Could not build</h3>
+                    <div class="recommend-warnings">
+                        @foreach (var w in result.Warnings)
+                        {
+                            <p class="warning">@w</p>
+                        }
+                    </div>
+                    <p>Try increasing your budget or check that hardware data is loaded from the CSV.</p>
+                </div>
             }
         </div>
-        <p>Try increasing your budget or check that hardware data is loaded from the CSV.</p>
     }
-}
-
-<style>
-    .recommend-warnings { background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; padding: 0.5em 1em; margin: 1em 0; }
-    .recommend-warnings .warning { margin: 0.25em 0; }
-    .hint { font-size: 0.9em; color: #666; margin-left: 0.5em; }
-    .recommend-actions { display: flex; gap: 0.5em; margin: 1em 0; flex-wrap: wrap; }
-    .recommend-actions form { margin: 0; }
-    .recommend-hint { font-size: 0.9em; color: #666; margin-top: 0.5em; }
-</style>
+</div>

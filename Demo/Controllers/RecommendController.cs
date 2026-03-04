@@ -19,7 +19,7 @@ public class RecommendController : Controller
 
     public IActionResult Index()
     {
-        return View(new RecommendBuildVM { Budget = 5000, TargetTier = 7 });
+        return View(new RecommendBuildVM { Budget = 5000 });
     }
 
     [HttpPost]
@@ -31,7 +31,7 @@ public class RecommendController : Controller
             return View(vm);
         }
 
-        var result = await _recommend.RecommendAsync(vm.Budget, vm.TargetTier, vm.OptimizationType);
+        var result = await _recommend.RecommendAsync(vm.Budget, vm.OptimizationType);
         ViewBag.Result = result;
         ViewBag.Budget = vm.Budget;
         return View(vm);

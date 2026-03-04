@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Demo.Controllers;
 
-[Authorize]
+[Authorize(Roles = Roles.Admin)]
 public class FeedbackAdminController : Controller
 {
     private readonly DB db;

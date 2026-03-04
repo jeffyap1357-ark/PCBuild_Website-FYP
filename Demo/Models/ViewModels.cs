@@ -110,25 +110,27 @@ public class ShareBuildVM
 }
 
 // PC Recommend
-/// <summary>Optimization strategy for recommendations: performance, budget, or balanced.</summary>
+/// <summary>Optimization strategy for recommendations.</summary>
 public enum OptimizationType
 {
     /// <summary>Prioritize CPU/GPU performance; higher weights on Special score.</summary>
     Performance,
-    /// <summary>Prioritize value-for-money; higher weights on price efficiency (Special/Price).</summary>
+    /// <summary>Prioritize value-for-money; higher weights on price efficiency.</summary>
     Budget,
-    /// <summary>Balance performance and value; moderate weights on both.</summary>
-    Balanced
+    /// <summary>Balance performance and value.</summary>
+    Balanced,
+    /// <summary>Gaming-focused; uses GamingScore weighting.</summary>
+    Gaming,
+    /// <summary>Office/productivity-focused; uses OfficeScore weighting.</summary>
+    Office,
+    /// <summary>Content editing-focused; uses EditingScore weighting.</summary>
+    Editing
 }
 
 public class RecommendBuildVM
 {
     [Required, Range(1000, 50000), Display(Name = "Budget (RM)")]
     public decimal Budget { get; set; } = 5000;
-
-    [Display(Name = "Target tier (1-10, higher = better performance)")]
-    [Range(1, 10)]
-    public int TargetTier { get; set; } = 7;
 
     [Display(Name = "Optimization type")]
     public OptimizationType OptimizationType { get; set; } = OptimizationType.Balanced;

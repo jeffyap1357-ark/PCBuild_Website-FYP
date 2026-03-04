@@ -51,8 +51,22 @@ public class User
     [Required, MaxLength(256)]
     public string Email { get; set; }
 
+    /// <summary>Admin or User. Root admin has IsRootAdmin=true.</summary>
+    [Required, MaxLength(20)]
+    public string Role { get; set; } = "User";
+
+    /// <summary>Root admin cannot be deleted or have role changed by others.</summary>
+    public bool IsRootAdmin { get; set; }
+
     public List<Build> Builds { get; set; } = [];
     public List<UserGuideProgress> GuideProgresses { get; set; } = [];
+}
+
+/// <summary>Role names for authorization.</summary>
+public static class Roles
+{
+    public const string Admin = "Admin";
+    public const string User = "User";
 }
 
 // Build: PC builds created by users
@@ -144,10 +158,32 @@ public class Hardware
     [MaxLength(50)]
     public string? FormFactor { get; set; }
 
+    /// <summary>Legacy overall score 1-10. Used when GamingScore/OfficeScore/EditingScore not set.</summary>
     public int? Special { get; set; }
 
     /// <summary>Number of RAM slots (Motherboard only). Typically 2 or 4.</summary>
     public int? RamSlots { get; set; }
+
+    /// <summary>Release year (e.g. 2023).</summary>
+    public int? ReleaseYear { get; set; }
+
+    /// <summary>Consumer rating 1-5.</summary>
+    public int? Rating { get; set; }
+
+    /// <summary>Numeric performance score for ranking (0-100).</summary>
+    public int? PerformanceScore { get; set; }
+
+    /// <summary>Power consumption in watts.</summary>
+    public int? PowerConsumption { get; set; }
+
+    /// <summary>Gaming suitability 1-10.</summary>
+    public int? GamingScore { get; set; }
+
+    /// <summary>Office/productivity suitability 1-10.</summary>
+    public int? OfficeScore { get; set; }
+
+    /// <summary>Content editing suitability 1-10.</summary>
+    public int? EditingScore { get; set; }
 
     [ForeignKey(nameof(CategoryId))]
     public Category Category { get; set; }

@@ -1,5 +1,6 @@
 global using Demo.Models;
 global using Demo;
+global using Microsoft.AspNetCore.Authentication.Cookies;
 global using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,7 +12,12 @@ var connStr = $@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename={dbPath};In
 builder.Services.AddSqlServer<DB>(connStr);
 builder.Services.AddScoped<Helper>();
 builder.Services.AddScoped<Demo.Services.PcRecommendService>();
-builder.Services.AddAuthentication().AddCookie();
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.AccessDeniedPath = "/Account/AccessDenied";
+    });
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSession();
 
@@ -190,12 +196,95 @@ catch (Exception ex)
     logger.LogWarning(ex, "Could not ensure Feedback table exists.");
 }
 
-// Import hardware from CSV if file exists (run AddHardwareCompatibility.sql first for Socket/DdrType columns)
+// Ensure Users table has Role and IsRootAdmin columns, seed root admin
+try
+{
+    using var scopeUsers = app.Services.CreateScope();
+    var dbUsers = scopeUsers.ServiceProvider.GetRequiredService<DB>();
+    var helper = scopeUsers.ServiceProvider.GetRequiredService<Helper>();
+    dbUsers.Database.ExecuteSqlRaw(@"
+        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Users') AND name = 'Role')
+        BEGIN
+            ALTER TABLE [Users] ADD [Role] nvarchar(20) NOT NULL DEFAULT 'User';
+        END
+        ELSE
+        BEGIN
+            UPDATE [Users] SET [Role] = 'User' WHERE [Role] IS NULL OR [Role] = '';
+        END;
+        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Users') AND name = 'IsRootAdmin')
+        BEGIN
+            ALTER TABLE [Users] ADD [IsRootAdmin] bit NOT NULL DEFAULT 0;
+        END
+        ELSE
+        BEGIN
+            UPDATE [Users] SET [IsRootAdmin] = 0 WHERE [IsRootAdmin] IS NULL;
+        END;
+    ");
+    var rootAdmin = dbUsers.Users.FirstOrDefault(u => u.IsRootAdmin);
+    if (rootAdmin == null)
+    {
+        var rootEmail = builder.Configuration["RootAdmin:Email"] ?? "admin@pcbuild.local";
+        var rootPassword = builder.Configuration["RootAdmin:Password"] ?? "Admin@123";
+        var existingAdmin = dbUsers.Users.FirstOrDefault(u => u.Username == "admin");
+        if (existingAdmin != null)
+        {
+            existingAdmin.IsRootAdmin = true;
+            existingAdmin.Role = Roles.Admin;
+            existingAdmin.Password = helper.HashPassword(rootPassword);
+        }
+        else
+        {
+            dbUsers.Users.Add(new User
+            {
+                Username = "admin",
+                Email = rootEmail,
+                Password = helper.HashPassword(rootPassword),
+                Role = Roles.Admin,
+                IsRootAdmin = true
+            });
+        }
+        dbUsers.SaveChanges();
+        logger.LogInformation("Root admin account created. Username: admin");
+    }
+}
+catch (Exception ex)
+{
+    logger.LogWarning(ex, "Could not ensure root admin.");
+}
+
+// Ensure Hardware has performance attribute columns (fallback if migration not applied)
+try
+{
+    using var scopeHw = app.Services.CreateScope();
+    var dbHw = scopeHw.ServiceProvider.GetRequiredService<DB>();
+    dbHw.Database.ExecuteSqlRaw(@"
+        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Hardware') AND name = 'ReleaseYear')
+            ALTER TABLE [Hardware] ADD [ReleaseYear] int NULL;
+        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Hardware') AND name = 'Rating')
+            ALTER TABLE [Hardware] ADD [Rating] int NULL;
+        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Hardware') AND name = 'PerformanceScore')
+            ALTER TABLE [Hardware] ADD [PerformanceScore] int NULL;
+        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Hardware') AND name = 'PowerConsumption')
+            ALTER TABLE [Hardware] ADD [PowerConsumption] int NULL;
+        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Hardware') AND name = 'GamingScore')
+            ALTER TABLE [Hardware] ADD [GamingScore] int NULL;
+        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Hardware') AND name = 'OfficeScore')
+            ALTER TABLE [Hardware] ADD [OfficeScore] int NULL;
+        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Hardware') AND name = 'EditingScore')
+            ALTER TABLE [Hardware] ADD [EditingScore] int NULL;
+    ");
+}
+catch (Exception ex)
+{
+    logger.LogWarning(ex, "Could not add Hardware performance columns.");
+}
+
+// Import hardware from CSV if file exists
 try
 {
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<DB>();
-    var csvPath = Path.Combine(builder.Environment.ContentRootPath, "Data", "pc_hardware_dataset_v2.csv");
+    var csvPath = Path.Combine(builder.Environment.ContentRootPath, "Data", "hardware_table.csv");
     await Demo.Services.CsvHardwareImport.ImportFromCsvAsync(db, csvPath, logger);
 }
 catch (Exception ex)

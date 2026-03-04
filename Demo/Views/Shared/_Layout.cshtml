@@ -25,22 +25,33 @@
     <nav>
         <a href="/">Home</a>
         <a href="/Hardware/List">Hardware List</a>
-        <a href="/Learning/Index">📚 Learning & Guide</a>
-        <a href="/Community/Index">👥 Community</a>
-        <a href="/Recommend">✨ Recommend Build</a>
+        <a href="/Learning/Index">Learning & Guide</a>
+        <a href="/Community/Index">Community</a>
+        <a href="/Recommend">Recommend Build</a>
         @if (User.Identity!.IsAuthenticated)
         {
             <a href="/Build/Configure">PC Build Config</a>
             <a href="/Build/Index">My Builds</a>
+            <a href="/Quiz/Index">Quiz</a>
+            <a href="/Performance/Index">Performance Build</a>
         }
 
         <div></div>
 
         @if (User.Identity.IsAuthenticated)
         {
+            @if (User.IsInRole(Roles.Admin))
+            {
+                <a href="/Admin">Admin</a>
+            }
             <a href="/Account/Logout">Logout</a>
             <a href="/Account/UpdatePassword">Update Password</a>
             <a href="/Account/UpdateProfile">Update Profile</a>
+            @if (User.IsInRole(Roles.Admin))
+            {
+                <a href="/QuizAdmin/Index">Quiz Admin</a>
+                <a href="/FeedbackAdmin/Index">Feedback Admin</a>
+            }
         }
         else
         {

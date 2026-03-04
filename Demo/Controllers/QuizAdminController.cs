@@ -3,8 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Demo.Controllers;
 
-// Simple admin management for quiz questions (assumes only trusted users access)
-[Authorize]
+[Authorize(Roles = Roles.Admin)]
 public class QuizAdminController : Controller
 {
     private readonly DB db;

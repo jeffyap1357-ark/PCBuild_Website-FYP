@@ -1,0 +1,12 @@
+@{
+    ViewBag.Title = "Admin | Dashboard";
+}
+
+<div class="admin-dashboard">
+    <h2>Admin Dashboard</h2>
+    <p>Welcome, @User.Identity?.Name. You have admin access.</p>
+    <ul class="admin-links">
+        <li><a href="/QuizAdmin/Index">Quiz Admin</a> — Manage quiz questions</li>
+        <li><a href="/FeedbackAdmin/Index">Feedback Admin</a> — View feedback reports</li>
+    </ul>
+</div>

@@ -11,6 +11,14 @@
     {
         <li><a href="/Build/Configure">PC Build Config</a> – Create a new build</li>
         <li><a href="/Build/Index">My Builds</a> – Your saved builds</li>
+        <li><a href="/Quiz/Index">Quiz</a> – Test your PC building knowledge</li>
+        <li><a href="/Performance/Index">Performance Build</a> – Build and score your PC by budget</li>
+        @if (User.IsInRole(Roles.Admin))
+        {
+            <li><a href="/Admin">Admin</a> – Admin dashboard</li>
+            <li><a href="/QuizAdmin/Index">Quiz Admin</a> – Manage quiz questions</li>
+            <li><a href="/FeedbackAdmin/Index">Feedback Admin</a> – View feedback reports</li>
+        }
     }
     else
     {

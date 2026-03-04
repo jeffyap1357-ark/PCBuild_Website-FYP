@@ -65,4 +65,54 @@ public class HardwareController : Controller
 
         return View(h);
     }
+
+    // GET: Hardware/Compare?id1=1 or Compare?id1=1&id2=2 - Compare two hardware items of the same category
+    public IActionResult Compare(int id1, int id2 = 0)
+    {
+        var h1 = db.Hardware.Include(x => x.Category).FirstOrDefault(x => x.HardwareId == id1);
+        if (h1 == null)
+        {
+            TempData["Info"] = "Hardware item not found.";
+            return RedirectToAction(nameof(List));
+        }
+
+        var sameCategory = db.Hardware.Include(h => h.Category)
+            .Where(h => h.CategoryId == h1.CategoryId)
+            .OrderBy(h => h.Name)
+            .ToList();
+
+        if (id2 <= 0)
+        {
+            ViewBag.Hardware1 = h1;
+            ViewBag.Hardware2 = (Hardware?)null;
+            ViewBag.SameCategoryHardware = sameCategory;
+            ViewBag.CategoryName = h1.Category?.Type ?? "Hardware";
+            return View();
+        }
+
+        if (id1 == id2)
+        {
+            TempData["Info"] = "Please select two different items to compare.";
+            return RedirectToAction(nameof(Compare), new { id1 });
+        }
+
+        var h2 = db.Hardware.Include(x => x.Category).FirstOrDefault(x => x.HardwareId == id2);
+        if (h2 == null)
+        {
+            TempData["Info"] = "Second hardware item not found.";
+            return RedirectToAction(nameof(Compare), new { id1 });
+        }
+
+        if (h1.CategoryId != h2.CategoryId)
+        {
+            TempData["Info"] = "Can only compare hardware of the same category (e.g. RAM vs RAM).";
+            return RedirectToAction(nameof(Compare), new { id1 });
+        }
+
+        ViewBag.Hardware1 = h1;
+        ViewBag.Hardware2 = h2;
+        ViewBag.SameCategoryHardware = sameCategory;
+        ViewBag.CategoryName = h1.Category?.Type ?? "Hardware";
+        return View();
+    }
 }

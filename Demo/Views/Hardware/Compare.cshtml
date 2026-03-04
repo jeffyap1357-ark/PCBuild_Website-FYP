@@ -1,0 +1,163 @@
+@inject Demo.Helper Helper
+
+@{
+    ViewBag.Title = "Hardware | Compare";
+    var h1 = ViewBag.Hardware1 as Hardware;
+    var h2 = ViewBag.Hardware2 as Hardware;
+    var sameCategory = ViewBag.SameCategoryHardware as List<Hardware> ?? new List<Hardware>();
+    var categoryName = ViewBag.CategoryName as string ?? "Hardware";
+}
+
+<div class="hardware-compare">
+    <h2 class="hardware-compare-title">Compare @categoryName</h2>
+
+    @if (h2 == null)
+    {
+        @* Picker mode: dropdown to select second item (same category only) *@
+        <div class="hardware-compare-dropdown-row">
+            <div class="hardware-compare-dropdown-cell">
+                <span class="hardware-compare-dropdown-label">Compare</span>
+                <strong>@(h1?.Name)</strong>
+            </div>
+            <div class="hardware-compare-dropdown-cell">
+                <span class="hardware-compare-dropdown-label">with</span>
+                <select class="hardware-compare-select" onchange="if(this.value){window.location='/Hardware/Compare?id1=@(h1?.HardwareId)&id2='+this.value;}">
+                    <option value="">— Select @categoryName —</option>
+                    @foreach (var o in sameCategory.Where(x => x.HardwareId != h1?.HardwareId))
+                    {
+                        <option value="@o.HardwareId">@o.Name — @o.Price.ToString("C")</option>
+                    }
+                </select>
+            </div>
+        </div>
+        @if (!sameCategory.Any(x => x.HardwareId != h1?.HardwareId))
+        {
+            <p class="hardware-compare-empty">No other @categoryName found to compare.</p>
+        }
+    }
+    else
+    {
+        @* Full compare: dropdowns in name place, user can change directly *@
+        <div class="hardware-compare-header">
+            <div class="hardware-compare-thumb">
+                <div class="hardware-compare-thumb-img">
+                    @{
+                        var img1 = Helper.GetHardwareImagePath(h1!.Picture, h1.Name);
+                    }
+                    @if (!string.IsNullOrEmpty(img1))
+                    {
+                        <img src="/hardware/@img1" alt="@h1.Name" onerror="this.onerror=null;this.style.display='none';var p=this.nextElementSibling;if(p)p.style.display='flex';">
+                        <span class="hardware-compare-placeholder" style="display:none">No image</span>
+                    }
+                    else
+                    {
+                        <span class="hardware-compare-placeholder">No image</span>
+                    }
+                </div>
+                <select class="hardware-compare-select hardware-compare-name-select" onchange="if(this.value){window.location='/Hardware/Compare?id1='+this.value+'&id2=@h2.HardwareId';}">
+                    @foreach (var o in sameCategory.Where(x => x.HardwareId != h2.HardwareId))
+                    {
+                        @if (o.HardwareId == h1.HardwareId)
+                        {
+                            <option value="@o.HardwareId" selected>@o.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@o.HardwareId">@o.Name</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="hardware-compare-vs">VS</div>
+            <div class="hardware-compare-thumb">
+                <div class="hardware-compare-thumb-img">
+                    @{
+                        var img2 = Helper.GetHardwareImagePath(h2.Picture, h2.Name);
+                    }
+                    @if (!string.IsNullOrEmpty(img2))
+                    {
+                        <img src="/hardware/@img2" alt="@h2.Name" onerror="this.onerror=null;this.style.display='none';var p=this.nextElementSibling;if(p)p.style.display='flex';">
+                        <span class="hardware-compare-placeholder" style="display:none">No image</span>
+                    }
+                    else
+                    {
+                        <span class="hardware-compare-placeholder">No image</span>
+                    }
+                </div>
+                <select class="hardware-compare-select hardware-compare-name-select" onchange="if(this.value){window.location='/Hardware/Compare?id1=@h1.HardwareId&id2='+this.value;}">
+                    @foreach (var o in sameCategory.Where(x => x.HardwareId != h1.HardwareId))
+                    {
+                        @if (o.HardwareId == h2.HardwareId)
+                        {
+                            <option value="@o.HardwareId" selected>@o.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@o.HardwareId">@o.Name</option>
+                        }
+                    }
+                </select>
+            </div>
+        </div>
+
+        <table class="hardware-compare-table">
+            <thead>
+                <tr>
+                    <th>Specification</th>
+                    <th>@h1.Name</th>
+                    <th>@h2.Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    var rows = new List<(string Label, string V1, string V2)>();
+                    rows.Add(("Name", h1.Name, h2.Name));
+                    rows.Add(("Category", h1.Category?.Type ?? "—", h2.Category?.Type ?? "—"));
+                    rows.Add(("Brand", h1.Brand ?? "—", h2.Brand ?? "—"));
+                    rows.Add(("Price", h1.Price.ToString("C"), h2.Price.ToString("C")));
+                    if (!string.IsNullOrEmpty(h1.Socket) || !string.IsNullOrEmpty(h2.Socket))
+                        rows.Add(("Socket", h1.Socket ?? "—", h2.Socket ?? "—"));
+                    if (!string.IsNullOrEmpty(h1.DdrType) || !string.IsNullOrEmpty(h2.DdrType))
+                        rows.Add(("DDR Type", h1.DdrType ?? "—", h2.DdrType ?? "—"));
+                    if (!string.IsNullOrEmpty(h1.FormFactor) || !string.IsNullOrEmpty(h2.FormFactor))
+                        rows.Add(("Form Factor", h1.FormFactor ?? "—", h2.FormFactor ?? "—"));
+                    if (h1.RamSlots.HasValue || h2.RamSlots.HasValue)
+                        rows.Add(("RAM Slots", h1.RamSlots?.ToString() ?? "—", h2.RamSlots?.ToString() ?? "—"));
+                    if (h1.ReleaseYear.HasValue || h2.ReleaseYear.HasValue)
+                        rows.Add(("Release Year", h1.ReleaseYear?.ToString() ?? "—", h2.ReleaseYear?.ToString() ?? "—"));
+                    if (h1.Rating.HasValue || h2.Rating.HasValue)
+                        rows.Add(("Rating", (h1.Rating?.ToString() ?? "—") + "/5", (h2.Rating?.ToString() ?? "—") + "/5"));
+                    if (h1.PowerConsumption.HasValue || h2.PowerConsumption.HasValue)
+                        rows.Add(("Power (W)", h1.PowerConsumption?.ToString() ?? "—", h2.PowerConsumption?.ToString() ?? "—"));
+                    if (h1.GamingScore.HasValue || h2.GamingScore.HasValue)
+                        rows.Add(("Gaming", (h1.GamingScore?.ToString() ?? "—") + "/10", (h2.GamingScore?.ToString() ?? "—") + "/10"));
+                    if (h1.OfficeScore.HasValue || h2.OfficeScore.HasValue)
+                        rows.Add(("Office", (h1.OfficeScore?.ToString() ?? "—") + "/10", (h2.OfficeScore?.ToString() ?? "—") + "/10"));
+                    if (h1.EditingScore.HasValue || h2.EditingScore.HasValue)
+                        rows.Add(("Editing", (h1.EditingScore?.ToString() ?? "—") + "/10", (h2.EditingScore?.ToString() ?? "—") + "/10"));
+                    if (h1.Special.HasValue || h2.Special.HasValue)
+                        rows.Add(("Special", h1.Special?.ToString() ?? "—", h2.Special?.ToString() ?? "—"));
+                    rows.Add(("Description", h1.Detail ?? "No description available.", h2.Detail ?? "No description available."));
+                }
+                @foreach (var row in rows)
+                {
+                    var diff = row.V1 != row.V2;
+                    <tr class="@(diff ? "hardware-compare-diff" : "")">
+                        <td class="hardware-compare-label">@row.Label</td>
+                        <td class="hardware-compare-val">@row.V1</td>
+                        <td class="hardware-compare-val">@row.V2</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <p class="hardware-compare-links">
+            <a href="@Url.Action("Detail", new { id = h1.HardwareId })" class="button secondary">View @h1.Name</a>
+            <a href="@Url.Action("Detail", new { id = h2.HardwareId })" class="button secondary">View @h2.Name</a>
+        </p>
+    }
+
+    <p class="hardware-compare-back">
+        <a href="@Url.Action("List")" class="button">← Back to Hardware List</a>
+    </p>
+</div>

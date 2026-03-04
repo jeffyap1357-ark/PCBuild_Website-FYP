@@ -37,7 +37,7 @@ public class AccountController : Controller
         if (ModelState.IsValid)
         {
             TempData["Info"] = "Login successfully.";
-            hp.SignIn(u!.Username, "User", vm.RememberMe);
+            hp.SignIn(u!.Username, u.Role ?? Roles.User, vm.RememberMe);
 
             if (string.IsNullOrEmpty(returnURL))
                 return RedirectToAction("Index", "Home");
@@ -95,6 +95,7 @@ public class AccountController : Controller
                 Username = vm.Username,
                 Email = vm.Email,
                 Password = hp.HashPassword(vm.Password),
+                Role = Roles.User,
             });
             db.SaveChanges();
             TempData["Info"] = "Register successfully. Please login.";
@@ -186,6 +187,8 @@ public class AccountController : Controller
         var u = db.Users.FirstOrDefault(x => x.Email == vm.Email);
         if (u == null)
             ModelState.AddModelError("Email", "Email not found.");
+        else if (u.IsRootAdmin)
+            ModelState.AddModelError("Email", "Password reset is not allowed for this account. Contact system administrator.");
 
         if (ModelState.IsValid)
         {

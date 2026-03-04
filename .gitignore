@@ -1,0 +1,32 @@
+# Build
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.dll
+*.exe
+*.pdb
+*.log
+
+# Database
+*.mdf
+*.ldf
+
+# IDE
+.vs/
+.idea/
+*.rsuser
+
+# NuGet
+packages/
+*.nupkg
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# ASP.NET
+*.dbmdl
+*.jfm
+*.pfx
+*.publishsettings
