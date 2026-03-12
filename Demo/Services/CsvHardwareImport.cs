@@ -33,9 +33,20 @@ public class CsvHardwareImport
             if (parts.Count < 4) continue;
 
             var name = GetByHeader(parts, headerParts, "Name");
-            var catId = GetByHeader(parts, headerParts, "CategoryId");
-            if (string.IsNullOrEmpty(name) || !CategoryMap.TryGetValue(catId, out var catType) || !categoryByName.TryGetValue(catType, out var cat))
-                continue;
+            var catIdStr = GetByHeader(parts, headerParts, "CategoryId");
+            if (string.IsNullOrEmpty(name)) continue;
+
+            Models.Category? cat = null;
+            if (int.TryParse(catIdStr, out var catIdNum) && catIdNum >= 1 && catIdNum <= 8)
+            {
+                cat = await db.Categories.FindAsync(catIdNum);
+            }
+            else if (CategoryMap.TryGetValue(catIdStr, out var mappedCatType))
+            {
+                categoryByName.TryGetValue(mappedCatType, out cat);
+            }
+            if (cat == null) continue;
+            var catType = cat.Type;
             var dedupKey = $"{name}|{cat.CategoryId}";
             if (!seenKeys.Add(dedupKey))
                 continue;
@@ -68,30 +79,18 @@ public class CsvHardwareImport
             var gamingScore = ParseInt(GetByHeader(parts, headerParts, "GamingScore"), 1, 10);
             var officeScore = ParseInt(GetByHeader(parts, headerParts, "OfficeScore"), 1, 10);
             var editingScore = ParseInt(GetByHeader(parts, headerParts, "EditingScore"), 1, 10);
+            var reference = GetByHeader(parts, headerParts, "Reference");
+            if (string.IsNullOrWhiteSpace(reference)) reference = null;
 
-            var existing = await db.Hardware.FirstOrDefaultAsync(h => h.Name == name && h.CategoryId == cat.CategoryId);
+            var existing = await db.Components.FirstOrDefaultAsync(h => h.Name == name && h.CategoryId == cat.CategoryId);
             if (existing != null)
             {
-                existing.Price = price;
-                existing.Detail = detail;
-                existing.Brand = brand;
-                existing.Picture = string.IsNullOrEmpty(picture) ? null : picture;
-                existing.Socket = string.IsNullOrEmpty(socket) ? null : socket;
-                existing.DdrType = string.IsNullOrEmpty(ddrType) ? null : ddrType;
-                existing.FormFactor = string.IsNullOrEmpty(formFactor) ? null : formFactor;
-                existing.Special = special;
-                existing.RamSlots = ramSlots;
-                existing.ReleaseYear = releaseYear;
-                existing.Rating = rating;
-                existing.PerformanceScore = performanceScore;
-                existing.PowerConsumption = powerConsumption;
-                existing.GamingScore = gamingScore;
-                existing.OfficeScore = officeScore;
-                existing.EditingScore = editingScore;
+                // Do NOT overwrite existing records - user edits in DB (Socket, etc.) must persist.
+                // CSV import only adds new hardware; existing rows keep their current values.
             }
             else
             {
-                db.Hardware.Add(new Models.Hardware
+                db.Components.Add(new Models.Component
                 {
                     Name = name,
                     CategoryId = cat.CategoryId,
@@ -110,7 +109,8 @@ public class CsvHardwareImport
                     PowerConsumption = powerConsumption,
                     GamingScore = gamingScore,
                     OfficeScore = officeScore,
-                    EditingScore = editingScore
+                    EditingScore = editingScore,
+                    Reference = reference
                 });
             }
         }

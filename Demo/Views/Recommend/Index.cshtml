@@ -6,6 +6,8 @@
     ViewBag.Title = "PC Build | Recommend Build";
     var result = ViewBag.Result as RecommendResult;
     var budget = ViewBag.Budget as decimal? ?? Model.Budget;
+    var score = result?.Success == true && result.Parts?.Any() == true ? BuildAssessmentService.ComputeScore(result.Parts) : 0;
+    var assessment = result?.Success == true && result.Parts?.Any() == true ? BuildAssessmentService.GetAssessment(score, result.Parts) : null;
 }
 
 <div class="recommend-page">
@@ -54,11 +56,25 @@
                 }
                 <div class="recommend-summary">
                     <span class="recommend-total">Total: @result.TotalPrice.ToString("C")</span>
+                    @if (score > 0)
+                    {
+                        <span class="recommend-score"> &middot; Score: @score</span>
+                    }
                     @if (result.TotalPrice > budget)
                     {
                         <span class="recommend-over">(over budget)</span>
                     }
                 </div>
+                @if (assessment != null)
+                {
+                    <div class="build-assessment recommend-assessment">
+                        <strong>Assessment:</strong> @assessment.Rating<br />
+                        <p class="build-assessment-comment">@assessment.Comment</p>
+                        <p class="build-assessment-detail">
+                            <strong>Strengths:</strong> @assessment.Strengths &middot; <strong>Weaknesses:</strong> @assessment.Weaknesses
+                        </p>
+                    </div>
+                }
                 <div class="recommend-parts-card">
                     <table class="recommend-table">
                         <thead>

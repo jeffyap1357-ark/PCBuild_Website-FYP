@@ -1,9 +1,12 @@
 @model PerformanceBuildVM
+@using Demo.Services
 
 @{
     ViewBag.Title = "PC Build | Performance Test";
     var parts = ViewBag.SelectedParts as List<Hardware> ?? new List<Hardware>();
     var savedId = ViewBag.SavedReportId as int?;
+    var score = parts.Any() ? BuildAssessmentService.ComputeScore(parts) : 0;
+    var assessment = parts.Any() ? BuildAssessmentService.GetAssessment(score, parts) : null;
 }
 
 <p>Set your budget, pick compatible components, and the system will calculate a performance score for your custom PC build.</p>
@@ -61,6 +64,16 @@
         <strong>Total Price:</strong> @Model.TotalPrice.ToString("C")<br />
         <strong>Total Performance Score:</strong> @Model.TotalScore
     </p>
+    @if (assessment != null)
+    {
+        <div class="build-assessment">
+            <strong>Assessment:</strong> @assessment.Rating<br />
+            <p class="build-assessment-comment">@assessment.Comment</p>
+            <p class="build-assessment-detail">
+                <strong>Strengths:</strong> @assessment.Strengths &middot; <strong>Weaknesses:</strong> @assessment.Weaknesses
+            </p>
+        </div>
+    }
 
     <table class="table">
         <thead>

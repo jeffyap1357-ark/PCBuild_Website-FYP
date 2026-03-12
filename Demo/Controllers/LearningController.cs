@@ -74,6 +74,19 @@ public class LearningController : Controller
             }
         }
 
+        var ordered = db.Guides.OrderBy(g => g.SortOrder).Select(g => new { g.GuideId, g.GuideName }).ToList();
+        var idx = ordered.FindIndex(g => g.GuideId == id);
+        if (idx > 0)
+        {
+            ViewBag.PrevId = ordered[idx - 1].GuideId;
+            ViewBag.PrevName = ordered[idx - 1].GuideName;
+        }
+        if (idx >= 0 && idx < ordered.Count - 1)
+        {
+            ViewBag.NextId = ordered[idx + 1].GuideId;
+            ViewBag.NextName = ordered[idx + 1].GuideName;
+        }
+
         return View(guide);
     }
 }

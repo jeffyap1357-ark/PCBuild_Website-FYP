@@ -1,26 +1,28 @@
 @model List<Guide>
-
 @{
     ViewBag.Title = "PC Build | Learning & Guide";
     var readIds = ViewBag.ReadIds as HashSet<int> ?? new HashSet<int>();
+    var index = 0;
 }
-
-<p>Browse learning materials. Select a guide to read. Items you have read will show in a different color. <a href="@Url.Action("Diagnose")">Diagnose DB</a></p>
+<h1 class="guide-page-title">Learning &amp; Guide</h1>
+<p class="guide-intro">Learning material for beginners: no prior PC hardware knowledge needed. Each guide explains <em>what</em> the part does and <em>why</em> it matters, with clear terms and step-by-step advice. Select a guide to read; items you have read show with a check. <a href="@Url.Action("Diagnose")">Diagnose DB</a></p>
 
 <ul class="guide-list">
     @foreach (var g in Model)
     {
+        index++;
         var read = readIds.Contains(g.GuideId);
         <li class="@(read ? "guide-read" : "")">
-            <span class="guide-status">@(read ? "✓" : "○")</span>
-            <div>
-                <a href="@Url.Action("Detail", new { id = g.GuideId })">@g.GuideName</a>
+            <span class="guide-num" aria-hidden="true">@index</span>
+            <span class="guide-status" aria-label="@(read ? "Read" : "Unread")">@(read ? "✓" : "○")</span>
+            <div class="guide-list-body">
+                <a href="@Url.Action("Detail", new { id = g.GuideId })" class="guide-list-title">@g.GuideName</a>
                 @if (!string.IsNullOrEmpty(g.GuideDesc))
                 {
                     <span class="guide-desc">@g.GuideDesc</span>
                 }
             </div>
-            <a href="@Url.Action("Detail", new { id = g.GuideId })" class="button">View</a>
+            <a href="@Url.Action("Detail", new { id = g.GuideId })" class="button">Read</a>
         </li>
     }
 </ul>

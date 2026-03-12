@@ -61,6 +61,40 @@ catch (Exception ex)
     logger.LogWarning(ex, "Could not ensure Guide table exists. Visit /Learning/Diagnose to see tables in DB.");
 }
 
+// Seed real learning material (Build PC, hardware chapters, Install OS)
+try
+{
+    var seedPath = Path.Combine(builder.Environment.ContentRootPath, "Data", "SeedLearningGuides.sql");
+    if (File.Exists(seedPath))
+    {
+        using var scopeSeed = app.Services.CreateScope();
+        var dbSeed = scopeSeed.ServiceProvider.GetRequiredService<DB>();
+        var sql = File.ReadAllText(seedPath);
+        dbSeed.Database.ExecuteSqlRaw(sql);
+        logger.LogInformation("Learning guides seed executed from Data/SeedLearningGuides.sql");
+    }
+}
+catch (Exception ex)
+{
+    logger.LogWarning(ex, "Learning guides seed failed. You can run Data/SeedLearningGuides.sql manually.");
+}
+
+// Ensure Guide has ContentModules column (for admin Learning Material Maker)
+try
+{
+    using var scopeGuide = app.Services.CreateScope();
+    var dbGuide = scopeGuide.ServiceProvider.GetRequiredService<DB>();
+    dbGuide.Database.ExecuteSqlRaw(@"
+        IF EXISTS (SELECT 1 FROM sys.tables t JOIN sys.schemas s ON t.schema_id = s.schema_id WHERE s.name = N'dbo' AND t.name = N'Guide')
+        AND NOT EXISTS (SELECT 1 FROM sys.columns c JOIN sys.tables t ON c.object_id = t.object_id JOIN sys.schemas s ON t.schema_id = s.schema_id WHERE s.name = N'dbo' AND t.name = N'Guide' AND c.name = N'ContentModules')
+        ALTER TABLE [dbo].[Guide] ADD [ContentModules] nvarchar(max) NULL;
+    ");
+}
+catch (Exception ex)
+{
+    logger.LogWarning(ex, "Guide ContentModules column may not exist. Add it manually if using Learning Material Maker.");
+}
+
 // Ensure PerformanceReport tables exist (fallback if migrations failed)
 try
 {
@@ -92,7 +126,7 @@ try
                 [Score] int NOT NULL,
                 CONSTRAINT [PK_PerformanceReportItems] PRIMARY KEY ([PerformanceReportItemId]),
                 CONSTRAINT [FK_PerformanceReportItems_PerformanceReports_PerformanceReportId] FOREIGN KEY ([PerformanceReportId]) REFERENCES [dbo].[PerformanceReports]([PerformanceReportId]) ON DELETE CASCADE,
-                CONSTRAINT [FK_PerformanceReportItems_Hardware_HardwareId] FOREIGN KEY ([HardwareId]) REFERENCES [dbo].[Hardware]([HardwareId]) ON DELETE CASCADE
+                CONSTRAINT [FK_PerformanceReportItems_Component_HardwareId] FOREIGN KEY ([HardwareId]) REFERENCES [dbo].[Component]([ComponentId]) ON DELETE CASCADE
             );
             CREATE INDEX [IX_PerformanceReportItems_PerformanceReportId] ON [dbo].[PerformanceReportItems]([PerformanceReportId]);
             CREATE INDEX [IX_PerformanceReportItems_HardwareId] ON [dbo].[PerformanceReportItems]([HardwareId]);
@@ -252,31 +286,72 @@ catch (Exception ex)
     logger.LogWarning(ex, "Could not ensure root admin.");
 }
 
-// Ensure Hardware has performance attribute columns (fallback if migration not applied)
+// Ensure Component has performance attribute columns (fallback if migration not applied)
 try
 {
     using var scopeHw = app.Services.CreateScope();
     var dbHw = scopeHw.ServiceProvider.GetRequiredService<DB>();
     dbHw.Database.ExecuteSqlRaw(@"
-        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Hardware') AND name = 'ReleaseYear')
-            ALTER TABLE [Hardware] ADD [ReleaseYear] int NULL;
-        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Hardware') AND name = 'Rating')
-            ALTER TABLE [Hardware] ADD [Rating] int NULL;
-        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Hardware') AND name = 'PerformanceScore')
-            ALTER TABLE [Hardware] ADD [PerformanceScore] int NULL;
-        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Hardware') AND name = 'PowerConsumption')
-            ALTER TABLE [Hardware] ADD [PowerConsumption] int NULL;
-        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Hardware') AND name = 'GamingScore')
-            ALTER TABLE [Hardware] ADD [GamingScore] int NULL;
-        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Hardware') AND name = 'OfficeScore')
-            ALTER TABLE [Hardware] ADD [OfficeScore] int NULL;
-        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Hardware') AND name = 'EditingScore')
-            ALTER TABLE [Hardware] ADD [EditingScore] int NULL;
+        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Component') AND name = 'ReleaseYear')
+            ALTER TABLE [Component] ADD [ReleaseYear] int NULL;
+        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Component') AND name = 'Rating')
+            ALTER TABLE [Component] ADD [Rating] int NULL;
+        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Component') AND name = 'PerformanceScore')
+            ALTER TABLE [Component] ADD [PerformanceScore] int NULL;
+        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Component') AND name = 'PowerConsumption')
+            ALTER TABLE [Component] ADD [PowerConsumption] int NULL;
+        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Component') AND name = 'GamingScore')
+            ALTER TABLE [Component] ADD [GamingScore] int NULL;
+        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Component') AND name = 'OfficeScore')
+            ALTER TABLE [Component] ADD [OfficeScore] int NULL;
+        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Component') AND name = 'EditingScore')
+            ALTER TABLE [Component] ADD [EditingScore] int NULL;
+        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Component') AND name = 'Reference')
+            ALTER TABLE [Component] ADD [Reference] nvarchar(500) NULL;
+
+        -- Rewire foreign keys from Hardware -> Component while keeping HardwareId column names.
+        DECLARE @sql nvarchar(max);
+
+        IF OBJECT_ID('dbo.BuildDetails') IS NOT NULL
+        BEGIN
+            SET @sql = N'';
+            SELECT @sql = @sql + N'ALTER TABLE [' + OBJECT_SCHEMA_NAME(parent_object_id) + N'].[' + OBJECT_NAME(parent_object_id) + N'] DROP CONSTRAINT [' + name + N'];'
+            FROM sys.foreign_keys
+            WHERE parent_object_id = OBJECT_ID('dbo.BuildDetails') AND referenced_object_id = OBJECT_ID('dbo.Hardware');
+            IF (@sql <> N'') EXEC sp_executesql @sql;
+
+            IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE parent_object_id = OBJECT_ID('dbo.BuildDetails') AND referenced_object_id = OBJECT_ID('dbo.Component'))
+                ALTER TABLE [BuildDetails] WITH CHECK ADD CONSTRAINT [FK_BuildDetails_Component_HardwareId] FOREIGN KEY ([HardwareId]) REFERENCES [Component]([ComponentId]) ON DELETE CASCADE;
+        END
+
+        IF OBJECT_ID('dbo.DraftBuildDetails') IS NOT NULL
+        BEGIN
+            SET @sql = N'';
+            SELECT @sql = @sql + N'ALTER TABLE [' + OBJECT_SCHEMA_NAME(parent_object_id) + N'].[' + OBJECT_NAME(parent_object_id) + N'] DROP CONSTRAINT [' + name + N'];'
+            FROM sys.foreign_keys
+            WHERE parent_object_id = OBJECT_ID('dbo.DraftBuildDetails') AND referenced_object_id = OBJECT_ID('dbo.Hardware');
+            IF (@sql <> N'') EXEC sp_executesql @sql;
+
+            IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE parent_object_id = OBJECT_ID('dbo.DraftBuildDetails') AND referenced_object_id = OBJECT_ID('dbo.Component'))
+                ALTER TABLE [DraftBuildDetails] WITH CHECK ADD CONSTRAINT [FK_DraftBuildDetails_Component_HardwareId] FOREIGN KEY ([HardwareId]) REFERENCES [Component]([ComponentId]) ON DELETE CASCADE;
+        END
+
+        IF OBJECT_ID('dbo.PerformanceReportItems') IS NOT NULL
+        BEGIN
+            SET @sql = N'';
+            SELECT @sql = @sql + N'ALTER TABLE [' + OBJECT_SCHEMA_NAME(parent_object_id) + N'].[' + OBJECT_NAME(parent_object_id) + N'] DROP CONSTRAINT [' + name + N'];'
+            FROM sys.foreign_keys
+            WHERE parent_object_id = OBJECT_ID('dbo.PerformanceReportItems') AND referenced_object_id = OBJECT_ID('dbo.Hardware');
+            IF (@sql <> N'') EXEC sp_executesql @sql;
+
+            IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE parent_object_id = OBJECT_ID('dbo.PerformanceReportItems') AND referenced_object_id = OBJECT_ID('dbo.Component'))
+                ALTER TABLE [PerformanceReportItems] WITH CHECK ADD CONSTRAINT [FK_PerformanceReportItems_Component_HardwareId] FOREIGN KEY ([HardwareId]) REFERENCES [Component]([ComponentId]) ON DELETE CASCADE;
+        END
     ");
 }
 catch (Exception ex)
 {
-    logger.LogWarning(ex, "Could not add Hardware performance columns.");
+    logger.LogWarning(ex, "Could not add Component performance columns.");
 }
 
 // Import hardware from CSV if file exists
@@ -298,5 +373,9 @@ app.UseRequestLocalization("en-MY");
 app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
+// Support /Hardware/5 as shorthand for /Hardware/Detail/5
+app.MapControllerRoute("HardwareById", "Hardware/{id:int}", new { controller = "Hardware", action = "Detail" });
 app.MapDefaultControllerRoute();
+
+logger.LogInformation("Ready. Open http://localhost:5006 or https://localhost:7143 in your browser.");
 app.Run();

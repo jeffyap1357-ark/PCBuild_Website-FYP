@@ -1,19 +1,44 @@
 @model Guide
-
 @{
     ViewBag.Title = "PC Build | " + Model.GuideName;
+    var prevId = ViewBag.PrevId as int?;
+    var nextId = ViewBag.NextId as int?;
+    var prevName = ViewBag.PrevName as string;
+    var nextName = ViewBag.NextName as string;
 }
+<nav class="guide-nav guide-nav-top" aria-label="Guide navigation">
+    <a href="@Url.Action("Index")" class="button button-secondary">← Back to list</a>
+    @if (prevId.HasValue)
+    {
+        <a href="@Url.Action("Detail", new { id = prevId.Value })" class="button button-secondary" title="@prevName">← Previous</a>
+    }
+    @if (nextId.HasValue)
+    {
+        <a href="@Url.Action("Detail", new { id = nextId.Value })" class="button button-secondary" title="@nextName">Next →</a>
+    }
+</nav>
 
-<h2>@Model.GuideName</h2>
-@if (!string.IsNullOrEmpty(Model.GuideDesc))
-{
-    <p class="guide-desc">@Model.GuideDesc</p>
-}
+<article class="guide-article">
+    <header class="guide-header">
+        <h1 class="guide-title">@Model.GuideName</h1>
+        @if (!string.IsNullOrEmpty(Model.GuideDesc))
+        {
+            <p class="guide-desc">@Model.GuideDesc</p>
+        }
+    </header>
+    <div class="guide-content">
+        @Html.Raw(Model.Content)
+    </div>
+</article>
 
-<div class="guide-content">
-    @Html.Raw(Model.Content)
-</div>
-
-<p style="margin-top: 24px;">
-    <a href="@Url.Action("Index")" class="button">← Back to list</a>
-</p>
+<nav class="guide-nav guide-nav-bottom" aria-label="Guide navigation">
+    <a href="@Url.Action("Index")" class="button button-secondary">← Back to list</a>
+    @if (prevId.HasValue)
+    {
+        <a href="@Url.Action("Detail", new { id = prevId.Value })" class="button button-secondary" title="@prevName">← Previous</a>
+    }
+    @if (nextId.HasValue)
+    {
+        <a href="@Url.Action("Detail", new { id = nextId.Value })" class="button button-secondary" title="@nextName">Next →</a>
+    }
+</nav>

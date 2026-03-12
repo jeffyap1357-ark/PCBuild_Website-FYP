@@ -1,44 +1,47 @@
-hardwareId,Name,CategoryId,Price,Detail,Brand,Picture,Socket,DdrType,FormFactor,Special,RamSlots,ReleaseYear,Rating,PerformanceScore,PowerConsumption,GamingScore,OfficeScore,EditingScore
-MB001,ASUS B760-PLUS WIFI,CY_MB,899,"Intel B760 ATX (2023). Gaming/office/editing. LGA1700, DDR5, PCIe 4.0. 4x RAM slots. M.2 heatsinks.",ASUS,b760_plus.jpg,LGA1700,DDR5,ATX,7,4,2023,4,75,,7,8,7
-MB002,MSI PRO B760M-A WIFI,CY_MB,699,"Intel B760 Micro-ATX (2023). Office/budget. LGA1700, DDR4, PCIe 4.0. 2x RAM slots.",MSI,b760m_pro.jpg,LGA1700,DDR4,Micro-ATX,6,2,2023,4,65,,6,8,6
-MB003,MSI B550-A PRO,CY_MB,599,"AMD B550 ATX (2020). Gaming/value. AM4, DDR4, PCIe 4.0. 4x RAM slots.",MSI,b550_pro.jpg,AM4,DDR4,ATX,6,4,2020,4,68,,7,7,7
-MB004,ASRock B650M Pro RS,CY_MB,999,"AMD B650 Micro-ATX (2023). Gaming/editing. AM5, DDR5, PCIe 5.0. 4x RAM slots.",ASRock,b650m_rs.jpg,AM5,DDR5,Micro-ATX,8,4,2023,5,82,,8,8,9
-MB005,Gigabyte B450M DS3H,CY_MB,399,"AMD B450 Micro-ATX (2019). Budget/office. AM4, DDR4, PCIe 3.0. 2x RAM slots.",Gigabyte,b450m_ds3h.jpg,AM4,DDR4,Micro-ATX,5,2,2019,4,55,,5,7,5
-MB006,ASRock B560M Pro4,CY_MB,449,"Intel B560 Micro-ATX (2021). Budget. LGA1200, DDR4, PCIe 4.0. 4x RAM slots.",ASRock,b560m_pro4.jpg,LGA1200,DDR4,Micro-ATX,6,4,2021,4,62,,6,7,6
-CPU001,Intel Core i3-12100F,CY_CPU,449,"4-core 8-thread (2022). Budget gaming/office. LGA1700. 1080p gaming, light editing.",Intel,i3_12100f.jpg,LGA1700,,,6,,2022,4,52,58,6,8,5
-CPU002,Intel Core i5-13400F,CY_CPU,999,"10-core 16-thread (2023). Mid-range gaming/editing. LGA1700. 1080p-1440p gaming.",Intel,i5_13400f.jpg,LGA1700,,,8,,2023,5,78,65,8,8,8
-CPU003,Intel Core i7-13700K,CY_CPU,1899,"16-core 24-thread (2023). High-end. LGA1700. 4K gaming, heavy editing.",Intel,i7_13700k.jpg,LGA1700,,,10,,2023,5,95,125,10,9,10
-CPU004,Ryzen 5 5500,CY_CPU,449,"6-core 12-thread (2022). Budget. AM4. 1080p gaming, office.",AMD,r5_5500.jpg,AM4,,,6,,2022,4,55,65,6,8,6
-CPU005,Ryzen 5 5600,CY_CPU,699,"6-core 12-thread (2022). Value gaming. AM4. 1080p gaming, light editing.",AMD,r5_5600.jpg,AM4,,,7,,2022,5,72,65,7,8,7
-CPU006,Ryzen 5 3600,CY_CPU,499,"6-core 12-thread (2019). Budget/older. AM4. 1080p gaming, office.",AMD,r5_3600.jpg,AM4,,,5,,2019,4,58,65,6,7,6
-CPU007,Ryzen 7 7700X,CY_CPU,1699,"8-core 16-thread (2023). High-end. AM5. 4K gaming, content creation.",AMD,r7_7700x.jpg,AM5,,,9,,2023,5,92,105,9,9,10
-CPU008,Intel Core i5-10400F,CY_CPU,499,"6-core 12-thread (2020). Budget/older. LGA1200. 1080p gaming, office.",Intel,i5_10400f.jpg,LGA1200,,,5,,2020,4,55,65,6,7,5
-GPU001,GTX 1650 4GB,CY_GPU,699,"4GB GDDR6 (2019). Budget. 1080p low-med gaming, office.",NVIDIA,gtx1650.jpg,,,5,,2019,4,45,75,5,7,4
-GPU002,RX 6500 XT 4GB,CY_GPU,799,"4GB GDDR6 (2022). Budget. 1080p gaming, PCIe 4.0.",AMD,rx6500xt.jpg,,,5,,2022,4,48,107,5,6,4
-GPU003,RX 6600 8GB,CY_GPU,1199,"8GB GDDR6 (2021). Mid-range value. 1080p high, 1440p med gaming.",AMD,rx6600.jpg,,,7,,2021,5,68,132,7,6,6
-GPU004,RTX 4060 8GB,CY_GPU,1499,"8GB GDDR6 (2023). Mid-range. 1080p-1440p gaming, DLSS3.",NVIDIA,rtx4060.jpg,,,8,,2023,5,75,115,8,6,7
-GPU005,RTX 4070 12GB,CY_GPU,2599,"12GB GDDR6X (2023). High-end. 1440p-4K gaming, editing.",NVIDIA,rtx4070.jpg,,,10,,2023,5,92,200,10,7,9
-GPU006,RX 7800 XT 16GB,CY_GPU,2499,"16GB GDDR6 (2023). High-end. 1440p-4K gaming, content creation.",AMD,rx7800xt.jpg,,,9,,2023,5,90,263,9,7,9
-GPU007,RTX 3060 12GB,CY_GPU,1299,"12GB GDDR6 (2021). Mid-range. 1080p-1440p, editing.",NVIDIA,rtx3060.jpg,,,7,,2021,5,70,170,7,6,8
-RAM001,Kingston 8GB DDR4 3200MHz,CY_RAM,149,"8GB DDR4 (budget). Office, light use.",Kingston,kingston8ddr4.jpg,,DDR4,,6,,,4,35,,4,7,3
-RAM002,Corsair 16GB DDR4 3200MHz,CY_RAM,299,"16GB DDR4 (2022). Gaming/office. 1080p gaming.",Corsair,corsair16ddr4.jpg,,DDR4,,6,,2022,5,55,,6,8,6
-RAM003,Kingston 16GB DDR5 5200MHz,CY_RAM,399,"16GB DDR5 (2023). Mid-range. DDR5 performance.",Kingston,kingston16ddr5.jpg,,DDR5,,7,,2023,5,65,,7,8,7
-RAM004,Corsair 32GB DDR4 3600MHz,CY_RAM,599,"32GB DDR4 (2022). Gaming/editing. High capacity.",Corsair,corsair32ddr4.jpg,,DDR4,,8,,2022,5,75,,8,8,9
-RAM005,Kingston 32GB DDR5 6000MHz,CY_RAM,799,"32GB DDR5 (2023). High-end. Content creation.",Kingston,kingston32ddr5.jpg,,DDR5,,9,,2023,5,85,,9,8,10
-RAM006,G.Skill 16GB DDR4 2666MHz,CY_RAM,229,"16GB DDR4 (budget). Office, basic use.",G.Skill,gskill16ddr4.jpg,,DDR4,,5,,,4,45,,5,7,4
-ST001,Kingston NV2 500GB,CY_STORAGE,199,"500GB Gen4 NVMe (2022). Budget. Office, light gaming.",Kingston,nv2_500.jpg,,,5,,2022,4,50,,5,7,4
-ST002,Samsung 970 EVO 1TB,CY_STORAGE,499,"1TB Gen3 NVMe (2021). Mid-range. Gaming, editing.",Samsung,970evo.jpg,,,8,,2021,5,72,,8,7,8
-ST003,WD SN770 1TB,CY_STORAGE,399,"1TB Gen4 NVMe (2022). Value. Gaming, office.",Western Digital,sn770.jpg,,,7,,2022,5,68,,7,7,7
-ST004,Samsung 980 PRO 2TB,CY_STORAGE,899,"2TB Gen4 NVMe (2022). High-end. 4K editing, heavy workloads.",Samsung,980pro.jpg,,,9,,2022,5,88,,9,7,10
-ST005,Crucial P3 1TB,CY_STORAGE,329,"1TB Gen3 NVMe (2022). Budget. Gaming, office.",Crucial,p3_1tb.jpg,,,6,,2022,4,60,,6,7,6
-ST006,WD Blue SN580 2TB,CY_STORAGE,649,"2TB Gen4 NVMe (2024). Mid-high. Content creation.",Western Digital,sn580_2tb.jpg,,,8,,2024,5,80,,8,7,9
-PSU001,FSP Hexa 550W 80+ White,CY_PSU,199,"550W (budget). Office, basic builds.",FSP,hexa550.jpg,,,4,,,3,40,,4,6,4
-PSU002,Corsair 650W 80+ Bronze,CY_PSU,399,"650W (2021). Mid-range. Gaming builds.",Corsair,corsair650.jpg,,,6,,2021,4,60,,6,7,6
-PSU003,Cooler Master 750W 80+ Gold,CY_PSU,599,"750W (2022). Mid-high. Gaming, editing.",Cooler Master,cm750.jpg,,,8,,2022,5,78,,8,7,8
-PSU004,Seasonic 850W 80+ Gold,CY_PSU,799,"850W (2022). High-end. High-power GPUs.",Seasonic,seasonic850.jpg,,,9,,2022,5,88,,9,7,9
-PSU005,be quiet! 750W 80+ Gold,CY_PSU,649,"750W (2023). Quiet, efficient. Gaming/editing.",be quiet,bq750.jpg,,,8,,2023,5,82,,8,7,8
-PSU006,Thermaltake 550W 80+ Bronze,CY_PSU,249,"550W (budget). Office, entry gaming.",Thermaltake,tt550.jpg,,,5,,,4,50,,5,6,5
-CASE001,NZXT H5 Flow,CY_CASE,399,"ATX Mid Tower (2022). Gaming. Good airflow.",NZXT,nzxth5.jpg,,,ATX,7,,2022,5,75,,8,6,7
-CASE002,Cooler Master TD300,CY_CASE,299,"Micro-ATX (2021). Compact. Office, SFF.",Cooler Master,td300.jpg,,,Micro-ATX,6,,2021,4,65,,6,7,6
-CASE003,Lian Li O11 Dynamic,CY_CASE,599,"ATX (2020). Premium. Showcase, water cooling.",Lian Li,o11.jpg,,,ATX,9,,2020,5,88,,9,5,8
-CASE004,Tecware Nexus M,CY_CASE,199,"Micro-ATX (budget). Office, value build.",Tecware,nexusm.jpg,,,Micro-ATX,5,,,4,55,,5,7,5
+hardwareId,Name,CategoryId,Price,Detail,Brand,Picture,Socket,DdrType,FormFactor,Special,RamSlots,ReleaseYear,Rating,PerformanceScore,PowerConsumption,GamingScore,OfficeScore,EditingScore,Reference
+MB001,ASUS B760-PLUS WIFI,2,899,"Intel B760 ATX (2023). Gaming/office/editing. LGA1700, DDR5, PCIe 4.0. 4x RAM slots. M.2 heatsinks.",ASUS,b760_plus.jpg,LGA1700,DDR5,ATX,7,4,2023,4,75,,7,8,7,
+MB002,MSI PRO B760M-A WIFI,2,699,"Intel B760 Micro-ATX (2023). Office/budget. LGA1700, DDR4, PCIe 4.0. 2x RAM slots.",MSI,b760m_pro.jpg,LGA1700,DDR4,Micro-ATX,6,2,2023,4,65,,6,8,6,
+MB003,MSI B550-A PRO,2,599,"AMD B550 ATX (2020). Gaming/value. AM4, DDR4, PCIe 4.0. 4x RAM slots.",MSI,b550_pro.jpg,AM4,DDR4,ATX,6,4,2020,4,68,,7,7,7,
+MB004,ASRock B650M Pro RS,2,999,"AMD B650 Micro-ATX (2023). Gaming/editing. AM5, DDR5, PCIe 5.0. 4x RAM slots.",ASRock,b650m_rs.jpg,AM5,DDR5,Micro-ATX,8,4,2023,5,82,,8,8,9,
+MB005,Gigabyte B450M DS3H,2,399,"AMD B450 Micro-ATX (2019). Budget/office. AM4, DDR4, PCIe 3.0. 2x RAM slots.",Gigabyte,b450m_ds3h.jpg,AM4,DDR4,Micro-ATX,5,2,2019,4,55,,5,7,5,
+MB006,ASRock B560M Pro4,2,449,"Intel B560 Micro-ATX (2021). Budget. LGA1200, DDR4, PCIe 4.0. 4x RAM slots.",ASRock,b560m_pro4.jpg,LGA1200,DDR4,Micro-ATX,6,4,2021,4,62,,6,7,6,
+CPU001,Intel Core i3-12100F,1,449,"4-core 8-thread (2022). Budget gaming/office. LGA1700. 1080p gaming, light editing.",Intel,i3_12100f.jpg,LGA1700,,,6,,2022,4,52,58,6,8,5,
+CPU002,Intel Core i5-13400F,1,999,"10-core 16-thread (2023). Mid-range gaming/editing. LGA1700. 1080p-1440p gaming.",Intel,i5_13400f.jpg,LGA1700,,,8,,2023,5,78,65,8,8,8,
+CPU003,Intel Core i7-13700K,1,1899,"16-core 24-thread (2023). High-end. LGA1700. 4K gaming, heavy editing.",Intel,i7_13700k.jpg,LGA1700,,,10,,2023,5,95,125,10,9,10,
+CPU004,Ryzen 5 5500,1,449,"6-core 12-thread (2022). Budget. AM4. 1080p gaming, office.",AMD,r5_5500.jpg,AM4,,,6,,2022,4,55,65,6,8,6,
+CPU005,Ryzen 5 5600,1,699,"6-core 12-thread (2022). Value gaming. AM4. 1080p gaming, light editing.",AMD,r5_5600.jpg,AM4,,,7,,2022,5,72,65,7,8,7,
+CPU006,Ryzen 5 3600,1,499,"6-core 12-thread (2019). Budget/older. AM4. 1080p gaming, office.",AMD,r5_3600.jpg,AM4,,,5,,2019,4,58,65,6,7,6,
+CPU007,Ryzen 7 7700X,1,1699,"8-core 16-thread (2023). High-end. AM5. 4K gaming, content creation.",AMD,r7_7700x.jpg,AM5,,,9,,2023,5,92,105,9,9,10,
+CPU008,Intel Core i5-10400F,1,499,"6-core 12-thread (2020). Budget/older. LGA1200. 1080p gaming, office.",Intel,i5_10400f.jpg,LGA1200,,,5,,2020,4,55,65,6,7,5,
+GPU001,GTX 1650 4GB,3,699,"4GB GDDR6 (2019). Budget. 1080p low-med gaming, office.",NVIDIA,gtx1650.jpg,,,5,,2019,4,45,75,5,7,4,
+GPU002,RX 6500 XT 4GB,3,799,"4GB GDDR6 (2022). Budget. 1080p gaming, PCIe 4.0.",AMD,rx6500xt.jpg,,,5,,2022,4,48,107,5,6,4,
+GPU003,RX 6600 8GB,3,1199,"8GB GDDR6 (2021). Mid-range value. 1080p high, 1440p med gaming.",AMD,rx6600.jpg,,,7,,2021,5,68,132,7,6,6,
+GPU004,RTX 4060 8GB,3,1499,"8GB GDDR6 (2023). Mid-range. 1080p-1440p gaming, DLSS3.",NVIDIA,rtx4060.jpg,,,8,,2023,5,75,115,8,6,7,
+GPU005,RTX 4070 12GB,3,2599,"12GB GDDR6X (2023). High-end. 1440p-4K gaming, editing.",NVIDIA,rtx4070.jpg,,,10,,2023,5,92,200,10,7,9,
+GPU006,RX 7800 XT 16GB,3,2499,"16GB GDDR6 (2023). High-end. 1440p-4K gaming, content creation.",AMD,rx7800xt.jpg,,,9,,2023,5,90,263,9,7,9,
+GPU007,RTX 3060 12GB,3,1299,"12GB GDDR6 (2021). Mid-range. 1080p-1440p, editing.",NVIDIA,rtx3060.jpg,,,7,,2021,5,70,170,7,6,8,
+RAM001,Kingston 8GB DDR4 3200MHz,4,149,"8GB DDR4 (budget). Office, light use.",Kingston,kingston8ddr4.jpg,,DDR4,,6,,,4,35,,4,7,3,
+RAM002,Corsair 16GB DDR4 3200MHz,4,299,"16GB DDR4 (2022). Gaming/office. 1080p gaming.",Corsair,corsair16ddr4.jpg,,DDR4,,6,,2022,5,55,,6,8,6,
+RAM003,Kingston 16GB DDR5 5200MHz,4,399,"16GB DDR5 (2023). Mid-range. DDR5 performance.",Kingston,kingston16ddr5.jpg,,DDR5,,7,,2023,5,65,,7,8,7,
+RAM004,Corsair 32GB DDR4 3600MHz,4,599,"32GB DDR4 (2022). Gaming/editing. High capacity.",Corsair,corsair32ddr4.jpg,,DDR4,,8,,2022,5,75,,8,8,9,
+RAM005,Kingston 32GB DDR5 6000MHz,4,799,"32GB DDR5 (2023). High-end. Content creation.",Kingston,kingston32ddr5.jpg,,DDR5,,9,,2023,5,85,,9,8,10,
+RAM006,G.Skill 16GB DDR4 2666MHz,4,229,"16GB DDR4 (budget). Office, basic use.",G.Skill,gskill16ddr4.jpg,,DDR4,,5,,,4,45,,5,7,4,
+ST001,Kingston NV2 500GB,5,199,"500GB Gen4 NVMe (2022). Budget. Office, light gaming.",Kingston,nv2_500.jpg,,,5,,2022,4,50,,5,7,4,
+ST002,Samsung 970 EVO 1TB,5,499,"1TB Gen3 NVMe (2021). Mid-range. Gaming, editing.",Samsung,970evo.jpg,,,8,,2021,5,72,,8,7,8,
+ST003,WD SN770 1TB,5,399,"1TB Gen4 NVMe (2022). Value. Gaming, office.",Western Digital,sn770.jpg,,,7,,2022,5,68,,7,7,7,
+ST004,Samsung 980 PRO 2TB,5,899,"2TB Gen4 NVMe (2022). High-end. 4K editing, heavy workloads.",Samsung,980pro.jpg,,,9,,2022,5,88,,9,7,10,
+ST005,Crucial P3 1TB,5,329,"1TB Gen3 NVMe (2022). Budget. Gaming, office.",Crucial,p3_1tb.jpg,,,6,,2022,4,60,,6,7,6,
+ST006,WD Blue SN580 2TB,5,649,"2TB Gen4 NVMe (2024). Mid-high. Content creation.",Western Digital,sn580_2tb.jpg,,,8,,2024,5,80,,8,7,9,
+PSU001,FSP Hexa 550W 80+ White,6,199,"550W (budget). Office, basic builds.",FSP,hexa550.jpg,,,,4,,,3,40,,4,6,4,
+PSU002,Corsair 650W 80+ Bronze,6,399,"650W (2021). Mid-range. Gaming builds.",Corsair,corsair650.jpg,,,,6,,2021,4,60,,6,7,6,
+PSU003,Cooler Master 750W 80+ Gold,6,599,"750W (2022). Mid-high. Gaming, editing.",Cooler Master,cm750.jpg,,,,8,,2022,5,78,,8,7,8,
+PSU004,Seasonic 850W 80+ Gold,6,799,"850W (2022). High-end. High-power GPUs.",Seasonic,seasonic850.jpg,,,,9,,2022,5,88,,9,7,9,
+PSU005,be quiet! 750W 80+ Gold,6,649,"750W (2023). Quiet, efficient. Gaming/editing.",be quiet,bq750.jpg,,,,8,,2023,5,82,,8,7,8,
+PSU006,Thermaltake 550W 80+ Bronze,6,249,"550W (budget). Office, entry gaming.",Thermaltake,tt550.jpg,,,,5,,,4,50,,5,6,5,
+COOL001,Noctua NH-D15,7,109.99,"Dual tower, 140mm fans.",Noctua,noctua_nhd15.jpg,,,9,,,5,85,,9,7,9,
+COOL002,Cooler Master Hyper 212,7,44.99,"Single tower, 120mm fan.",Cooler Master,hyper212.jpg,,,6,,,4,60,,6,7,6,
+COOL003,be quiet! Dark Rock Pro 4,7,89.99,"Dual tower, 135mm fan.",be quiet,darkrockpro4.jpg,,,8,,,5,80,,8,7,8,
+CASE001,NZXT H5 Flow,8,399,"ATX Mid Tower (2022). Gaming. Good airflow.",NZXT,nzxth5.jpg,,,ATX,7,,2022,5,75,,8,6,7,
+CASE002,Cooler Master TD300,8,299,"Micro-ATX (2021). Compact. Office, SFF.",Cooler Master,td300.jpg,,,Micro-ATX,6,,2021,4,65,,6,7,6,
+CASE003,Lian Li O11 Dynamic,8,599,"ATX (2020). Premium. Showcase, water cooling.",Lian Li,o11.jpg,,,ATX,9,,2020,5,88,,9,5,8,
+CASE004,Tecware Nexus M,8,199,"Micro-ATX (budget). Office, value build.",Tecware,nexusm.jpg,,,Micro-ATX,5,,,4,55,,5,7,5,

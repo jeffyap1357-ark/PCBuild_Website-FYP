@@ -674,6 +674,12 @@ a.button.secondary:hover {
     }
 }
 
+.hardware-card-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
 .hardware-card {
     display: flex;
     flex-direction: column;
@@ -699,6 +705,16 @@ a.button.secondary:hover {
     align-items: center;
     justify-content: center;
     overflow: hidden;
+}
+
+.hardware-card-image-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
 }
 
 .hardware-card-image img {
@@ -744,6 +760,23 @@ a.button.secondary:hover {
     margin-top: auto;
 }
 
+.hardware-card-reference {
+    display: inline-block;
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-align: center;
+    background: var(--accent);
+    color: var(--bg-dark);
+    border-radius: 6px;
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+.hardware-card-reference:hover {
+    opacity: 0.9;
+}
+
 /* Hardware Detail ------------------------------------------------------------ */
 
 .hardware-detail-layout {
@@ -764,6 +797,15 @@ a.button.secondary:hover {
     align-items: center;
     justify-content: center;
     overflow: hidden;
+}
+
+.hardware-detail-image-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
 }
 
 .hardware-detail-picture {
@@ -1194,6 +1236,18 @@ a.button.secondary:hover {
 
 /* Learning & Guide ----------------------------------------------------------- */
 
+.guide-page-title {
+    margin-bottom: 0.25em;
+    font-size: 1.75rem;
+}
+
+.guide-intro {
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    max-width: 640px;
+}
+
 .guide-list {
     list-style: none;
     padding: 0;
@@ -1203,7 +1257,7 @@ a.button.secondary:hover {
 .guide-list li {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 12px;
     padding: 14px 18px;
     border: 1px solid var(--border);
     margin-bottom: 10px;
@@ -1224,6 +1278,25 @@ a.button.secondary:hover {
     color: var(--accent);
 }
 
+.guide-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: var(--bg-elevated);
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.guide-read .guide-num {
+    background: var(--accent);
+    color: #fff;
+}
+
 .guide-read {
     background: var(--accent-dim) !important;
     border-color: var(--accent-border) !important;
@@ -1232,6 +1305,23 @@ a.button.secondary:hover {
 .guide-status {
     width: 24px;
     text-align: center;
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.guide-read .guide-status {
+    color: var(--accent);
+}
+
+.guide-list-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.guide-list-title {
+    font-weight: 600;
+    display: inline-block;
 }
 
 .guide-desc {
@@ -1241,20 +1331,154 @@ a.button.secondary:hover {
     margin-top: 4px;
 }
 
-.guide-content {
+/* Guide detail: navigation */
+.guide-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.guide-nav-bottom {
+    margin-top: 2rem;
+    margin-bottom: 0;
+    padding-top: 1rem;
+    padding-bottom: 0;
+    border-top: 1px solid var(--border);
+    border-bottom: none;
+}
+
+.button-secondary {
+    background: var(--bg-elevated);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+.button-secondary:hover {
+    background: var(--bg-card);
+    border-color: var(--accent-border);
+    color: var(--accent);
+}
+
+/* Guide detail: article */
+.guide-article {
     max-width: 800px;
-    line-height: 1.7;
+}
+
+.guide-header {
+    margin-bottom: 1.5rem;
+}
+
+.guide-title {
+    font-size: 1.5rem;
+    margin: 0 0 0.35em 0;
+    line-height: 1.3;
     color: var(--text);
 }
 
-.guide-content h3,
+.guide-header .guide-desc {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.guide-content {
+    max-width: 100%;
+    line-height: 1.75;
+    color: var(--text);
+    font-size: 1rem;
+}
+
+.guide-content p {
+    margin: 0.75em 0;
+}
+
+.guide-content p:first-of-type {
+    margin-top: 0;
+}
+
+.guide-content h3 {
+    margin: 1.75em 0 0.5em 0;
+    font-size: 1.2rem;
+    color: var(--text);
+    font-weight: 600;
+}
+
+.guide-content h3:first-child {
+    margin-top: 0;
+}
+
 .guide-content h4 {
-    margin-top: 1.4em;
+    margin: 1.25em 0 0.4em 0;
+    font-size: 1.05rem;
+    color: var(--text);
+    font-weight: 600;
+}
+
+.guide-content ul,
+.guide-content ol {
+    margin: 0.6em 0;
+    padding-left: 1.5em;
+}
+
+.guide-content li {
+    margin: 0.35em 0;
+}
+
+.guide-content strong {
+    font-weight: 600;
     color: var(--text);
 }
 
-.guide-content ul {
-    margin: 0.5em 0;
+.guide-content em {
+    font-style: italic;
+}
+
+.guide-content .guide-fig,
+.guide-content figure {
+    margin: 1.25em 0;
+    padding: 0;
+}
+
+.guide-content .guide-fig img,
+.guide-content figure img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+}
+
+.guide-content .guide-fig figcaption,
+.guide-content figure figcaption {
+    margin-top: 0.5em;
+    font-size: 0.9em;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+/* Print: hide nav and buttons, keep article readable */
+@media print {
+    .guide-nav,
+    .button,
+    .guide-page-title,
+    .guide-intro {
+        display: none !important;
+    }
+    .guide-article {
+        max-width: none;
+    }
+    .guide-content {
+        font-size: 11pt;
+        line-height: 1.6;
+    }
+    .guide-title {
+        font-size: 1.4rem;
+    }
 }
 
 /* Recommend ------------------------------------------------------------------ */
@@ -1452,17 +1676,118 @@ a.button.secondary:hover {
     font-size: 0.9em;
 }
 
-/* Build Configure Page ------------------------------------------------------ */
+/* Build Configure Page – inline: left = dropdowns, middle = preview, right = total */
 
 .build-page {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(220px, 280px) 1fr minmax(260px, 320px);
     gap: 24px;
     align-items: start;
+    position: relative;
+    min-height: 60vh;
+}
+
+.build-select-col {
+    padding: 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    min-width: 0;
+}
+
+.build-select-title {
+    margin: 0 0 16px 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.build-select-section {
+    margin-bottom: 14px;
+}
+
+.build-select-section:last-child {
+    margin-bottom: 0;
+}
+
+.build-select-hint {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin: -4px 0 8px 0;
+}
+
+.build-select-row {
+    margin-bottom: 10px;
+}
+
+.build-select-row:last-child {
+    margin-bottom: 0;
+}
+
+.build-select-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+}
+
+.build-select {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    color: var(--text);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 32px;
+}
+
+.build-select:hover {
+    border-color: var(--accent-border);
+}
+
+.build-select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-dim);
+}
+
+.build-select option:disabled {
+    color: var(--text-muted);
 }
 
 .build-main {
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.build-main > .build-section,
+.build-main > .build-actions {
+    width: 100%;
+    max-width: 720px;
+}
+
+.build-middle {
+    min-width: 0;
+    position: sticky;
+    top: 20px;
+}
+
+.build-main .build-page-title {
+    width: 100%;
+    text-align: center;
 }
 
 .build-page-title {
@@ -1530,48 +1855,321 @@ a.button.secondary:hover {
     margin: -8px 0 16px 0;
 }
 
-.build-category-tabs {
-    display: flex;
-    width: 100%;
-    gap: 0;
-}
-
-.build-category-tab {
-    flex: 1 1 0;
-    padding: 12px 6px;
+.build-assessment {
+    margin: 16px 0;
+    padding: 14px 18px;
     background: var(--bg-elevated);
-    color: var(--text-muted);
     border: 1px solid var(--border);
-    border-radius: 0;
-    font: inherit;
-    font-size: 0.9rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-    min-width: 0;
+    border-radius: 8px;
+    border-left: 4px solid var(--accent);
 }
 
-.build-category-tab:first-child {
-    border-radius: 8px 0 0 8px;
-}
-
-.build-category-tab:last-child {
-    border-radius: 0 8px 8px 0;
-}
-
-.build-category-tab:not(:first-child) {
-    border-left: none;
-}
-
-.build-category-tab:hover {
+.build-assessment-comment {
+    margin: 8px 0 4px 0;
     color: var(--text);
-    border-color: var(--accent-border);
 }
 
-.build-category-tab.active {
-    background: var(--accent);
-    color: var(--bg-dark);
-    border-color: var(--accent);
+.build-assessment-detail {
+    margin: 0;
+    font-size: 0.9em;
+    color: var(--text-muted);
+}
+
+/* Build Preview – case + motherboard + components */
+.build-diagram-section {
+    margin-bottom: 24px;
+    width: 100%;
+    max-width: 720px;
+}
+
+.build-diagram-wrap.build-diagram-case-view {
+    position: relative;
+    width: 100%;
+    max-width: 720px;
+    aspect-ratio: 4/3;
+    margin: 0 auto;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--bg-elevated);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+
+.build-diagram-bg.build-diagram-case {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.build-diagram-display-box.build-display-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.build-diagram-display-box .build-diagram-box {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+#build-case-box-mb {
+    position: absolute;
+    z-index: 2;
+}
+
+#build-case-box-mb .build-diagram-mb-fixed {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#build-case-box-mb .build-diagram-mb-fixed img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+#build-case-box-cpu,
+#build-case-box-ram1,
+#build-case-box-ram2,
+#build-case-box-ram3,
+#build-case-box-ram4,
+#build-case-box-gpu,
+#build-case-box-storage,
+#build-case-box-cooler {
+    position: absolute;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#build-case-box-cpu .build-diagram-component,
+#build-case-box-ram1 .build-diagram-component,
+#build-case-box-ram2 .build-diagram-component,
+#build-case-box-ram3 .build-diagram-component,
+#build-case-box-ram4 .build-diagram-component,
+#build-case-box-gpu .build-diagram-component,
+#build-case-box-storage .build-diagram-component,
+#build-case-box-cooler .build-diagram-component {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#build-case-box-cpu img,
+#build-case-box-ram1 img,
+#build-case-box-ram2 img,
+#build-case-box-ram3 img,
+#build-case-box-ram4 img,
+#build-case-box-gpu img,
+#build-case-box-storage img,
+#build-case-box-cooler img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+#build-case-box-psu {
+    z-index: 2;
+}
+
+#build-case-box-psu .build-diagram-component img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+/* Per-case layout: MB and PSU position/size (default) */
+.build-diagram-case-view[data-case="default"] #build-case-box-mb,
+.build-diagram-case-view:not([data-case]) #build-case-box-mb {
+    left: 12%;
+    top: 18%;
+    width: 52%;
+    height: 64%;
+}
+
+.build-diagram-case-view[data-case="default"] #build-case-box-psu,
+.build-diagram-case-view:not([data-case]) #build-case-box-psu {
+    left: 68%;
+    top: 58%;
+    width: 22%;
+    height: 28%;
+}
+
+.build-diagram-case-view[data-case="td300"] #build-case-box-mb {
+    left: 10%;
+    top: 15%;
+    width: 55%;
+    height: 68%;
+}
+
+.build-diagram-case-view[data-case="td300"] #build-case-box-psu {
+    left: 68%;
+    top: 55%;
+    width: 24%;
+    height: 30%;
+}
+
+.build-diagram-case-view[data-case="h5flow"] #build-case-box-mb {
+    left: 14%;
+    top: 20%;
+    width: 50%;
+    height: 62%;
+}
+
+.build-diagram-case-view[data-case="h5flow"] #build-case-box-psu {
+    left: 70%;
+    top: 60%;
+    width: 20%;
+    height: 26%;
+}
+
+.build-diagram-case-view[data-case="nexusm"] #build-case-box-mb {
+    left: 11%;
+    top: 16%;
+    width: 54%;
+    height: 66%;
+}
+
+.build-diagram-case-view[data-case="nexusm"] #build-case-box-psu {
+    left: 67%;
+    top: 57%;
+    width: 23%;
+    height: 28%;
+}
+
+/* B550 motherboard: larger MB box in preview so it doesn’t look small */
+.build-diagram-case-view[data-mb-layout="b550"] #build-case-box-mb {
+    left: 10%;
+    top: 3%;
+    width: 58%;
+    height: 72%;
+}
+
+/* Per-motherboard layout: component slots (default) */
+.build-diagram-case-view[data-mb-layout="default"] #build-case-box-cpu,
+.build-diagram-case-view:not([data-mb-layout]) #build-case-box-cpu {
+    left: 28%;
+    top: 8%;
+    width: 44%;
+    height: 22%;
+}
+
+/* Default: 4 RAM slots, each its own box (vertical stack) */
+.build-diagram-case-view[data-mb-layout="default"] #build-case-box-ram1,
+.build-diagram-case-view:not([data-mb-layout]) #build-case-box-ram1 { left: 8%; top: 35%; width: 22%; height: 9%; }
+.build-diagram-case-view[data-mb-layout="default"] #build-case-box-ram2,
+.build-diagram-case-view:not([data-mb-layout]) #build-case-box-ram2 { left: 8%; top: 44%; width: 22%; height: 9%; }
+.build-diagram-case-view[data-mb-layout="default"] #build-case-box-ram3,
+.build-diagram-case-view:not([data-mb-layout]) #build-case-box-ram3 { left: 8%; top: 53%; width: 22%; height: 9%; }
+.build-diagram-case-view[data-mb-layout="default"] #build-case-box-ram4,
+.build-diagram-case-view:not([data-mb-layout]) #build-case-box-ram4 { left: 8%; top: 62%; width: 22%; height: 9%; }
+
+.build-diagram-case-view[data-mb-layout="default"] #build-case-box-gpu,
+.build-diagram-case-view:not([data-mb-layout]) #build-case-box-gpu {
+    left: 35%;
+    top: 55%;
+    width: 58%;
+    height: 32%;
+}
+
+.build-diagram-case-view[data-mb-layout="default"] #build-case-box-storage,
+.build-diagram-case-view:not([data-mb-layout]) #build-case-box-storage {
+    left: 8%;
+    top: 78%;
+    width: 28%;
+    height: 18%;
+}
+
+.build-diagram-case-view[data-mb-layout="default"] #build-case-box-cooler,
+.build-diagram-case-view:not([data-mb-layout]) #build-case-box-cooler {
+    left: 40%;
+    top: 2%;
+    width: 20%;
+    height: 18%;
+}
+
+/* B760M: 4 RAM slots, each its own box */
+.build-diagram-case-view[data-mb-layout="b760m"] #build-case-box-cpu { left: 45%; top: 24.5%; width: 16%; height: 20%; }
+.build-diagram-case-view[data-mb-layout="b760m"] #build-case-box-ram1 { left: 62.2%; top: 10%; width: 25%; height: 52%; }
+.build-diagram-case-view[data-mb-layout="b760m"] #build-case-box-ram2 { left: 65.5%; top: 10%; width: 25%; height: 52%; }
+.build-diagram-case-view[data-mb-layout="b760m"] #build-case-box-ram3 { left: 68.8%; top: 10%; width: 25%; height: 52%; }
+.build-diagram-case-view[data-mb-layout="b760m"] #build-case-box-ram4 { left: 72.2%; top: 10%; width: 25%; height: 52%; }
+.build-diagram-case-view[data-mb-layout="b760m"] #build-case-box-gpu { left: 7%; top: 52%; width: 60%; height: 34%; }
+.build-diagram-case-view[data-mb-layout="b760m"] #build-case-box-storage { left: 25%; top: 50%; width: 28%; height: 20%; }
+.build-diagram-case-view[data-mb-layout="b760m"] #build-case-box-cooler { left: 43%; top: 23%; width: 20%; height: 25%; }
+
+/* B760 (ATX): 4 RAM slots, each its own box */
+.build-diagram-case-view[data-mb-layout="b760"] #build-case-box-cpu { left: 28%; top: 22%; width: 48%; height: 20%; }
+.build-diagram-case-view[data-mb-layout="b760"] #build-case-box-ram1 { left: 66.5%; top: 6%; width: 15%; height: 52%; }
+.build-diagram-case-view[data-mb-layout="b760"] #build-case-box-ram2 { left: 70.3%; top: 6%; width: 15%; height: 52%; }
+.build-diagram-case-view[data-mb-layout="b760"] #build-case-box-ram3 { left: 73.7%; top: 6%; width: 15%; height: 52%; }
+.build-diagram-case-view[data-mb-layout="b760"] #build-case-box-ram4 { left: 77%; top: 6%; width: 15%; height: 52%; }
+.build-diagram-case-view[data-mb-layout="b760"] #build-case-box-gpu { left: 4%; top: 44%; width: 62%; height: 54%; }
+.build-diagram-case-view[data-mb-layout="b760"] #build-case-box-storage { left: 29%; top: 47%; width: 26%; height: 26%; }
+.build-diagram-case-view[data-mb-layout="b760"] #build-case-box-cooler { left: 25%; top: 19%; width: 55%; height: 23%; }
+
+/* B650M: 4 RAM slots, each its own box */
+.build-diagram-case-view[data-mb-layout="b650m"] #build-case-box-cpu { left: 36.05%; top: 21%; width: 36%; height: 18%; }
+.build-diagram-case-view[data-mb-layout="b650m"] #build-case-box-ram1 { left: 63.4%; top: 8%; width: 15%; height: 45%; }
+.build-diagram-case-view[data-mb-layout="b650m"] #build-case-box-ram2 { left: 66%; top: 8%; width: 15%; height: 45%; }
+.build-diagram-case-view[data-mb-layout="b650m"] #build-case-box-ram3 { left: 69.4%; top: 8%; width: 15%; height: 45%; }
+.build-diagram-case-view[data-mb-layout="b650m"] #build-case-box-ram4 { left: 72%; top: 8%; width: 15%; height: 45%; }
+.build-diagram-case-view[data-mb-layout="b650m"] #build-case-box-gpu { left: 17%; top: 40%; width: 55%; height: 50%; }
+.build-diagram-case-view[data-mb-layout="b650m"] #build-case-box-storage { left: 34%; top: 46%; width: 29%; height: 15%; }
+.build-diagram-case-view[data-mb-layout="b650m"] #build-case-box-cooler { left: 34%; top: 18%; width: 40%; height: 25%; }
+
+/* B560M: 4 RAM slots, each its own box */
+.build-diagram-case-view[data-mb-layout="b560m"] #build-case-box-cpu { left: 25%; top: 23.5%; width: 60%; height: 20%; }
+.build-diagram-case-view[data-mb-layout="b560m"] #build-case-box-ram1 { left: 70%; top: 5%; width: 15%; height: 56%; }
+.build-diagram-case-view[data-mb-layout="b560m"] #build-case-box-ram2 { left: 73%; top: 5%; width: 15%; height: 56%; }
+.build-diagram-case-view[data-mb-layout="b560m"] #build-case-box-ram3 { left: 76%; top: 5%; width: 15%; height: 56%; }
+.build-diagram-case-view[data-mb-layout="b560m"] #build-case-box-ram4 { left: 79%; top: 5%; width: 15%; height: 56%; }
+.build-diagram-case-view[data-mb-layout="b560m"] #build-case-box-gpu { left: 3%; top: 43%; width: 68%; height: 35%; }
+.build-diagram-case-view[data-mb-layout="b560m"] #build-case-box-storage { left: 23%; top: 67.5%; width: 32%; height: 14%; }
+.build-diagram-case-view[data-mb-layout="b560m"] #build-case-box-cooler { left: 44%; top: 19%; width: 25%; height: 30%; }
+
+/* B550: 4 RAM slots, each its own box */
+.build-diagram-case-view[data-mb-layout="b550"] #build-case-box-cpu { left: 33.2%; top: 23.5%; width: 37%; height: 14%; }
+.build-diagram-case-view[data-mb-layout="b550"] #build-case-box-ram1 { left: 62.5%; top: 10%; width: 15%; height: 41%; }
+.build-diagram-case-view[data-mb-layout="b550"] #build-case-box-ram2 { left: 65%; top: 10%; width: 15%; height: 41%; }
+.build-diagram-case-view[data-mb-layout="b550"] #build-case-box-ram3 { left: 68%; top: 10%; width: 15%; height: 41%; }
+.build-diagram-case-view[data-mb-layout="b550"] #build-case-box-ram4 { left: 71%; top: 10%; width: 15%; height: 41%; }
+.build-diagram-case-view[data-mb-layout="b550"] #build-case-box-gpu { left: 15%; top: 41%; width: 58%; height: 40%; }
+.build-diagram-case-view[data-mb-layout="b550"] #build-case-box-storage { left: 32%; top: 42%; width: 28%; height: 20%; }
+.build-diagram-case-view[data-mb-layout="b550"] #build-case-box-cooler { left: 33%; top: 20%; width: 40%; height: 25%; }
+
+/* B450M – Gigabyte B450M DS3H (red box overlay) */
+.build-diagram-case-view[data-mb-layout="b450m"] #build-case-box-cpu { left: 26%; top: 25%; width: 45%; height: 18%; }
+.build-diagram-case-view[data-mb-layout="b450m"] #build-case-box-cooler { left: 23%; top: 20%; width: 55%; height: 25%;; }
+.build-diagram-case-view[data-mb-layout="b450m"] #build-case-box-storage { left: 30%; top: 58%; width: 29%; height: 20%; }
+.build-diagram-case-view[data-mb-layout="b450m"] #build-case-box-ram1 { left: 63.3%; top: 7%; width: 15%; height: 53%; }
+.build-diagram-case-view[data-mb-layout="b450m"] #build-case-box-ram2 { left: 66.75%; top: 7%; width: 15%; height: 53%; }
+.build-diagram-case-view[data-mb-layout="b450m"] #build-case-box-ram3 { left: 70.2%; top: 7%; width: 15%; height: 53%; }
+.build-diagram-case-view[data-mb-layout="b450m"] #build-case-box-ram4 { left: 73.7%; top: 7%; width: 15%; height: 53%; }
+.build-diagram-case-view[data-mb-layout="b450m"] #build-case-box-gpu { left: 12%; top: 42.5%; width: 60%; height: 70%; }
+
+/* B450: 4 RAM slots, each its own box */
+.build-diagram-case-view[data-mb-layout="b450"] #build-case-box-cpu { left: 26%; top: 12%; width: 48%; height: 20%; }
+.build-diagram-case-view[data-mb-layout="b450"] #build-case-box-ram1 { left: 6%; top: 35%; width: 20%; height: 9%; }
+.build-diagram-case-view[data-mb-layout="b450"] #build-case-box-ram2 { left: 6%; top: 44%; width: 20%; height: 9%; }
+.build-diagram-case-view[data-mb-layout="b450"] #build-case-box-ram3 { left: 6%; top: 53%; width: 20%; height: 9%; }
+.build-diagram-case-view[data-mb-layout="b450"] #build-case-box-ram4 { left: 6%; top: 62%; width: 20%; height: 9%; }
+.build-diagram-case-view[data-mb-layout="b450"] #build-case-box-gpu { left: 32%; top: 58%; width: 62%; height: 28%; }
+.build-diagram-case-view[data-mb-layout="b450"] #build-case-box-storage { left: 8%; top: 82%; width: 26%; height: 14%; }
+.build-diagram-case-view[data-mb-layout="b450"] #build-case-box-cooler { left: 38%; top: 0%; width: 24%; height: 16%; }
+
+.recommend-assessment {
+    margin-top: 12px;
 }
 
 .build-component-section {
@@ -1580,6 +2178,54 @@ a.button.secondary:hover {
 
 .build-component-section.active {
     display: block;
+}
+
+/* Build page: show all dropdown sections in the select column (no single "active" tab) */
+.build-select-col .build-component-section {
+    display: block;
+}
+
+.build-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+}
+
+.build-filter-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.build-filter-buttons {
+    display: flex;
+    gap: 6px;
+}
+
+.build-filter-btn {
+    padding: 8px 14px;
+    background: var(--bg-elevated);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.build-filter-btn:hover {
+    color: var(--text);
+    border-color: var(--accent-border);
+}
+
+.build-filter-btn.active {
+    background: var(--accent);
+    color: var(--bg-dark);
+    border-color: var(--accent);
 }
 
 .build-ram-slots {
@@ -1603,36 +2249,57 @@ a.button.secondary:hover {
 }
 
 .build-ram-slot-list {
-    max-height: 280px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+    max-height: 320px;
+    overflow-y: auto;
 }
 
 .build-component-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 14px;
     max-height: 400px;
     overflow-y: auto;
 }
 
+@media (max-width: 1200px) {
+    .build-component-list {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .build-component-list {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
 .build-component-card {
+    position: relative;
     display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 14px 18px;
+    flex-direction: column;
+    gap: 0;
+    padding: 0;
     background: var(--bg-elevated);
     border: 2px solid var(--border);
-    border-radius: 10px;
+    border-radius: 12px;
     cursor: pointer;
     transition: all 0.2s;
+    overflow: hidden;
 }
 
 .build-component-card:hover {
     border-color: var(--accent-border);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
+/* Selected component: border only, no overlay – choose list stays clear */
 .build-component-card.selected {
     border-color: var(--accent);
-    background: var(--accent-dim);
+    border-width: 2px;
+    box-shadow: 0 0 0 1px var(--accent);
 }
 
 .build-component-card.incompatible {
@@ -1652,11 +2319,9 @@ a.button.secondary:hover {
 }
 
 .build-card-image {
-    width: 64px;
-    height: 64px;
-    flex-shrink: 0;
+    aspect-ratio: 1;
+    width: 100%;
     background: var(--bg-card);
-    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1667,7 +2332,7 @@ a.button.secondary:hover {
     width: 100%;
     height: 100%;
     object-fit: contain;
-    padding: 4px;
+    padding: 12px;
 }
 
 .build-card-noimg {
@@ -1678,29 +2343,41 @@ a.button.secondary:hover {
 .build-card-body {
     flex: 1;
     min-width: 0;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
 .build-card-name {
     font-weight: 600;
+    font-size: 0.9rem;
     color: var(--text);
-    margin-bottom: 2px;
+    margin-bottom: 0;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .build-card-brand {
-    font-size: 0.9em;
+    font-size: 0.8em;
     color: var(--text-muted);
-    margin-bottom: 4px;
+    margin-bottom: 2px;
 }
 
 .build-card-specs {
-    font-size: 0.8em;
+    font-size: 0.75em;
     color: var(--accent);
     margin-bottom: 4px;
 }
 
 .build-card-price {
     font-weight: 700;
+    font-size: 0.95rem;
     color: var(--accent);
+    margin-top: 4px;
 }
 
 .build-actions {
@@ -1716,7 +2393,6 @@ a.button.secondary:hover {
     padding: 20px;
     margin-bottom: 20px;
 }
-
 .build-sidebar-title {
     display: flex;
     align-items: center;
@@ -1880,12 +2556,21 @@ a.button.secondary:hover {
     margin-bottom: 8px;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
     .build-page {
         grid-template-columns: 1fr;
     }
 
+    .build-select-col {
+        order: 1;
+    }
+
+    .build-main {
+        order: 2;
+    }
+
     .build-sidebar {
+        order: 3;
         position: static;
     }
 }
@@ -1933,4 +2618,104 @@ main hr {
     border: none;
     border-top: 1px solid var(--border);
     margin: 1.5em 0;
+}
+
+/* Learning Admin / Material Maker */
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1em 0;
+}
+.admin-table th,
+.admin-table td {
+    padding: 0.5em 0.75em;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+.admin-table th {
+    font-weight: 600;
+    color: var(--text);
+}
+.button.small {
+    padding: 0.25em 0.5em;
+    font-size: 0.9em;
+    margin-right: 0.25em;
+}
+.button.danger {
+    background: var(--danger, #c33);
+    color: #fff;
+}
+.button.danger:hover {
+    filter: brightness(1.1);
+}
+.form-block {
+    margin-bottom: 1.25em;
+}
+.form-block label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.25em;
+}
+.form-block input[type="text"],
+.form-block input[type="number"],
+.form-block textarea {
+    width: 100%;
+    max-width: 32em;
+    padding: 0.5em;
+}
+.form-block .hint {
+    font-size: 0.9em;
+    color: var(--text-muted);
+    margin: 0.25em 0 0.5em;
+}
+.learning-modules-block .module-toolbar {
+    margin-bottom: 0.75em;
+}
+.learning-modules-block .module-toolbar .button {
+    margin-right: 0.5em;
+}
+.modules-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75em;
+}
+.module-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 0.5em 0.75em;
+    align-items: start;
+    padding: 0.75em;
+    background: var(--bg-elevated, #f5f5f5);
+    border-radius: 6px;
+    border: 1px solid var(--border);
+}
+.module-item .module-type {
+    font-size: 0.85em;
+    font-weight: 600;
+    text-transform: capitalize;
+    color: var(--text-muted);
+    grid-column: 1;
+}
+.module-item .module-value,
+.module-item .module-caption {
+    grid-column: 2;
+    min-width: 0;
+}
+.module-item .module-caption {
+    margin-top: 0.25em;
+}
+.module-item .module-actions {
+    grid-column: 3;
+    display: flex;
+    gap: 0.25em;
+}
+.module-item .module-actions .button {
+    min-width: 2em;
+    padding: 0.25em;
+}
+.form-actions {
+    margin-top: 1.5em;
+}
+.form-actions .button {
+    margin-right: 0.5em;
 }

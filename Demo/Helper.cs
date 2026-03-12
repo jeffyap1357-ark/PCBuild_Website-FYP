@@ -7,11 +7,27 @@ using System.Net;
 using System.Security.Claims;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Demo.Models;
 
 namespace Demo;
 
 public class Helper
 {
+    /// <summary>GPU names that are duplicates (same product, different name). Hidden from lists; canonical names like "RTX 4060 8GB" are shown.</summary>
+    public static readonly HashSet<string> GpuDuplicateDisplayNames = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "RTX 4060", "RTX 4070", "RX 6600", "RX 7800 XT"
+    };
+
+    /// <summary>Remove duplicate GPU entries from display (same product, different name). Data stays in DB.</summary>
+    /// <param name="categoryType">When "GPU", filter by duplicate names; optional when list items have Category loaded.</param>
+    public static List<Hardware> FilterDuplicateGpuFromDisplay(List<Hardware> list, string? categoryType = null)
+    {
+        var isGpu = categoryType == "GPU" || list.Count > 0 && list[0].Category?.Type == "GPU";
+        if (!isGpu) return list;
+        return list.Where(h => !GpuDuplicateDisplayNames.Contains(h.Name?.Trim() ?? "")).ToList();
+    }
+
     private readonly IWebHostEnvironment en;
     private readonly IHttpContextAccessor ct;
     private readonly IConfiguration cf;
@@ -79,7 +95,7 @@ public class Helper
 
     private static readonly Dictionary<string, string> HardwareImageMap = new(StringComparer.OrdinalIgnoreCase)
     {
-        ["ASUS B760-PLUS WIFI"] = "b760.png", ["MSI PRO B760M-A WIFI"] = "b760m.png", ["MSI B550-A PRO"] = "b550a.png",
+        ["ASUS B760-PLUS WIFI"] = "b760.png", ["MSI PRO B760M-A WIFI"] = "b760m.png",
         ["ASRock B650M Pro RS"] = "b650mpro.png", ["Intel Core i5-13400F"] = "intel5134.png", ["Intel Core i7-13700K"] = "intel5134.png",
         ["Ryzen 5 5600"] = "r55600.png", ["Ryzen 7 7700X"] = "r77700x.png", ["RTX 4060"] = "rtx4060.png", ["RTX 4070"] = "rtx4070.png",
         ["RX 6600"] = "rx660.png", ["RX 7800 XT"] = "rx780.png", ["Corsair 16GB DDR4 3200MHz"] = "consair16.png",
@@ -101,6 +117,120 @@ public class Helper
             if (name.Contains(kv.Key, StringComparison.OrdinalIgnoreCase))
                 return kv.Value;
         return picture ?? "";
+    }
+
+    // Build page prefers transparent "clean" images from /implant when available.
+    public string GetBuildImagePath(string? picture, string name)
+    {
+        var hardwareFile = GetHardwareImagePath(picture, name);
+        var hardwarePath = string.IsNullOrWhiteSpace(hardwareFile) ? "" : $"hardware/{hardwareFile}";
+        var implantFolder = Path.Combine(en.WebRootPath, "implant");
+
+        if (!Directory.Exists(implantFolder))
+            return hardwarePath;
+
+        var implantFiles = Directory.EnumerateFiles(implantFolder)
+            .Select(Path.GetFileName)
+            .Where(f => !string.IsNullOrWhiteSpace(f))
+            .Cast<string>()
+            .ToList();
+
+        if (implantFiles.Count == 0)
+            return hardwarePath;
+
+        static string Normalize(string s) => Regex.Replace(s.ToLowerInvariant(), "[^a-z0-9]+", "");
+
+        // B550 motherboard: use new image from implant (same filename, replaced file)
+        var nameLower = (name ?? "").ToLowerInvariant();
+        var picLower = (picture ?? "").ToLowerInvariant();
+        if (nameLower.Contains("b550") || picLower.Contains("b550"))
+        {
+            var b550Match = implantFiles.FirstOrDefault(f =>
+            {
+                var n = Normalize(f);
+                return n.Contains("b550") && (n.Contains("removebg") || n.Contains("clean") || n.Contains("usethis"));
+            });
+            if (b550Match != null)
+                return $"implant/{b550Match}";
+        }
+
+        var keys = new List<string>();
+        if (!string.IsNullOrWhiteSpace(hardwareFile))
+            keys.Add(Path.GetFileNameWithoutExtension(hardwareFile));
+        if (!string.IsNullOrWhiteSpace(picture))
+            keys.Add(Path.GetFileNameWithoutExtension(picture));
+        if (!string.IsNullOrWhiteSpace(name))
+        {
+            keys.Add(name);
+            foreach (var word in name.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+                keys.Add(word);
+        }
+
+        var normalizedKeys = keys
+            .Select(Normalize)
+            .Where(k => k.Length >= 3)
+            .Distinct()
+            .ToList();
+
+        string? match = null;
+        foreach (var key in normalizedKeys)
+        {
+            match = implantFiles.FirstOrDefault(f =>
+            {
+                var normalizedFile = Normalize(f);
+                return normalizedFile.Contains(key) &&
+                       (normalizedFile.Contains("removebg") || normalizedFile.Contains("clean") || normalizedFile.Contains("usethis"));
+            });
+            if (match != null) break;
+        }
+
+        return match != null ? $"implant/{match}" : hardwarePath;
+    }
+
+    /// <summary>Layout key for PC case (data-case). Used to position MB + PSU on the case.</summary>
+    public static string GetCaseLayoutKey(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "default";
+        var n = name.ToLowerInvariant();
+        if (n.Contains("td300")) return "td300";
+        if (n.Contains("h5 flow") || n.Contains("h5flow")) return "h5flow";
+        if (n.Contains("nexus") && n.Contains("m")) return "nexusm";
+        return "default";
+    }
+
+    /// <summary>RAM diagram: pic 1–3 by brand (Corsair, G.Skill, Kingston); pic 4 = other. Empty slot shows no image. Name used when brand missing (e.g. Kingston 32GB DDR5 6000MHz).</summary>
+    private static readonly Dictionary<string, string> RamBrandToImage = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["Corsair"] = "implant/ram_1.png",
+        ["G.Skill"] = "implant/ram_2.png",
+        ["Kingston"] = "implant/ram_3.png",
+    };
+
+    public static string GetRamDisplayImage(string? brand, string? name = null)
+    {
+        if (!string.IsNullOrWhiteSpace(brand) && RamBrandToImage.TryGetValue(brand.Trim(), out var path))
+            return path;
+        var n = (name ?? "").ToLowerInvariant();
+        if (n.Contains("kingston")) return "implant/ram_3.png";
+        if (n.Contains("corsair")) return "implant/ram_1.png";
+        if (n.Contains("g.skill") || n.Contains("gskill")) return "implant/ram_2.png";
+        if (!string.IsNullOrWhiteSpace(brand)) return "implant/ram_4.png";
+        return "implant/ram_4.png";
+    }
+
+    /// <summary>Layout key for motherboard (data-mb-layout). Each board has different slot positions for CPU, RAM, GPU, etc.</summary>
+    public static string GetMotherboardLayoutKey(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "default";
+        var n = name.ToLowerInvariant();
+        if (n.Contains("b450m")) return "b450m";
+        if (n.Contains("b560m")) return "b560m";
+        if (n.Contains("b650m")) return "b650m";
+        if (n.Contains("b760m")) return "b760m";
+        if (n.Contains("b760")) return "b760";
+        if (n.Contains("b550")) return "b550";
+        if (n.Contains("b450")) return "b450";
+        return "default";
     }
 
     // ------------------------------------------------------------------------

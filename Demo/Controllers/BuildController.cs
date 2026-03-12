@@ -49,7 +49,7 @@ public class BuildController : Controller
                     {
                         CategoryId = c.CategoryId,
                         Type = c.Type,
-                        Items = c.Hardware.OrderBy(h => h.Name).ToList(),
+                        Items = c.Type == "GPU" ? Helper.FilterDuplicateGpuFromDisplay(c.Hardware.OrderBy(h => h.Name).ToList(), "GPU") : c.Hardware.OrderBy(h => h.Name).ToList(),
                         SelectedHardwareId = c.Type == "RAM" ? null : draft.Details.Where(dd => dd.Hardware.CategoryId == c.CategoryId).Select(dd => (int?)dd.HardwareId).FirstOrDefault(),
                         RamSlotSelections = c.Type == "RAM" ? ramSelections : []
                     }).ToList();
@@ -65,7 +65,7 @@ public class BuildController : Controller
             {
                 CategoryId = c.CategoryId,
                 Type = c.Type,
-                Items = c.Hardware.OrderBy(h => h.Name).ToList(),
+                Items = c.Type == "GPU" ? Helper.FilterDuplicateGpuFromDisplay(c.Hardware.OrderBy(h => h.Name).ToList(), "GPU") : c.Hardware.OrderBy(h => h.Name).ToList(),
                 SelectedHardwareId = null,
                 RamSlotSelections = c.Type == "RAM" ? new List<int?>(new int?[4]) : []
             }).ToList();
@@ -214,7 +214,7 @@ public class BuildController : Controller
                 {
                     CategoryId = c.CategoryId,
                     Type = c.Type,
-                    Items = c.Hardware.OrderBy(h => h.Name).ToList(),
+                    Items = c.Type == "GPU" ? Helper.FilterDuplicateGpuFromDisplay(c.Hardware.OrderBy(h => h.Name).ToList(), "GPU") : c.Hardware.OrderBy(h => h.Name).ToList(),
                     SelectedHardwareId = c.Type == "RAM" ? null : build.BuildDetails.Where(bd => bd.Hardware.CategoryId == c.CategoryId).Select(bd => (int?)bd.HardwareId).FirstOrDefault(),
                     RamSlotSelections = c.Type == "RAM" ? ramSelections : []
                 }).ToList()
@@ -246,7 +246,7 @@ public class BuildController : Controller
             {
                 CategoryId = c.CategoryId,
                 Type = c.Type,
-                Items = c.Hardware.OrderBy(h => h.Name).ToList(),
+                Items = c.Type == "GPU" ? Helper.FilterDuplicateGpuFromDisplay(c.Hardware.OrderBy(h => h.Name).ToList(), "GPU") : c.Hardware.OrderBy(h => h.Name).ToList(),
                 SelectedHardwareId = c.Type == "RAM" ? null : vm.Categories?.FirstOrDefault(x => x.CategoryId == c.CategoryId)?.SelectedHardwareId,
                 RamSlotSelections = c.Type == "RAM" ? (ramCat?.RamSlotSelections ?? new List<int?>(new int?[4])) : []
             }).ToList();

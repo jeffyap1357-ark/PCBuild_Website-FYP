@@ -13,6 +13,8 @@ public class DB : DbContext
     protected override void OnModelCreating(ModelBuilder mb)
     {
         mb.Entity<UserGuideProgress>().HasKey(x => new { x.UserId, x.GuideId });
+        mb.Entity<Hardware>().HasQueryFilter(h => h.Name != "Lian Li O11 Dynamic");
+        mb.Entity<Component>().HasQueryFilter(c => c.Name != "Lian Li O11 Dynamic");
     }
 
     public DbSet<User> Users { get; set; }
@@ -20,6 +22,7 @@ public class DB : DbContext
     public DbSet<BuildDetail> BuildDetails { get; set; }
     public DbSet<Category> Categories { get; set; }
     public DbSet<Hardware> Hardware { get; set; }
+    public DbSet<Component> Components { get; set; }
     public DbSet<Guide> Guides { get; set; }
     public DbSet<UserGuideProgress> UserGuideProgresses { get; set; }
     public DbSet<Community> Communities { get; set; }
@@ -123,6 +126,7 @@ public class Category
     public string Type { get; set; }
 
     public List<Hardware> Hardware { get; set; } = [];
+    public List<Component> Components { get; set; } = [];
 }
 
 // Hardware: individual components
@@ -185,6 +189,67 @@ public class Hardware
     /// <summary>Content editing suitability 1-10.</summary>
     public int? EditingScore { get; set; }
 
+    [MaxLength(500)]
+    public string? Reference { get; set; }
+
+    [ForeignKey(nameof(CategoryId))]
+    public Category Category { get; set; }
+}
+
+[Table("Component", Schema = "dbo")]
+public class Component
+{
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int ComponentId { get; set; }
+
+    // Compatibility alias for legacy code paths still using HardwareId naming.
+    [NotMapped]
+    public int HardwareId
+    {
+        get => ComponentId;
+        set => ComponentId = value;
+    }
+
+    [Required, MaxLength(200)]
+    public string Name { get; set; }
+
+    public int CategoryId { get; set; }
+
+    [Precision(10, 2)]
+    public decimal Price { get; set; }
+
+    [MaxLength(2000)]
+    public string? Detail { get; set; }
+
+    [MaxLength(100)]
+    public string? Brand { get; set; }
+
+    [MaxLength(200)]
+    public string? Picture { get; set; }
+
+    [MaxLength(50)]
+    public string? Socket { get; set; }
+
+    [MaxLength(20)]
+    public string? DdrType { get; set; }
+
+    [MaxLength(50)]
+    public string? FormFactor { get; set; }
+
+    public int? Special { get; set; }
+    public int? RamSlots { get; set; }
+    public int? ReleaseYear { get; set; }
+    public int? Rating { get; set; }
+    public int? PerformanceScore { get; set; }
+    public int? PowerConsumption { get; set; }
+    public int? GamingScore { get; set; }
+    public int? OfficeScore { get; set; }
+    public int? EditingScore { get; set; }
+
+    [MaxLength(500)]
+    public string? Reference { get; set; }
+
     [ForeignKey(nameof(CategoryId))]
     public Category Category { get; set; }
 }
@@ -204,6 +269,9 @@ public class Guide
     public string? GuideDesc { get; set; }
 
     public string Content { get; set; } = "";
+
+    /// <summary>JSON array of modules: { "type": "title"|"content"|"image", "value": "...", "caption"?: "..." }. Used by admin Learning Material Maker.</summary>
+    public string? ContentModules { get; set; }
 
     public int SortOrder { get; set; }
 }
