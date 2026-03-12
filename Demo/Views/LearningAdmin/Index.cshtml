@@ -1,0 +1,40 @@
+@model List<Guide>
+@{
+    ViewBag.Title = "Admin | Learning Material Maker";
+}
+<div class="admin-dashboard">
+    <p><a href="@Url.Action("Create")" class="button">Create new guide</a></p>
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Order</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var g in Model)
+            {
+                <tr>
+                    <td>@g.SortOrder</td>
+                    <td>@g.GuideName</td>
+                    <td>@(string.IsNullOrEmpty(g.GuideDesc) ? "—" : (g.GuideDesc.Length > 60 ? g.GuideDesc.Substring(0, 60) + "…" : g.GuideDesc))</td>
+                    <td>
+                        <a href="@Url.Action("Edit", new { id = g.GuideId })" class="button small">Edit</a>
+                        <a href="@Url.Action("Detail", "Learning", new { id = g.GuideId })" class="button small secondary" target="_blank">View</a>
+                        <form method="post" action="@Url.Action("Delete")" style="display:inline;" onsubmit="return confirm('Delete this guide?');">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@g.GuideId" />
+                            <button type="submit" class="button small danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    @if (!Model.Any())
+    {
+        <p>No guides yet. <a href="@Url.Action("Create")">Create one</a>.</p>
+    }
+</div>

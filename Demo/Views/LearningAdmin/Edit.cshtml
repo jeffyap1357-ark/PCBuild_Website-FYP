@@ -1,0 +1,138 @@
+@model Guide
+@using Demo.Controllers
+@{
+    ViewBag.Title = Model.GuideId == 0 ? "Create Learning Guide" : "Edit Learning Guide";
+    var modules = new List<GuideModule>();
+    if (!string.IsNullOrWhiteSpace(Model.ContentModules))
+    {
+        try
+        {
+            modules = System.Text.Json.JsonSerializer.Deserialize<List<GuideModule>>(Model.ContentModules) ?? new List<GuideModule>();
+        }
+        catch { }
+    }
+}
+<form method="post" action="@Url.Action("Save")" id="learning-admin-form">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="guideId" value="@Model.GuideId" />
+
+    <div class="form-block">
+        <label for="guideName">Guide name</label>
+        <input type="text" id="guideName" name="guideName" value="@Model.GuideName" required />
+    </div>
+    <div class="form-block">
+        <label for="guideDesc">Short description</label>
+        <input type="text" id="guideDesc" name="guideDesc" value="@Model.GuideDesc" />
+    </div>
+    <div class="form-block">
+        <label for="sortOrder">Sort order</label>
+        <input type="number" id="sortOrder" name="sortOrder" value="@Model.SortOrder" />
+    </div>
+
+    <div class="form-block learning-modules-block">
+        <label>Content modules</label>
+        <p class="hint">Add blocks in order: Title, Content (paragraph), or Image. Reorder with Up/Down.</p>
+        <div class="module-toolbar">
+            <button type="button" class="button small add-module" data-type="title">+ Title</button>
+            <button type="button" class="button small add-module" data-type="content">+ Content</button>
+            <button type="button" class="button small add-module" data-type="image">+ Image</button>
+        </div>
+        <div id="modules-list" class="modules-list">
+            @foreach (var m in modules)
+            {
+                <div class="module-item" data-type="@(m.Type ?? "content")">
+                    <span class="module-type">@(m.Type ?? "content")</span>
+                    @if ((m.Type ?? "").ToLowerInvariant() == "title")
+                    {
+                        <input type="text" class="module-value" placeholder="Title text" value="@m.Value" />
+                    }
+                    else if ((m.Type ?? "").ToLowerInvariant() == "image")
+                    {
+                        <input type="text" class="module-value" placeholder="Image URL (e.g. /hardware/xxx.jpg)" value="@m.Value" />
+                        <input type="text" class="module-caption" placeholder="Caption (optional)" value="@m.Caption" />
+                    }
+                    else
+                    {
+                        <textarea class="module-value" rows="3" placeholder="Paragraph text">@m.Value</textarea>
+                    }
+                    <div class="module-actions">
+                        <button type="button" class="button small move-up" title="Move up">↑</button>
+                        <button type="button" class="button small move-down" title="Move down">↓</button>
+                        <button type="button" class="button small remove-module" title="Remove">✕</button>
+                    </div>
+                </div>
+            }
+        </div>
+        <input type="hidden" name="modulesJson" id="modulesJson" value="" />
+    </div>
+
+    <div class="form-actions">
+        <button type="submit" class="button">Save guide</button>
+        <a href="@Url.Action("Index")" class="button secondary">Cancel</a>
+    </div>
+</form>
+
+@section foot {
+<script>
+(function() {
+    var list = document.getElementById('modules-list');
+    var form = document.getElementById('learning-admin-form');
+    var hidden = document.getElementById('modulesJson');
+
+    function addModule(type, value, caption) {
+        value = value || '';
+        caption = caption || '';
+        var div = document.createElement('div');
+        div.className = 'module-item';
+        div.setAttribute('data-type', type);
+        var typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
+        div.innerHTML = '<span class="module-type">' + typeLabel + '</span>';
+        if (type === 'title') {
+            div.innerHTML += '<input type="text" class="module-value" placeholder="Title text" value="' + escapeAttr(value) + '" />';
+        } else if (type === 'image') {
+            div.innerHTML += '<input type="text" class="module-value" placeholder="Image URL (e.g. /hardware/xxx.jpg)" value="' + escapeAttr(value) + '" />';
+            div.innerHTML += '<input type="text" class="module-caption" placeholder="Caption (optional)" value="' + escapeAttr(caption) + '" />';
+        } else {
+            div.innerHTML += '<textarea class="module-value" rows="3" placeholder="Paragraph text">' + escapeHtml(value) + '</textarea>';
+        }
+        div.innerHTML += '<div class="module-actions"><button type="button" class="button small move-up" title="Move up">↑</button><button type="button" class="button small move-down" title="Move down">↓</button><button type="button" class="button small remove-module" title="Remove">✕</button></div>';
+        list.appendChild(div);
+        bindItem(div);
+    }
+    function escapeAttr(s) {
+        return (s + '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+    function escapeHtml(s) {
+        return (s + '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+    function bindItem(div) {
+        var up = div.querySelector('.move-up');
+        var down = div.querySelector('.move-down');
+        var rem = div.querySelector('.remove-module');
+        if (up) up.onclick = function() { if (div.previousElementSibling) list.insertBefore(div, div.previousElementSibling); };
+        if (down) down.onclick = function() { if (div.nextElementSibling) list.insertBefore(div.nextElementSibling, div); };
+        if (rem) rem.onclick = function() { div.remove(); };
+    }
+    function collectModules() {
+        var arr = [];
+        list.querySelectorAll('.module-item').forEach(function(div) {
+            var type = (div.getAttribute('data-type') || 'content').toLowerCase();
+            var valueEl = div.querySelector('.module-value');
+            var captionEl = div.querySelector('.module-caption');
+            var value = valueEl ? valueEl.value : '';
+            var caption = captionEl ? captionEl.value : '';
+            arr.push({ type: type, value: value, caption: type === 'image' ? caption : undefined });
+        });
+        return arr;
+    }
+    form.onsubmit = function() {
+        hidden.value = JSON.stringify(collectModules());
+    };
+
+    document.querySelectorAll('.add-module').forEach(function(btn) {
+        btn.onclick = function() { addModule(btn.getAttribute('data-type'), '', ''); };
+    });
+    list.querySelectorAll('.module-item').forEach(bindItem);
+})();
+</script>
+}
