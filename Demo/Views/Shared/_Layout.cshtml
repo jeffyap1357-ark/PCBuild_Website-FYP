@@ -20,7 +20,7 @@
         path.StartsWith("/QuizAdmin", StringComparison.OrdinalIgnoreCase) ||
         path.StartsWith("/FeedbackAdmin", StringComparison.OrdinalIgnoreCase));
 }
-<body class="@(isAdminSite ? "body-admin-site" : "")">
+<body class="@(isAdminSite ? "body-admin-site" : "") @(User.Identity?.IsAuthenticated == true ? "chatbot-logged-in" : "")">
     <div class="info">@Html.Raw(TempData["Info"])</div>
 
     <header>
@@ -96,6 +96,11 @@
     {
         <footer>
         </footer>
+    }
+
+    @if (!isAdminSite)
+    {
+        @await Html.PartialAsync("_Chatbot")
     }
 
     <script src="/js/jquery.min.js"></script>

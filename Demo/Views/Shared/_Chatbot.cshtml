@@ -1,0 +1,22 @@
+@* Chatbot: keyword-based help, introduces all webpage features *@
+<div id="chatbot-wrap" class="chatbot-wrap" aria-hidden="true">
+    <div class="chatbot-panel" id="chatbot-panel">
+        <div class="chatbot-header">
+            <h3>PC Build Help</h3>
+            <button type="button" class="chatbot-close" id="chatbot-close" aria-label="Close">×</button>
+        </div>
+        <div class="chatbot-messages" id="chatbot-messages">
+            <div class="chatbot-msg chatbot-msg-bot">
+                <p>Hi! I'm your PC Build assistant. Type <strong>help</strong> to see all features, or ask about: hardware, quiz, performance, build, learning, community, recommend, login.</p>
+            </div>
+        </div>
+        <div class="chatbot-input-wrap">
+            <input type="text" class="chatbot-input" id="chatbot-input" placeholder="Type a question..." maxlength="200" autocomplete="off">
+            <button type="button" class="chatbot-send" id="chatbot-send" aria-label="Send">Send</button>
+        </div>
+    </div>
+    <button type="button" class="chatbot-toggle" id="chatbot-toggle" aria-label="Open help chat" title="Help">
+        <span class="chatbot-toggle-icon">?</span>
+    </button>
+</div>
+<script src="/js/chatbot.js" asp-append-version="true"></script>
