@@ -134,8 +134,13 @@ public class QuizController : Controller
         }
 
         const int QuestionsPerQuiz = 5;
-        var questions = db.QuizQuestions
-            .Where(q => q.IsActive && (string.IsNullOrEmpty(q.Level) ? normalizedLevel == "Beginner" : string.Equals(q.Level, normalizedLevel, StringComparison.OrdinalIgnoreCase)))
+        IQueryable<QuizQuestion> levelQuery = db.QuizQuestions.Where(q => q.IsActive);
+        if (normalizedLevel == "Beginner")
+            levelQuery = levelQuery.Where(q => q.Level == null || q.Level == "" || q.Level == "Beginner");
+        else
+            levelQuery = levelQuery.Where(q => q.Level != null && q.Level != "" && q.Level == normalizedLevel);
+
+        var questions = levelQuery
             .OrderBy(q => Guid.NewGuid())
             .Take(QuestionsPerQuiz)
             .ToList();
