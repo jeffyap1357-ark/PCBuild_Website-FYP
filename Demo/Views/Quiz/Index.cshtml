@@ -12,6 +12,7 @@
     </div>
 
     <form method="post" id="quiz-form">
+        <input type="hidden" asp-for="Level" />
         <div asp-validation-summary="ModelOnly"></div>
 
         <div id="quiz-progress">
@@ -36,22 +37,22 @@
                     <input type="hidden" asp-for="Questions[i].OptionD" />
 
                     <div class="quiz-options-grid">
-                        <label class="quiz-option-card">
+                        <label class="quiz-option-card quiz-opt-a">
                             <input type="radio" asp-for="Questions[i].SelectedOption" value="A" />
                             <span class="quiz-option-label">A</span>
                             <span class="quiz-option-text">@q.OptionA</span>
                         </label>
-                        <label class="quiz-option-card">
+                        <label class="quiz-option-card quiz-opt-b">
                             <input type="radio" asp-for="Questions[i].SelectedOption" value="B" />
                             <span class="quiz-option-label">B</span>
                             <span class="quiz-option-text">@q.OptionB</span>
                         </label>
-                        <label class="quiz-option-card">
+                        <label class="quiz-option-card quiz-opt-c">
                             <input type="radio" asp-for="Questions[i].SelectedOption" value="C" />
                             <span class="quiz-option-label">C</span>
                             <span class="quiz-option-text">@q.OptionC</span>
                         </label>
-                        <label class="quiz-option-card">
+                        <label class="quiz-option-card quiz-opt-d">
                             <input type="radio" asp-for="Questions[i].SelectedOption" value="D" />
                             <span class="quiz-option-label">D</span>
                             <span class="quiz-option-text">@q.OptionD</span>
@@ -111,42 +112,37 @@
 }
 else
 {
-    <h2>Quiz Result</h2>
-    <p>
-        <strong>Score:</strong> @Model.CorrectCount / @Model.TotalQuestions
-    </p>
+    <div class="quiz-result-card">
+        <h2>Quiz Result - @Model.Level</h2>
+        <p class="quiz-result-score">
+            <strong>Score:</strong> @Model.CorrectCount / @Model.TotalQuestions
+        </p>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Question</th>
-                <th>Your Answer</th>
-                <th>Correct Answer</th>
-            </tr>
-        </thead>
-        <tbody>
+        <div class="quiz-result-list">
             @for (var i = 0; i < Model.Questions.Count; i++)
             {
                 var q = Model.Questions[i];
-                <tr class="@(q.IsCorrect ? "quiz-correct" : "quiz-wrong")">
-                    <td>@(i + 1)</td>
-                    <td>@q.QuestionText</td>
-                    <td>@(string.IsNullOrEmpty(q.SelectedOption) ? "-" : q.SelectedOption)</td>
-                    <td>@q.CorrectOption</td>
-                </tr>
+                <article class="quiz-result-item @(q.IsCorrect ? "quiz-correct" : "quiz-wrong")">
+                    <div class="quiz-result-q">@(i + 1). @q.QuestionText</div>
+                    <div class="quiz-result-ans">Your answer: @(string.IsNullOrEmpty(q.SelectedOption) ? "-" : q.SelectedOption) | Correct: @q.CorrectOption</div>
+                    @if (!string.IsNullOrEmpty(q.Explanation))
+                    {
+                        <div class="quiz-result-explanation">@q.Explanation</div>
+                    }
+                </article>
             }
-        </tbody>
-    </table>
+        </div>
 
-    @if (ViewBag.SavedAttemptId != null)
-    {
-        <p><em>Result saved. You can review it later in <a href="@Url.Action("History")">History</a>.</em></p>
-    }
+        @if (ViewBag.SavedAttemptId != null)
+        {
+            <p><em>Result saved. <a href="@Url.Action("History")">View History</a></em></p>
+        }
 
-    <p>
-        <a href="@Url.Action("Index")" class="button">Retry Quiz</a>
-        <a href="@Url.Action("History")" class="button secondary">View History</a>
-    </p>
+        <p>
+            <a href="@Url.Action("Index", new { level = Model.Level })" class="button">Retry @Model.Level</a>
+            <a href="@Url.Action("LevelsView")" class="button secondary">Choose Level</a>
+            <a href="@Url.Action("History")" class="button secondary">View History</a>
+        </p>
+    </div>
 }
 

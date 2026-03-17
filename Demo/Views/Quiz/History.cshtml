@@ -4,34 +4,40 @@
     ViewBag.Title = "PC Build | Quiz History";
 }
 
-<p>Your past quiz attempts.</p>
+<p>Your past quiz attempts by level.</p>
 
 @if (!Model.Any())
 {
-    <p>No quiz history yet. Try the <a href="@Url.Action("Index")">PC Knowledge Quiz</a>.</p>
+    <p>No quiz history yet. Try the <a href="@Url.Action("LevelsView")">PC Knowledge Test</a>.</p>
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Attempt</th>
-                <th>Date</th>
-                <th>Score</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var a in Model)
-            {
-                <tr>
-                    <td>#@a.QuizAttemptId</td>
-                    <td>@a.TakenAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
-                    <td>@a.CorrectCount / @a.TotalQuestions</td>
-                    <td><a href="@Url.Action("Detail", new { id = a.QuizAttemptId })">View</a></td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <div class="quiz-history-list">
+        @foreach (var a in Model)
+        {
+            var level = string.IsNullOrEmpty(a.Level) ? "Mixed" : a.Level;
+            var isFull = a.TotalQuestions > 0 && a.CorrectCount == a.TotalQuestions;
+            var levelClass = level.Equals("Beginner", StringComparison.OrdinalIgnoreCase) ? "quiz-history-level-beginner"
+                : level.Equals("Normal", StringComparison.OrdinalIgnoreCase) ? "quiz-history-level-normal"
+                : "quiz-history-level-professional";
+            <article class="quiz-history-card @(isFull ? "quiz-history-full" : "")">
+                <header>
+                    <div>
+                        <strong>
+                            <span class="quiz-history-level @levelClass">@level</span>
+                        </strong>
+                        <div class="quiz-history-meta">
+                            Attempt #@a.QuizAttemptId · @a.TakenAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")
+                        </div>
+                    </div>
+                    <div class="quiz-history-score">
+                        @a.CorrectCount / @a.TotalQuestions
+                    </div>
+                </header>
+                <footer>
+                    <a href="@Url.Action("Detail", new { id = a.QuizAttemptId })" class="button secondary">View details</a>
+                </footer>
+            </article>
+        }
+    </div>
 }
-

@@ -449,6 +449,9 @@ public class QuizQuestion
     [Required, MaxLength(1)]
     public string CorrectOption { get; set; }
 
+    [MaxLength(20)]
+    public string? Level { get; set; }
+
     public bool IsActive { get; set; } = true;
 }
 
@@ -471,6 +474,9 @@ public class QuizAttempt
     public User User { get; set; }
 
     public List<QuizAttemptDetail> Details { get; set; } = [];
+
+    [NotMapped]
+    public string? Level { get; set; }
 }
 
 // QuizAttemptDetail: per-question answer for an attempt

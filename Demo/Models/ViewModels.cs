@@ -170,10 +170,12 @@ public class QuizQuestionAnswerVM
     // Filled after grading
     public string CorrectOption { get; set; }
     public bool IsCorrect { get; set; }
+    public string? Explanation { get; set; }
 }
 
 public class QuizTakeVM
 {
+    public string Level { get; set; } = "Beginner";
     public List<QuizQuestionAnswerVM> Questions { get; set; } = [];
 
     public int TotalQuestions => Questions.Count;
