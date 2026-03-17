@@ -223,6 +223,19 @@ public class FeedbackReportVM
     public List<Feedback> Feedbacks { get; set; } = [];
 }
 
+public class AdminDashboardVM
+{
+    public int UserCount { get; set; }
+    public int BuildCount { get; set; }
+    public int HardwareCount { get; set; }
+    public int QuizAttemptCount { get; set; }
+    public int PerformanceReportCount { get; set; }
+    public int FeedbackCount { get; set; }
+    public int CommunityCount { get; set; }
+    public List<KeyValuePair<string, int>> HardwareByCategory { get; set; } = [];
+    public List<KeyValuePair<int, int>> FeedbackByRating { get; set; } = [];
+}
+
 public class HardwareEditVM
 {
     public int HardwareId { get; set; }

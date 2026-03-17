@@ -1,14 +1,122 @@
+@model AdminDashboardVM
+
 @{
     ViewBag.Title = "Admin | Dashboard";
 }
 
 <div class="admin-dashboard">
     <h2>Admin Dashboard</h2>
-    <p>Welcome, @User.Identity?.Name. You have admin access.</p>
-    <ul class="admin-links">
-        <li><a href="/HardwareAdmin">Hardware CRUD</a> — Add, edit, delete hardware; choose category first for compatibility (Socket, DdrType, Form factor, etc.); two images (display + clean for build diagram), stored with unique names</li>
-        <li><a href="/LearningAdmin/Index">Learning Material Maker</a> — Create and edit learning guides (title, content, image modules)</li>
-        <li><a href="/QuizAdmin/Index">Quiz Admin</a> — Manage quiz questions</li>
-        <li><a href="/FeedbackAdmin/Index">Feedback Admin</a> — View feedback reports</li>
-    </ul>
+    <p class="admin-dashboard-welcome">Welcome, @User.Identity?.Name. You have admin access.</p>
+
+    <div class="admin-stat-cards">
+        <div class="admin-stat-card">
+            <span class="admin-stat-value">@Model.UserCount</span>
+            <span class="admin-stat-label">Users</span>
+        </div>
+        <div class="admin-stat-card">
+            <span class="admin-stat-value">@Model.BuildCount</span>
+            <span class="admin-stat-label">Builds</span>
+        </div>
+        <div class="admin-stat-card">
+            <span class="admin-stat-value">@Model.HardwareCount</span>
+            <span class="admin-stat-label">Hardware</span>
+        </div>
+        <div class="admin-stat-card">
+            <span class="admin-stat-value">@Model.QuizAttemptCount</span>
+            <span class="admin-stat-label">Quiz Attempts</span>
+        </div>
+        <div class="admin-stat-card">
+            <span class="admin-stat-value">@Model.PerformanceReportCount</span>
+            <span class="admin-stat-label">Performance Reports</span>
+        </div>
+        <div class="admin-stat-card">
+            <span class="admin-stat-value">@Model.FeedbackCount</span>
+            <span class="admin-stat-label">Feedbacks</span>
+        </div>
+        <div class="admin-stat-card">
+            <span class="admin-stat-value">@Model.CommunityCount</span>
+            <span class="admin-stat-label">Shared Builds</span>
+        </div>
+    </div>
+
+    <div class="admin-charts">
+        <div class="admin-chart-card">
+            <h3>Hardware by Category</h3>
+            <canvas id="chart-hardware" width="400" height="220"></canvas>
+        </div>
+        <div class="admin-chart-card">
+            <h3>Feedback Rating Distribution</h3>
+            <canvas id="chart-feedback" width="400" height="220"></canvas>
+        </div>
+    </div>
+
+    <div class="admin-links-section">
+        <h3>Quick Links</h3>
+        <ul class="admin-links">
+            <li><a href="/HardwareAdmin">Hardware CRUD</a> — Add, edit, delete hardware; choose category first for compatibility</li>
+            <li><a href="/LearningAdmin/Index">Learning Material Maker</a> — Create and edit learning guides</li>
+            <li><a href="/QuizAdmin/Index">Quiz Admin</a> — Manage quiz questions</li>
+            <li><a href="/FeedbackAdmin/Index">Feedback Admin</a> — View feedback reports</li>
+        </ul>
+    </div>
 </div>
+
+@section head {
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+}
+
+@section foot {
+<script>
+(function() {
+    var hardwareData = @Html.Raw(ViewBag.HardwareChartData ?? "[]");
+    var feedbackData = @Html.Raw(ViewBag.FeedbackChartData ?? "[]");
+
+    if (hardwareData.length > 0 && typeof Chart !== 'undefined') {
+        new Chart(document.getElementById('chart-hardware'), {
+            type: 'bar',
+            data: {
+                labels: hardwareData.map(function(x) { return x.label; }),
+                datasets: [{
+                    label: 'Count',
+                    data: hardwareData.map(function(x) { return x.count; }),
+                    backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                }
+            }
+        });
+    }
+    if (feedbackData.length > 0 && typeof Chart !== 'undefined') {
+        new Chart(document.getElementById('chart-feedback'), {
+            type: 'bar',
+            data: {
+                labels: feedbackData.map(function(x) { return 'Rating ' + x.rating; }),
+                datasets: [{
+                    label: 'Count',
+                    data: feedbackData.map(function(x) { return x.count; }),
+                    backgroundColor: 'rgba(34, 197, 94, 0.6)',
+                    borderColor: 'rgba(34, 197, 94, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                }
+            }
+        });
+    }
+})();
+</script>
+}
