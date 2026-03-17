@@ -1,0 +1,10 @@
+@model string?
+
+@if (!string.IsNullOrEmpty(Model))
+{
+    <img src="@Model" alt="Avatar" class="header-user-avatar-img" />
+}
+else
+{
+    <span class="header-user-avatar" aria-hidden="true">@(ViewContext.HttpContext.User.Identity?.Name is { Length: > 0 } n ? n[0].ToString().ToUpperInvariant() : "?")</span>
+}

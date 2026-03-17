@@ -62,6 +62,12 @@ public class User
     /// <summary>Root admin cannot be deleted or have role changed by others.</summary>
     public bool IsRootAdmin { get; set; }
 
+    [MaxLength(100)]
+    public string? Avatar { get; set; }
+
+    [MaxLength(20)]
+    public string? Gender { get; set; }
+
     public List<Build> Builds { get; set; } = [];
     public List<UserGuideProgress> GuideProgresses { get; set; } = [];
 }

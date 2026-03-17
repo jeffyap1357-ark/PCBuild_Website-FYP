@@ -145,7 +145,9 @@ public class AccountController : Controller
         {
             Username = u.Username,
             Email = u.Email,
+            Gender = u.Gender,
         };
+        ViewBag.AvatarUrl = !string.IsNullOrEmpty(u.Avatar) ? $"/avatars/{u.Avatar}" : null;
         return View(vm);
     }
 
@@ -162,15 +164,32 @@ public class AccountController : Controller
         if (ModelState.IsValid("Username") && vm.Username != u.Username && db.Users.Any(x => x.Username == vm.Username))
             ModelState.AddModelError("Username", "Duplicated Username.");
 
+        if (vm.AvatarFile != null)
+        {
+            var err = hp.ValidatePhoto(vm.AvatarFile);
+            if (!string.IsNullOrEmpty(err))
+                ModelState.AddModelError("AvatarFile", err);
+        }
+
         if (ModelState.IsValid)
         {
             u.Username = vm.Username;
             u.Email = vm.Email;
+            u.Gender = string.IsNullOrWhiteSpace(vm.Gender) ? null : vm.Gender.Trim();
+
+            if (vm.AvatarFile != null)
+            {
+                if (!string.IsNullOrEmpty(u.Avatar))
+                    hp.DeletePhoto(u.Avatar, "avatars");
+                u.Avatar = hp.SavePhoto(vm.AvatarFile, "avatars");
+            }
+
             db.SaveChanges();
             TempData["Info"] = "Profile updated.";
             return RedirectToAction("Index", "Home");
         }
 
+        ViewBag.AvatarUrl = !string.IsNullOrEmpty(u.Avatar) ? $"/avatars/{u.Avatar}" : null;
         return View(vm);
     }
 

@@ -71,6 +71,13 @@ public class UpdateProfileVM
     [StringLength(256)]
     [EmailAddress]
     public string Email { get; set; }
+
+    [MaxLength(20)]
+    [Display(Name = "Gender")]
+    public string? Gender { get; set; }
+
+    [Display(Name = "Profile Picture")]
+    public IFormFile? AvatarFile { get; set; }
 }
 
 public class ResetPasswordVM

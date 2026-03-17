@@ -30,7 +30,7 @@
         {
             <div class="header-user" id="nav-user">
                 <button type="button" class="header-user-trigger" id="nav-user-trigger" title="Account" aria-label="Account" aria-expanded="false" aria-haspopup="true">
-                    <span class="header-user-avatar" aria-hidden="true">@(User.Identity.Name?.Length > 0 ? User.Identity.Name[0].ToString().ToUpperInvariant() : "?")</span>
+                    @await Component.InvokeAsync("UserAvatar")
                     <span class="header-user-name">@User.Identity.Name</span>
                 </button>
                 <div class="nav-user-dropdown" id="nav-user-dropdown" role="menu" hidden>
