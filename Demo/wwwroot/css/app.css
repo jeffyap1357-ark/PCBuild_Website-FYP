@@ -3776,7 +3776,7 @@ main hr {
     .perf-layout { grid-template-columns: 1fr; gap: 24px; }
 }
 .perf-form-col { min-width: 0; }
-.perf-side-col { min-width: 0; }
+.perf-side-col { min-width: 0; padding-top: 8px; }
 
 .perf-instruction {
     margin-bottom: 1.5em;
@@ -3806,6 +3806,10 @@ main hr {
     box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     transition: box-shadow 0.2s, border-color 0.2s;
 }
+.perf-select-item:nth-child(4n+1) { border-left: 3px solid rgba(59, 130, 246, 0.5); }
+.perf-select-item:nth-child(4n+2) { border-left: 3px solid rgba(34, 197, 94, 0.5); }
+.perf-select-item:nth-child(4n+3) { border-left: 3px solid rgba(168, 85, 247, 0.4); }
+.perf-select-item:nth-child(4n) { border-left: 3px solid rgba(245, 158, 11, 0.5); }
 .perf-select-item:hover {
     border-color: var(--accent-border, rgba(244, 197, 66, 0.4));
     box-shadow: 0 4px 12px rgba(0,0,0,0.06);
@@ -3851,94 +3855,104 @@ main hr {
 }
 
 .perf-summary-card {
-    background: linear-gradient(180deg, #fff 0%, #f8fafc 100%);
-    border: 1px solid var(--border);
+    background: linear-gradient(165deg, #f0f9ff 0%, #e0f2fe 50%, #f8fafc 100%);
+    border: 1px solid rgba(59, 130, 246, 0.2);
     border-radius: 14px;
     padding: 20px;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
     position: sticky;
     top: 20px;
     min-height: 140px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.08);
 }
 .perf-summary-card h3 {
     margin: 0 0 14px 0;
     font-size: 1rem;
     font-weight: 700;
-    color: var(--text);
+    color: #1e40af;
     padding-bottom: 10px;
-    border-bottom: 2px solid var(--accent);
+    border-bottom: 2px solid rgba(59, 130, 246, 0.4);
 }
 .perf-summary-card ul {
     margin: 0;
     padding: 0;
     list-style: none;
     font-size: 0.9rem;
-    max-height: 220px;
+    max-height: 200px;
     overflow-y: auto;
 }
 .perf-summary-card li {
-    padding: 8px 0;
-    border-bottom: 1px solid var(--border-light);
+    padding: 10px 12px;
+    margin-bottom: 6px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.7);
+    border: 1px solid rgba(59, 130, 246, 0.12);
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 8px;
 }
-.perf-summary-card li:last-child { border-bottom: none; }
-.perf-summary-empty { color: var(--text-muted); font-style: italic; padding: 12px 0; }
+.perf-summary-card li:last-child { margin-bottom: 0; }
+.perf-summary-empty { color: var(--text-muted); font-style: italic; padding: 12px 0; background: transparent; border: none; }
 .perf-summary-cat {
     font-weight: 600;
-    color: var(--accent);
+    color: #1d4ed8;
     font-size: 0.8rem;
     text-transform: uppercase;
     flex-shrink: 0;
 }
 .perf-summary-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 8px; }
-.perf-summary-price { font-weight: 600; color: var(--text); flex-shrink: 0; }
+.perf-summary-price { font-weight: 600; color: #0f766e; flex-shrink: 0; }
 .perf-summary-total {
-    margin: 14px 0 0 0;
-    padding-top: 14px;
-    border-top: 2px solid var(--border);
+    margin: 16px 0 0 0;
+    padding: 14px 12px;
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: 10px;
+    border: 1px solid rgba(59, 130, 246, 0.2);
     font-size: 1.05rem;
     font-weight: 700;
+    color: #1e40af;
 }
 
 .perf-result-card {
-    background: linear-gradient(180deg, #fff 0%, #f8fafc 100%);
-    border: 1px solid var(--border);
+    background: linear-gradient(165deg, #f0fdf4 0%, #dcfce7 40%, #f8fafc 100%);
+    border: 1px solid rgba(34, 197, 94, 0.25);
     border-radius: 14px;
-    padding: 20px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    padding: 22px;
+    margin-top: 20px;
+    box-shadow: 0 4px 16px rgba(34, 197, 94, 0.08);
 }
 .perf-result-card h3 {
-    margin: 0 0 14px 0;
+    margin: 0 0 16px 0;
     font-size: 1rem;
     font-weight: 700;
-    padding-bottom: 10px;
-    border-bottom: 2px solid var(--accent);
+    color: #15803d;
+    padding-bottom: 12px;
+    border-bottom: 2px solid rgba(34, 197, 94, 0.4);
 }
 .perf-result-main {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 18px 20px;
+    padding: 20px 22px;
     border-radius: 12px;
-    margin-bottom: 14px;
+    margin-bottom: 20px;
     font-weight: 600;
 }
-.perf-result-grade { font-size: 1.2rem; }
+.perf-result-grade { font-size: 1.25rem; }
 .perf-result-score { font-size: 1rem; opacity: 0.9; }
-.perf-grade-excellent { background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(34, 197, 94, 0.1) 100%); color: #15803d; }
-.perf-grade-good { background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.1) 100%); color: #1d4ed8; }
-.perf-grade-ok { background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(245, 158, 11, 0.1) 100%); color: #b45309; }
-.perf-grade-entry { background: linear-gradient(135deg, rgba(148, 163, 184, 0.25) 0%, rgba(148, 163, 184, 0.1) 100%); color: #4b5563; }
-.perf-result-meta { font-size: 0.9rem; color: var(--text-muted); margin: 0 0 10px 0; }
-.perf-result-comment { margin: 0 0 10px 0; font-size: 0.9rem; line-height: 1.5; }
-.perf-result-detail { margin: 0 0 6px 0; font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; }
+.perf-grade-excellent { background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(34, 197, 94, 0.12) 100%); color: #15803d; border: 1px solid rgba(34, 197, 94, 0.3); }
+.perf-grade-good { background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.12) 100%); color: #1d4ed8; border: 1px solid rgba(59, 130, 246, 0.3); }
+.perf-grade-ok { background: linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(245, 158, 11, 0.15) 100%); color: #b45309; border: 1px solid rgba(245, 158, 11, 0.35); }
+.perf-grade-entry { background: linear-gradient(135deg, rgba(148, 163, 184, 0.25) 0%, rgba(148, 163, 184, 0.12) 100%); color: #4b5563; border: 1px solid rgba(148, 163, 184, 0.3); }
+.perf-result-meta { font-size: 0.9rem; color: #0f766e; margin: 0 0 14px 0; font-weight: 500; }
+.perf-result-comment { margin: 0 0 16px 0; font-size: 0.9rem; line-height: 1.65; color: var(--text); }
+.perf-result-detail { margin: 0 0 10px 0; font-size: 0.85rem; color: var(--text-muted); line-height: 1.55; }
 .perf-result-table {
-    margin-top: 14px;
+    margin-top: 18px;
     font-size: 0.9rem;
     border-radius: 10px;
     overflow: hidden;
+    border: 1px solid rgba(34, 197, 94, 0.15);
 }
+.perf-result-table th { background: rgba(34, 197, 94, 0.12); color: #15803d; }
