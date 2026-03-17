@@ -23,11 +23,11 @@
             @for (var i = 0; i < Model.Categories.Count; i++)
             {
                 var cat = Model.Categories[i];
-                <p>
+                <div class="perf-select-item">
                     <label>@cat.Type</label>
                     <input type="hidden" asp-for="Categories[i].CategoryId" />
                     <input type="hidden" asp-for="Categories[i].Type" />
-                    <select asp-for="Categories[i].SelectedHardwareId" class="hardware-select" data-category="@cat.Type" data-category-id="@cat.CategoryId">
+                    <select asp-for="Categories[i].SelectedHardwareId" class="hardware-select perf-select" data-category="@cat.Type" data-category-id="@cat.CategoryId">
                         <option value="">-- None --</option>
                         @foreach (var h in cat.Items)
                         {
@@ -43,11 +43,12 @@
                             </option>
                         }
                     </select>
-                </p>
+                </div>
             }
+            </div>
 
-            <p>
-                <button type="submit" class="button">Calculate Performance</button>
+            <p class="perf-actions">
+                <button type="submit" class="button perf-btn-primary">Calculate Performance</button>
                 <a href="@Url.Action("History")" class="button secondary">View History</a>
             </p>
         </form>
@@ -128,7 +129,8 @@
                 });
                 totalEl.textContent = 'RM ' + total.toFixed(2);
                 listEl.innerHTML = items.map(function (x) {
-                    return '<li><span class="perf-summary-cat">' + (x.cat || '') + '</span> ' + (x.name || '').split(' - ')[0] + ' <span class="perf-summary-price">' + x.price.toFixed(2) + '</span></li>';
+                    var name = (x.name || '').split(' - ')[0];
+                    return '<li><span class="perf-summary-cat">' + (x.cat || '') + '</span><span class="perf-summary-name">' + name + '</span><span class="perf-summary-price">RM ' + x.price.toFixed(2) + '</span></li>';
                 }).join('') || '<li class="perf-summary-empty">No components selected</li>';
             }
 
