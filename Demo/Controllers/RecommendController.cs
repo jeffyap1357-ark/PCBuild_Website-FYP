@@ -65,7 +65,7 @@ public class RecommendController : Controller
         _db.SaveChanges();
 
         TempData["Info"] = "Build saved to My Builds.";
-        return RedirectToAction(nameof(Index), "Build");
+        return RedirectToAction(nameof(Index), "Build", new { showFeedback = 1 });
     }
 
     /// <summary>Create draft from recommendation and redirect to Configure page for editing.</summary>

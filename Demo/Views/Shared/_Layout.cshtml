@@ -101,6 +101,12 @@
     @if (!isAdminSite)
     {
         @await Html.PartialAsync("_Chatbot")
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            ViewBag.ShowFeedback = TempData["ShowFeedback"] as bool? == true ||
+                string.Equals(Context.Request.Query["showFeedback"], "1", StringComparison.OrdinalIgnoreCase);
+            @await Html.PartialAsync("_FeedbackPrompt", new Demo.Models.FeedbackCreateVM())
+        }
     }
 
     <script src="/js/jquery.min.js"></script>

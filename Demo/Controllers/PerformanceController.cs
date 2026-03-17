@@ -126,6 +126,7 @@ public class PerformanceController : Controller
             }
             db.SaveChanges();
             ViewBag.SavedReportId = report.PerformanceReportId;
+            TempData["ShowFeedback"] = true;
         }
 
         return View(vm);

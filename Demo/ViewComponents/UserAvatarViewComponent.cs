@@ -16,10 +16,17 @@ public class UserAvatarViewComponent : ViewComponent
         if (!User.Identity?.IsAuthenticated ?? true)
             return View("Default", (string?)null);
 
-        var u = _db.Users.FirstOrDefault(x => x.Username == User.Identity!.Name);
-        var avatarUrl = !string.IsNullOrEmpty(u?.Avatar)
-            ? $"/avatars/{u.Avatar}"
-            : null;
-        return View("Default", avatarUrl);
+        try
+        {
+            var u = _db.Users.FirstOrDefault(x => x.Username == User.Identity!.Name);
+            var avatarUrl = !string.IsNullOrEmpty(u?.Avatar)
+                ? $"/avatars/{u.Avatar}"
+                : null;
+            return View("Default", avatarUrl);
+        }
+        catch (Microsoft.Data.SqlClient.SqlException)
+        {
+            return View("Default", (string?)null);
+        }
     }
 }

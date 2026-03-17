@@ -244,6 +244,7 @@ public class QuizController : Controller
             db.SaveChanges();
 
             ViewBag.SavedAttemptId = attempt.QuizAttemptId;
+            TempData["ShowFeedback"] = true;
         }
 
         return View(resultVm);
