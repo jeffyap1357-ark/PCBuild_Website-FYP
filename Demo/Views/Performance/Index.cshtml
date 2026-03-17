@@ -11,97 +11,102 @@
 
 <p>Set your budget, pick compatible components, and the system will calculate a performance score for your custom PC build.</p>
 
-<form method="post" id="performance-form">
-    <div asp-validation-summary="ModelOnly"></div>
+<div class="perf-layout">
+    <div class="perf-form-col">
+        <form method="post" id="performance-form">
+            <div asp-validation-summary="ModelOnly"></div>
 
-    <p>
-        <label asp-for="Budget"></label>
-        <input asp-for="Budget" type="number" min="1000" max="50000" step="100" />
-        <span asp-validation-for="Budget"></span>
-    </p>
+            <p>
+                <label asp-for="Budget"></label>
+                <input asp-for="Budget" type="number" min="1000" max="50000" step="100" />
+                <span asp-validation-for="Budget"></span>
+            </p>
 
-    <p><strong>Select components by category:</strong> <em>Choose CPU first to filter compatible motherboards, then RAM and case will be filtered automatically.</em></p>
+            <p><strong>Select components by category:</strong> <em>Choose CPU first to filter compatible motherboards, then RAM and case will be filtered automatically.</em></p>
 
-    @for (var i = 0; i < Model.Categories.Count; i++)
-    {
-        var cat = Model.Categories[i];
-        <p>
-            <label>@cat.Type</label>
-            <input type="hidden" asp-for="Categories[i].CategoryId" />
-            <input type="hidden" asp-for="Categories[i].Type" />
-            <select asp-for="Categories[i].SelectedHardwareId" class="hardware-select" data-category="@cat.Type" data-category-id="@cat.CategoryId">
-                <option value="">-- None --</option>
-                @foreach (var h in cat.Items)
-                {
-                    <option value="@h.HardwareId"
-                            data-price="@h.Price"
-                            data-socket="@(h.Socket ?? "")"
-                            data-ddr="@(h.DdrType ?? "")"
-                            data-formfactor="@(h.FormFactor ?? "")">
-                        @h.Name - @h.Price.ToString("C")
-                    </option>
-                }
-            </select>
-        </p>
-    }
+            @for (var i = 0; i < Model.Categories.Count; i++)
+            {
+                var cat = Model.Categories[i];
+                <p>
+                    <label>@cat.Type</label>
+                    <input type="hidden" asp-for="Categories[i].CategoryId" />
+                    <input type="hidden" asp-for="Categories[i].Type" />
+                    <select asp-for="Categories[i].SelectedHardwareId" class="hardware-select" data-category="@cat.Type" data-category-id="@cat.CategoryId">
+                        <option value="">-- None --</option>
+                        @foreach (var h in cat.Items)
+                        {
+                            <option value="@h.HardwareId"
+                                    data-price="@h.Price"
+                                    data-name="@h.Name"
+                                    data-category="@(h.Category?.Type ?? "")"
+                                    data-score="@(h.PerformanceScore ?? h.Special ?? 5)"
+                                    data-socket="@(h.Socket ?? "")"
+                                    data-ddr="@(h.DdrType ?? "")"
+                                    data-formfactor="@(h.FormFactor ?? "")">
+                                @h.Name - @h.Price.ToString("C")
+                            </option>
+                        }
+                    </select>
+                </p>
+            }
 
-    <p class="total-row">
-        <strong>Estimated Total: </strong><span id="total-price">@Model.TotalPrice.ToString("C")</span>
-    </p>
+            <p>
+                <button type="submit" class="button">Calculate Performance</button>
+                <a href="@Url.Action("History")" class="button secondary">View History</a>
+            </p>
+        </form>
+    </div>
 
-    <p>
-        <button type="submit" class="button">Calculate Performance</button>
-        <a href="@Url.Action("History")" class="button secondary">View History</a>
-    </p>
-</form>
-
-@if (Model.HasResult && parts.Any())
-{
-    <hr />
-    <h2>Performance Report</h2>
-    <p>
-        <strong>Budget:</strong> @Model.Budget.ToString("C")<br />
-        <strong>Total Price:</strong> @Model.TotalPrice.ToString("C")<br />
-        <strong>Total Performance Score:</strong> @Model.TotalScore
-    </p>
-    @if (assessment != null)
-    {
-        <div class="build-assessment">
-            <strong>Assessment:</strong> @assessment.Rating<br />
-            <p class="build-assessment-comment">@assessment.Comment</p>
-            <p class="build-assessment-detail">
-                <strong>Strengths:</strong> @assessment.Strengths &middot; <strong>Weaknesses:</strong> @assessment.Weaknesses
+    <div class="perf-side-col">
+        <div class="perf-summary-card">
+            <h3>Selected Components</h3>
+            <ul id="perf-summary-list"></ul>
+            <p class="perf-summary-total">
+                <strong>Estimated Total:</strong> <span id="total-price">@Model.TotalPrice.ToString("C")</span>
             </p>
         </div>
-    }
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Component</th>
-                <th>Part</th>
-                <th>Price</th>
-                <th>Score</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var p in parts.OrderBy(p => p.Category?.Type))
-            {
-                <tr>
-                    <td>@p.Category?.Type</td>
-                    <td><a href="/Hardware/Detail/@p.HardwareId">@p.Name</a></td>
-                    <td>@p.Price.ToString("C")</td>
-                    <td>@(p.Special?.ToString() ?? "5")</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-
-    @if (savedId.HasValue)
-    {
-        <p><em>Report saved. You can review it later in <a href="@Url.Action("History")">History</a>.</em></p>
-    }
-}
+        @if (Model.HasResult && parts.Any())
+        {
+            <div class="perf-result-card">
+                <h3>Performance Report</h3>
+                <div class="perf-result-main @(score >= 85 ? "perf-grade-excellent" : score >= 70 ? "perf-grade-good" : score >= 55 ? "perf-grade-ok" : "perf-grade-entry")">
+                    <span class="perf-result-grade">@(assessment?.Rating ?? "—")</span>
+                    <span class="perf-result-score">Score: @score</span>
+                </div>
+                <p class="perf-result-meta">
+                    Budget: @Model.Budget.ToString("C") · Total: @Model.TotalPrice.ToString("C")
+                </p>
+                @if (assessment != null)
+                {
+                    <p class="perf-result-comment">@assessment.Comment</p>
+                    <p class="perf-result-detail"><strong>Strengths:</strong> @assessment.Strengths</p>
+                    <p class="perf-result-detail"><strong>Weaknesses:</strong> @assessment.Weaknesses</p>
+                }
+                <table class="table perf-result-table">
+                    <thead>
+                        <tr><th>Component</th><th>Part</th><th>Price</th><th>Score</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var p in parts.OrderBy(p => p.Category?.Type))
+                        {
+                            <tr>
+                                <td>@p.Category?.Type</td>
+                                <td><a href="/Hardware/Detail/@p.HardwareId">@p.Name</a></td>
+                                <td>@p.Price.ToString("C")</td>
+                                <td>@(p.PerformanceScore ?? p.Special ?? 5)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                @if (savedId.HasValue)
+                {
+                    <p><em>Report saved. <a href="@Url.Action("History")">View History</a></em></p>
+                }
+            </div>
+        }
+    </div>
+</div>
 
 @section foot {
     <script>
@@ -109,20 +114,30 @@
             var form = document.getElementById('performance-form');
             if (!form) return;
             var totalEl = document.getElementById('total-price');
+            var listEl = document.getElementById('perf-summary-list');
             var selects = form.querySelectorAll('.hardware-select');
 
-            function updateTotal() {
+            function updateSummary() {
                 var total = 0;
+                var items = [];
                 selects.forEach(function (s) {
                     var opt = s.options[s.selectedIndex];
-                    if (opt && opt.value) total += parseFloat(opt.getAttribute('data-price') || 0);
+                    if (opt && opt.value) {
+                        var price = parseFloat(opt.getAttribute('data-price') || 0);
+                        total += price;
+                        var name = opt.getAttribute('data-name') || opt.textContent || '';
+                        var cat = opt.getAttribute('data-category') || '';
+                        items.push({ cat: cat, name: name, price: price });
+                    }
                 });
-                totalEl.textContent = '$' + total.toFixed(2);
+                totalEl.textContent = 'RM ' + total.toFixed(2);
+                listEl.innerHTML = items.map(function (x) {
+                    return '<li><span class="perf-summary-cat">' + (x.cat || '') + '</span> ' + (x.name || '').split(' - ')[0] + ' <span class="perf-summary-price">' + x.price.toFixed(2) + '</span></li>';
+                }).join('') || '<li class="perf-summary-empty">No components selected</li>';
             }
 
-            selects.forEach(function (s) { s.addEventListener('change', updateTotal); });
-            updateTotal();
+            selects.forEach(function (s) { s.addEventListener('change', updateSummary); });
+            updateSummary();
         })();
     </script>
 }
-

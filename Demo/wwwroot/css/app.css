@@ -3763,3 +3763,60 @@ main hr {
 .quiz-history-meta { font-size: 0.9rem; color: var(--text-muted); margin-top: 4px; }
 .quiz-history-score { font-weight: 700; font-size: 1.1rem; }
 .quiz-history-full { border-color: var(--accent); }
+
+/* Performance Test: two-column layout, summary card, grade card */
+.perf-layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 24px;
+    margin: 1.5em 0;
+}
+@media (max-width: 900px) {
+    .perf-layout { grid-template-columns: 1fr; }
+}
+.perf-form-col { min-width: 0; }
+.perf-side-col { min-width: 0; }
+
+.perf-summary-card {
+    background: var(--bg-card, #f8f9fa);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    position: sticky;
+    top: 16px;
+}
+.perf-summary-card h3 { margin: 0 0 12px 0; font-size: 1rem; }
+.perf-summary-card ul { margin: 0; padding: 0; list-style: none; font-size: 0.9rem; max-height: 200px; overflow-y: auto; }
+.perf-summary-card li { padding: 4px 0; border-bottom: 1px solid var(--border-light); }
+.perf-summary-card li:last-child { border-bottom: none; }
+.perf-summary-empty { color: var(--text-muted); font-style: italic; }
+.perf-summary-cat { font-weight: 600; color: var(--text-muted); margin-right: 6px; }
+.perf-summary-price { float: right; }
+.perf-summary-total { margin: 12px 0 0 0; padding-top: 12px; border-top: 1px solid var(--border); font-size: 1rem; }
+
+.perf-result-card {
+    background: var(--bg-card, #f8f9fa);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+}
+.perf-result-card h3 { margin: 0 0 12px 0; font-size: 1rem; }
+.perf-result-main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+}
+.perf-result-grade { font-weight: 700; font-size: 1.1rem; }
+.perf-result-score { font-size: 0.95rem; opacity: 0.9; }
+.perf-grade-excellent { background: rgba(34, 197, 94, 0.15); color: #15803d; }
+.perf-grade-good { background: rgba(59, 130, 246, 0.15); color: #1d4ed8; }
+.perf-grade-ok { background: rgba(245, 158, 11, 0.15); color: #b45309; }
+.perf-grade-entry { background: rgba(148, 163, 184, 0.2); color: #4b5563; }
+.perf-result-meta { font-size: 0.9rem; color: var(--text-muted); margin: 0 0 8px 0; }
+.perf-result-comment { margin: 0 0 8px 0; font-size: 0.9rem; }
+.perf-result-detail { margin: 0 0 4px 0; font-size: 0.85rem; color: var(--text-muted); }
+.perf-result-table { margin-top: 12px; font-size: 0.9rem; }
