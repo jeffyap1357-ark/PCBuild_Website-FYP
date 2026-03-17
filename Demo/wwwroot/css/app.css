@@ -3995,7 +3995,17 @@ main hr {
 .chatbot-msg-bot a { color: #1d4ed8; text-decoration: underline; }
 .chatbot-msg-bot a:hover { color: #1e40af; }
 .chatbot-msg-bot ul { margin: 8px 0 0 0; padding-left: 20px; }
-.chatbot-input-wrap { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--border); border-radius: 0 0 16px 16px; background: #f8fafc; }
+.chatbot-quick-btns {
+    display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 16px 0;
+    border-top: 1px solid var(--border); background: #f8fafc;
+}
+.chatbot-quick-btn {
+    padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border);
+    background: #fff; color: var(--text-muted); font-size: 0.8rem; font-weight: 500;
+    cursor: pointer; transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+.chatbot-quick-btn:hover { background: #e2e8f0; border-color: #94a3b8; color: var(--text); }
+.chatbot-input-wrap { display: flex; gap: 8px; padding: 12px 16px; background: #f8fafc; border-radius: 0 0 16px 16px; }
 .chatbot-input { flex: 1; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border); font-size: 0.9rem; }
 .chatbot-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-dim); }
 .chatbot-send {
