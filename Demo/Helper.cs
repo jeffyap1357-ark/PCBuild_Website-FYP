@@ -89,6 +89,21 @@ public class Helper
         File.Delete(path);
     }
 
+    /// <summary>Save uploaded image with a unique filename to avoid duplicates. Returns the saved filename.</summary>
+    public string SaveHardwareImage(IFormFile file, string folder)
+    {
+        var ext = Path.GetExtension(file.FileName);
+        if (string.IsNullOrEmpty(ext) || !ext.Equals(".jpg", StringComparison.OrdinalIgnoreCase) && !ext.Equals(".jpeg", StringComparison.OrdinalIgnoreCase) && !ext.Equals(".png", StringComparison.OrdinalIgnoreCase))
+            ext = ".jpg";
+        var fileName = Guid.NewGuid().ToString("n") + ext;
+        var path = Path.Combine(en.WebRootPath, folder, fileName);
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        using var stream = file.OpenReadStream();
+        using var outStream = System.IO.File.Create(path);
+        stream.CopyTo(outStream);
+        return fileName;
+    }
+
     // ------------------------------------------------------------------------
     // Hardware Image Helper
     // ------------------------------------------------------------------------
@@ -120,11 +135,18 @@ public class Helper
     }
 
     // Build page prefers transparent "clean" images from /implant when available.
-    public string GetBuildImagePath(string? picture, string name)
+    public string GetBuildImagePath(string? picture, string name, string? cleanPicture = null)
     {
+        var implantFolder = Path.Combine(en.WebRootPath, "implant");
+        if (!string.IsNullOrWhiteSpace(cleanPicture) && Directory.Exists(implantFolder))
+        {
+            var cleanPath = Path.Combine(implantFolder, Path.GetFileName(cleanPicture));
+            if (System.IO.File.Exists(cleanPath))
+                return "implant/" + Path.GetFileName(cleanPicture);
+        }
+
         var hardwareFile = GetHardwareImagePath(picture, name);
         var hardwarePath = string.IsNullOrWhiteSpace(hardwareFile) ? "" : $"hardware/{hardwareFile}";
-        var implantFolder = Path.Combine(en.WebRootPath, "implant");
 
         if (!Directory.Exists(implantFolder))
             return hardwarePath;

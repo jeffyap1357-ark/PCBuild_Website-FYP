@@ -215,12 +215,15 @@ public class PerformanceController : Controller
                 }
 
                 var selectedId = selected?.FirstOrDefault(x => x.CategoryId == c.CategoryId)?.SelectedHardwareId;
+                var itemList = items.OrderBy(h => h.Name).ToList();
+                if (c.Type.Equals("GPU", StringComparison.OrdinalIgnoreCase))
+                    itemList = Helper.FilterDuplicateGpuFromDisplay(itemList, "GPU");
 
                 return new CategoryOptionVM
                 {
                     CategoryId = c.CategoryId,
                     Type = c.Type,
-                    Items = items.OrderBy(h => h.Name).ToList(),
+                    Items = itemList,
                     SelectedHardwareId = selectedId
                 };
             }).ToList();

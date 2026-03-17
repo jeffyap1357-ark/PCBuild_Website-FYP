@@ -16,7 +16,19 @@
             {
                 var cat = Model.Categories[i];
                 var isRam = cat.Type == "RAM";
-                <div class="build-select-section build-component-section" data-category-index="@i" data-is-ram="@(isRam ? "true" : "false")">
+                var isFirst = i == 0;
+                <div class="build-select-section build-component-section build-category-collapse @(isFirst ? "build-category-open" : "")" data-category-index="@i" data-is-ram="@(isRam ? "true" : "false")">
+                    <button type="button" class="build-category-header" aria-expanded="@(isFirst ? "true" : "false")">
+                        <span class="build-category-name">@cat.Type</span>
+                        <span class="build-category-chevron" aria-hidden="true">▼</span>
+                    </button>
+                    <div class="build-category-body">
+                    <div class="build-score-filters" role="group" aria-label="Sort by use case">
+                        <span class="build-score-filters-label">Filter by score</span>
+                        <button type="button" class="build-score-filter-btn" data-sort="gaming">Gaming</button>
+                        <button type="button" class="build-score-filter-btn" data-sort="office">Office</button>
+                        <button type="button" class="build-score-filter-btn" data-sort="editing">Edit score</button>
+                    </div>
                     @if (isRam)
                     {
                         <input type="hidden" name="Categories[@i].CategoryId" value="@cat.CategoryId" />
@@ -31,15 +43,18 @@
                                     <option value="">— None —</option>
                                     @foreach (var h in cat.Items)
                                     {
-                                        var imgPath = Helper.GetBuildImagePath(h.Picture, h.Name);
+                                        var imgPath = Helper.GetBuildImagePath(h.Picture, h.Name, h.CleanPicture);
                                         var isSelected = h.HardwareId == sel;
+                                        var sg = h.GamingScore ?? h.Special ?? 0;
+                                        var so = h.OfficeScore ?? h.Special ?? 0;
+                                        var se = h.EditingScore ?? h.Special ?? 0;
                                         if (isSelected)
                                         {
-                                            <option value="@h.HardwareId" selected data-price="@h.Price" data-img="@imgPath" data-ddr="@(h.DdrType ?? "")" data-ram-img="@Helper.GetRamDisplayImage(h.Brand, h.Name)">@h.Name — @h.Price.ToString("C")</option>
+                                            <option value="@h.HardwareId" selected data-price="@h.Price" data-img="@imgPath" data-ddr="@(h.DdrType ?? "")" data-ram-img="@Helper.GetRamDisplayImage(h.Brand, h.Name)" data-gaming="@sg" data-office="@so" data-editing="@se">@h.Name — @h.Price.ToString("C")</option>
                                         }
                                         else
                                         {
-                                            <option value="@h.HardwareId" data-price="@h.Price" data-img="@imgPath" data-ddr="@(h.DdrType ?? "")" data-ram-img="@Helper.GetRamDisplayImage(h.Brand, h.Name)">@h.Name — @h.Price.ToString("C")</option>
+                                            <option value="@h.HardwareId" data-price="@h.Price" data-img="@imgPath" data-ddr="@(h.DdrType ?? "")" data-ram-img="@Helper.GetRamDisplayImage(h.Brand, h.Name)" data-gaming="@sg" data-office="@so" data-editing="@se">@h.Name — @h.Price.ToString("C")</option>
                                         }
                                     }
                                 </select>
@@ -50,9 +65,8 @@
                     {
                         <input type="hidden" name="Categories[@i].CategoryId" value="@cat.CategoryId" />
                         <input type="hidden" name="Categories[@i].Type" value="@cat.Type" />
-                        <div class="build-select-row">
-                            <label class="build-select-label">@cat.Type</label>
-                            <select name="Categories[@i].SelectedHardwareId" class="build-select" data-category-type="@cat.Type">
+                        <div class="build-select-row build-select-dropdown-row">
+                            <select name="Categories[@i].SelectedHardwareId" class="build-select build-select-hidden" data-category-type="@cat.Type" id="build-select-edit-@i">
                                 <option value="">— None —</option>
                                 @{
                                     var compList = cat.Items;
@@ -60,22 +74,48 @@
                                 @for (var j = 0; j < compList.Count; j++)
                                 {
                                     var h = compList[j];
-                                    var imgPath = Helper.GetBuildImagePath(h.Picture, h.Name);
+                                    var imgPath = Helper.GetBuildImagePath(h.Picture, h.Name, h.CleanPicture);
                                     var dataCase = cat.Type == "PC case" ? Helper.GetCaseLayoutKey(h.Name) : "";
                                     var dataMbLayout = cat.Type == "Motherboard" ? Helper.GetMotherboardLayoutKey(h.Name) : "";
                                     var isSelected = h.HardwareId == cat.SelectedHardwareId;
+                                    var sg = h.GamingScore ?? h.Special ?? 0;
+                                    var so = h.OfficeScore ?? h.Special ?? 0;
+                                    var se = h.EditingScore ?? h.Special ?? 0;
                                     if (isSelected)
                                     {
-                                        <option value="@h.HardwareId" selected data-price="@h.Price" data-img="@imgPath" data-socket="@(h.Socket ?? "")" data-ddr="@(h.DdrType ?? "")" data-form-factor="@(h.FormFactor ?? "")" data-case="@dataCase" data-mb-layout="@dataMbLayout" data-ram-slots="@(cat.Type == "Motherboard" ? (h.RamSlots ?? 4) : 0)">@h.Name — @h.Price.ToString("C")</option>
+                                        <option value="@h.HardwareId" selected data-price="@h.Price" data-img="@imgPath" data-socket="@(h.Socket ?? "")" data-ddr="@(h.DdrType ?? "")" data-form-factor="@(h.FormFactor ?? "")" data-case="@dataCase" data-mb-layout="@dataMbLayout" data-ram-slots="@(cat.Type == "Motherboard" ? (h.RamSlots ?? 4) : 0)" data-gaming="@sg" data-office="@so" data-editing="@se">@h.Name — @h.Price.ToString("C")</option>
                                     }
                                     else
                                     {
-                                        <option value="@h.HardwareId" data-price="@h.Price" data-img="@imgPath" data-socket="@(h.Socket ?? "")" data-ddr="@(h.DdrType ?? "")" data-form-factor="@(h.FormFactor ?? "")" data-case="@dataCase" data-mb-layout="@dataMbLayout" data-ram-slots="@(cat.Type == "Motherboard" ? (h.RamSlots ?? 4) : 0)">@h.Name — @h.Price.ToString("C")</option>
+                                        <option value="@h.HardwareId" data-price="@h.Price" data-img="@imgPath" data-socket="@(h.Socket ?? "")" data-ddr="@(h.DdrType ?? "")" data-form-factor="@(h.FormFactor ?? "")" data-case="@dataCase" data-mb-layout="@dataMbLayout" data-ram-slots="@(cat.Type == "Motherboard" ? (h.RamSlots ?? 4) : 0)" data-gaming="@sg" data-office="@so" data-editing="@se">@h.Name — @h.Price.ToString("C")</option>
                                     }
                                 }
                             </select>
+                            <div class="build-select-dropdown">
+                                <button type="button" class="build-select-dropdown-trigger" aria-haspopup="listbox" aria-expanded="false">— None —</button>
+                                <div class="build-select-dropdown-panel" role="listbox" hidden>
+                                    <div class="build-select-options">
+                                        @for (var j = 0; j < compList.Count; j++)
+                                        {
+                                            var h = compList[j];
+                                            var imgPath = Helper.GetBuildImagePath(h.Picture, h.Name, h.CleanPicture);
+                                            var dataCase = cat.Type == "PC case" ? Helper.GetCaseLayoutKey(h.Name) : "";
+                                            var dataMbLayout = cat.Type == "Motherboard" ? Helper.GetMotherboardLayoutKey(h.Name) : "";
+                                            var sg2 = h.GamingScore ?? h.Special ?? 0;
+                                            var so2 = h.OfficeScore ?? h.Special ?? 0;
+                                            var se2 = h.EditingScore ?? h.Special ?? 0;
+                                            <button type="button" class="build-select-option" role="option" draggable="true" data-category-type="@cat.Type" data-value="@h.HardwareId" data-name="@h.Name" data-price="@h.Price" data-img="@imgPath" data-socket="@(h.Socket ?? "")" data-ddr="@(h.DdrType ?? "")" data-form-factor="@(h.FormFactor ?? "")" data-case="@dataCase" data-mb-layout="@dataMbLayout" data-ram-slots="@(cat.Type == "Motherboard" ? (h.RamSlots ?? 4) : 0)" data-gaming="@sg2" data-office="@so2" data-editing="@se2">
+                                                <span class="build-select-option-img">@if (!string.IsNullOrEmpty(imgPath)) { <img src="/@imgPath" alt=""> } else { <span class="build-card-noimg">—</span> }</span>
+                                                <span class="build-select-option-name">@h.Name</span>
+                                                <span class="build-select-option-score" aria-hidden="true"></span>
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     }
+                    </div>
                 </div>
             }
         </div>
@@ -91,36 +131,36 @@
             <section class="build-section build-diagram-section">
                 <h2 class="build-section-title"><span class="build-accent"></span>Build Preview</h2>
                 <div class="build-diagram-wrap build-diagram-case-view" id="build-diagram-case-view">
-                    <div class="build-diagram-bg build-diagram-case" id="build-diagram-case"></div>
+                    <div class="build-diagram-bg build-diagram-case build-drop-target" id="build-diagram-case" data-drop-category="PC case"></div>
                     <div class="build-diagram-display-box build-display-overlay">
-                        <div class="build-diagram-box build-diagram-box-mb" id="build-case-box-mb">
+                        <div class="build-diagram-box build-diagram-box-mb build-drop-target" id="build-case-box-mb" data-drop-category="Motherboard">
                             <div class="build-diagram-component build-diagram-mb-fixed"><img src="" alt="" id="build-case-img-mb"></div>
-                            <div class="build-diagram-box build-diagram-box-cpu" id="build-case-box-cpu">
+                            <div class="build-diagram-box build-diagram-box-cpu build-drop-target" id="build-case-box-cpu" data-drop-category="CPU">
                                 <div class="build-diagram-component"><img src="" alt="" id="build-case-img-cpu"></div>
                             </div>
-                            <div class="build-diagram-box build-diagram-box-ram" id="build-case-box-ram1">
+                            <div class="build-diagram-box build-diagram-box-ram build-drop-target" id="build-case-box-ram1" data-drop-category="RAM" data-drop-slot="0">
                                 <div class="build-diagram-component"><img src="" alt="" id="build-case-img-ram1"></div>
                             </div>
-                            <div class="build-diagram-box build-diagram-box-ram" id="build-case-box-ram2">
+                            <div class="build-diagram-box build-diagram-box-ram build-drop-target" id="build-case-box-ram2" data-drop-category="RAM" data-drop-slot="1">
                                 <div class="build-diagram-component"><img src="" alt="" id="build-case-img-ram2"></div>
                             </div>
-                            <div class="build-diagram-box build-diagram-box-ram" id="build-case-box-ram3">
+                            <div class="build-diagram-box build-diagram-box-ram build-drop-target" id="build-case-box-ram3" data-drop-category="RAM" data-drop-slot="2">
                                 <div class="build-diagram-component"><img src="" alt="" id="build-case-img-ram3"></div>
                             </div>
-                            <div class="build-diagram-box build-diagram-box-ram" id="build-case-box-ram4">
+                            <div class="build-diagram-box build-diagram-box-ram build-drop-target" id="build-case-box-ram4" data-drop-category="RAM" data-drop-slot="3">
                                 <div class="build-diagram-component"><img src="" alt="" id="build-case-img-ram4"></div>
                             </div>
-                            <div class="build-diagram-box build-diagram-box-gpu" id="build-case-box-gpu">
+                            <div class="build-diagram-box build-diagram-box-gpu build-drop-target" id="build-case-box-gpu" data-drop-category="GPU">
                                 <div class="build-diagram-component"><img src="" alt="" id="build-case-img-gpu"></div>
                             </div>
-                            <div class="build-diagram-box build-diagram-box-storage" id="build-case-box-storage">
+                            <div class="build-diagram-box build-diagram-box-storage build-drop-target" id="build-case-box-storage" data-drop-category="Storage">
                                 <div class="build-diagram-component"><img src="" alt="" id="build-case-img-storage"></div>
                             </div>
-                            <div class="build-diagram-box build-diagram-box-cooler" id="build-case-box-cooler">
+                            <div class="build-diagram-box build-diagram-box-cooler build-drop-target" id="build-case-box-cooler" data-drop-category="CPU cooler">
                                 <div class="build-diagram-component"><img src="" alt="" id="build-case-img-cooler"></div>
                             </div>
                         </div>
-                        <div class="build-diagram-box build-diagram-box-psu" id="build-case-box-psu">
+                        <div class="build-diagram-box build-diagram-box-psu build-drop-target" id="build-case-box-psu" data-drop-category="Power supply unit">
                             <div class="build-diagram-component"><img src="" alt="" id="build-case-img-psu"></div>
                         </div>
                     </div>
@@ -361,12 +401,219 @@
         sel.addEventListener('change', onSelectChange);
     });
 
+    function scoreAttr(sortKey) {
+        if (sortKey === 'gaming') return 'data-gaming';
+        if (sortKey === 'office') return 'data-office';
+        return 'data-editing';
+    }
+    function sortSelectByScore(sel, sortKey) {
+        if (!sel || sel.options.length < 2) return;
+        var attr = scoreAttr(sortKey);
+        var first = sel.options[0];
+        var rest = [];
+        for (var o = 1; o < sel.options.length; o++) rest.push(sel.options[o]);
+        var saved = sel.value;
+        rest.sort(function(a, b) {
+            return parseInt(b.getAttribute(attr) || '0', 10) - parseInt(a.getAttribute(attr) || '0', 10);
+        });
+        sel.innerHTML = '';
+        sel.appendChild(first);
+        rest.forEach(function(opt) { sel.appendChild(opt); });
+        sel.value = saved;
+    }
+    function sortDropdownPanelOptions(dropdown, sortKey) {
+        if (!dropdown) return;
+        var wrap = dropdown.querySelector('.build-select-options');
+        if (!wrap) return;
+        var attr = scoreAttr(sortKey);
+        var buttons = Array.prototype.slice.call(wrap.querySelectorAll('.build-select-option'));
+        /* Sort higher score first (descending) */
+        buttons.sort(function(a, b) {
+            return parseInt(b.getAttribute(attr) || '0', 10) - parseInt(a.getAttribute(attr) || '0', 10);
+        });
+        buttons.forEach(function(btn) { wrap.appendChild(btn); });
+        /* Show score in list so "higher to lower" is visible */
+        wrap.querySelectorAll('.build-select-option').forEach(function(btn) {
+            var scoreSpan = btn.querySelector('.build-select-option-score');
+            if (scoreSpan) {
+                var v = btn.getAttribute(attr);
+                scoreSpan.textContent = v !== null && v !== '' ? v + '/10' : '—';
+            }
+        });
+        wrap.closest('.build-select-dropdown-panel').classList.add('show-scores');
+        var panel = dropdown.querySelector('.build-select-dropdown-panel');
+        if (panel) panel.scrollTop = 0;
+    }
+    form.querySelectorAll('.build-score-filter-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var sortKey = this.getAttribute('data-sort') || 'gaming';
+            var section = this.closest('.build-component-section');
+            if (!section) return;
+            section.querySelectorAll('.build-score-filter-btn').forEach(function(b) { b.classList.toggle('active', b === this); }.bind(this));
+            var isRam = section.getAttribute('data-is-ram') === 'true';
+            if (isRam) {
+                section.querySelectorAll('.build-ram-slot select').forEach(function(sel) {
+                    sortSelectByScore(sel, sortKey);
+                    updateSelectOptionScores(sel, sortKey);
+                });
+            } else {
+                var row = section.querySelector('.build-select-dropdown-row');
+                if (row) {
+                    var sel = row.querySelector('.build-select');
+                    var dropdown = row.querySelector('.build-select-dropdown');
+                    sortSelectByScore(sel, sortKey);
+                    sortDropdownPanelOptions(dropdown, sortKey);
+                    if (dropdown) syncDropdownTrigger(dropdown);
+                }
+            }
+        });
+    });
+    function updateSelectOptionScores(sel, sortKey) {
+        if (!sel || sel.options.length < 2) return;
+        var attr = scoreAttr(sortKey);
+        for (var o = 1; o < sel.options.length; o++) {
+            var opt = sel.options[o];
+            var parts = opt.textContent.split(' — ');
+            var namePart = parts[0] || opt.textContent;
+            var pricePart = parts.length >= 2 ? parts.slice(1).join(' — ') : '';
+            var score = opt.getAttribute(attr);
+            var scoreStr = score !== null && score !== '' ? score + '/10' : '—';
+            opt.textContent = namePart + ' — ' + scoreStr + (pricePart ? ' — ' + pricePart : '');
+        }
+    }
+
+    /* Collapsible category: click header to toggle */
+    form.querySelectorAll('.build-category-header').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var section = this.closest('.build-category-collapse');
+            if (section) {
+                section.classList.toggle('build-category-open');
+                btn.setAttribute('aria-expanded', section.classList.contains('build-category-open'));
+            }
+        });
+    });
+
+    /* Custom dropdown: trigger opens panel; option click sets select and closes */
+    function syncDropdownTrigger(dropdown) {
+        var sel = dropdown.closest('.build-select-dropdown-row').querySelector('.build-select');
+        var trigger = dropdown.querySelector('.build-select-dropdown-trigger');
+        var opt = sel.options[sel.selectedIndex];
+        trigger.textContent = opt && opt.value ? (opt.textContent.split(' — ')[0] || opt.textContent) : '— None —';
+        dropdown.querySelectorAll('.build-select-option').forEach(function(btn) {
+            btn.classList.toggle('selected', btn.getAttribute('data-value') === sel.value);
+        });
+    }
+
+    form.querySelectorAll('.build-select-dropdown').forEach(function(dropdown) {
+        var trigger = dropdown.querySelector('.build-select-dropdown-trigger');
+        var panel = dropdown.querySelector('.build-select-dropdown-panel');
+        var sel = dropdown.closest('.build-select-dropdown-row').querySelector('.build-select');
+        syncDropdownTrigger(dropdown);
+
+        trigger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var isOpen = dropdown.classList.toggle('open');
+            panel.hidden = !isOpen;
+            trigger.setAttribute('aria-expanded', isOpen);
+        });
+
+        dropdown.querySelectorAll('.build-select-option').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var val = this.getAttribute('data-value');
+                sel.value = val || '';
+                syncDropdownTrigger(dropdown);
+                dropdown.classList.remove('open');
+                panel.hidden = true;
+                trigger.setAttribute('aria-expanded', 'false');
+                onSelectChange();
+            });
+        });
+    });
+
+    document.addEventListener('click', function() {
+        form.querySelectorAll('.build-select-dropdown.open').forEach(function(dropdown) {
+            dropdown.classList.remove('open');
+            dropdown.querySelector('.build-select-dropdown-panel').hidden = true;
+            dropdown.querySelector('.build-select-dropdown-trigger').setAttribute('aria-expanded', 'false');
+        });
+    });
+
+    form.querySelectorAll('.build-select-dropdown').forEach(function(dropdown) {
+        dropdown.addEventListener('click', function(e) { e.stopPropagation(); });
+    });
+
+    /* Drag and drop: drag component option onto build preview to select */
+    form.querySelectorAll('.build-select-option[draggable="true"]').forEach(function(opt) {
+        opt.addEventListener('dragstart', function(e) {
+            var catType = this.getAttribute('data-category-type') || '';
+            var value = this.getAttribute('data-value') || '';
+            e.dataTransfer.setData('text/plain', JSON.stringify({ categoryType: catType, hardwareId: value }));
+            e.dataTransfer.effectAllowed = 'copy';
+        });
+    });
+
+    var dropTargets = document.querySelectorAll('.build-drop-target');
+    dropTargets.forEach(function(target) {
+        var dropCategory = target.getAttribute('data-drop-category') || '';
+        var dropSlot = target.getAttribute('data-drop-slot');
+
+        target.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            var data = e.dataTransfer.getData('text/plain');
+            if (!data) return;
+            try {
+                var payload = JSON.parse(data);
+                if (payload.categoryType === dropCategory) {
+                    e.dataTransfer.dropEffect = 'copy';
+                    target.classList.add('build-drop-over');
+                }
+            } catch (err) {}
+        });
+
+        target.addEventListener('dragleave', function() {
+            target.classList.remove('build-drop-over');
+        });
+
+        target.addEventListener('drop', function(e) {
+            e.preventDefault();
+            target.classList.remove('build-drop-over');
+            var data = e.dataTransfer.getData('text/plain');
+            if (!data) return;
+            try {
+                var payload = JSON.parse(data);
+                if (payload.categoryType !== dropCategory) return;
+
+                if (dropCategory === 'RAM' && dropSlot !== undefined) {
+                    var ramSection = form.querySelector('.build-component-section[data-category-index="2"]');
+                    if (!ramSection) return;
+                    var slotEl = ramSection.querySelector('.build-ram-slot[data-slot="' + dropSlot + '"]');
+                    if (!slotEl) return;
+                    var sel = slotEl.querySelector('select');
+                    if (sel) { sel.value = payload.hardwareId || ''; onSelectChange(); }
+                } else {
+                    var idx = catOrder.indexOf(dropCategory);
+                    if (idx === -1) return;
+                    var section = form.querySelector('.build-component-section[data-category-index="' + idx + '"]');
+                    if (!section) return;
+                    var sel = section.querySelector('select.build-select');
+                    if (sel) {
+                        sel.value = payload.hardwareId || '';
+                        var dropdown = section.querySelector('.build-select-dropdown');
+                        if (dropdown) syncDropdownTrigger(dropdown);
+                        onSelectChange();
+                    }
+                }
+            } catch (err) {}
+        });
+    });
+
     var cleanBtn = document.getElementById('build-clean-btn');
     if (cleanBtn) {
         cleanBtn.addEventListener('click', function() {
             form.querySelectorAll('.build-select').forEach(function(sel) {
                 sel.selectedIndex = 0;
             });
+            form.querySelectorAll('.build-select-dropdown').forEach(syncDropdownTrigger);
             showCompatibilityWarnings();
             updateUI();
             updateDiagramLayout();

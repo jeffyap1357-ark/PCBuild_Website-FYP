@@ -13,8 +13,9 @@ public class DB : DbContext
     protected override void OnModelCreating(ModelBuilder mb)
     {
         mb.Entity<UserGuideProgress>().HasKey(x => new { x.UserId, x.GuideId });
-        mb.Entity<Hardware>().HasQueryFilter(h => h.Name != "Lian Li O11 Dynamic");
-        mb.Entity<Component>().HasQueryFilter(c => c.Name != "Lian Li O11 Dynamic");
+        // Exclude all Lian Li hardware from queries (e.g. Lian Li O11/011 Dynamic)
+        mb.Entity<Hardware>().HasQueryFilter(h => !h.Name.Contains("Lian Li"));
+        mb.Entity<Component>().HasQueryFilter(c => !c.Name.Contains("Lian Li"));
     }
 
     public DbSet<User> Users { get; set; }
@@ -152,6 +153,10 @@ public class Hardware
 
     [MaxLength(200)]
     public string? Picture { get; set; }
+
+    /// <summary>Clean/transparent image for build diagram (stored in implant folder).</summary>
+    [MaxLength(200)]
+    public string? CleanPicture { get; set; }
 
     [MaxLength(50)]
     public string? Socket { get; set; }

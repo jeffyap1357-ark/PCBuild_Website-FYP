@@ -7,6 +7,7 @@
     var brands = ViewBag.Brands as List<string>;
     var selectedCategoryId = ViewBag.SelectedCategoryId as int?;
     var selectedBrand = ViewBag.SelectedBrand as string ?? "";
+    var sortBy = ViewBag.SortBy as string ?? "";
 }
 
 <div class="hardware-list-page">
@@ -53,6 +54,16 @@
                         }
                     }
                 }
+            </select>
+        </div>
+        <div class="hardware-filter-group">
+            <label class="hardware-filter-label">Sort by</label>
+            <select id="hardware-sort" class="hardware-filter-select">
+                @if (sortBy == "") { <option value="" selected>Name</option> } else { <option value="">Name</option> }
+                @if (sortBy == "price") { <option value="price" selected>Price: Low to High</option> } else { <option value="price">Price: Low to High</option> }
+                @if (sortBy == "pricedesc") { <option value="pricedesc" selected>Price: High to Low</option> } else { <option value="pricedesc">Price: High to Low</option> }
+                @if (sortBy == "rating") { <option value="rating" selected>Rating: Low to High</option> } else { <option value="rating">Rating: High to Low</option> }
+                @if (sortBy == "ratingdesc") { <option value="ratingdesc" selected>Rating: High to Low</option> } else { <option value="ratingdesc">Rating: High to Low</option> }
             </select>
         </div>
     </aside>
@@ -103,10 +114,12 @@
     function fetchHardware() {
         var cat = document.getElementById('hardware-category')?.value || '';
         var brand = document.getElementById('hardware-brand')?.value || '';
+        var sort = document.getElementById('hardware-sort')?.value || '';
         var search = document.getElementById('hardware-search')?.value?.trim() || '';
         var params = new URLSearchParams();
         if (cat) params.set('categoryId', cat);
         if (brand) params.set('brand', brand);
+        if (sort) params.set('sortBy', sort);
         if (search) params.set('search', search);
 
         var url = '/Hardware/ListPartial' + (params.toString() ? '?' + params.toString() : '');
@@ -122,6 +135,7 @@
 
     document.getElementById('hardware-category')?.addEventListener('change', fetchHardware);
     document.getElementById('hardware-brand')?.addEventListener('change', fetchHardware);
+    document.getElementById('hardware-sort')?.addEventListener('change', fetchHardware);
 
     document.getElementById('hardware-search')?.addEventListener('input', function() {
         clearTimeout(searchTimer);

@@ -1,11 +1,11 @@
 @model List<Guide>
 @{
     ViewBag.Title = "PC Build | Learning & Guide";
+    ViewBag.HideMainTitle = true;
     var readIds = ViewBag.ReadIds as HashSet<int> ?? new HashSet<int>();
     var index = 0;
 }
 <h1 class="guide-page-title">Learning &amp; Guide</h1>
-<p class="guide-intro">Learning material for beginners: no prior PC hardware knowledge needed. Each guide explains <em>what</em> the part does and <em>why</em> it matters, with clear terms and step-by-step advice. Select a guide to read; items you have read show with a check. <a href="@Url.Action("Diagnose")">Diagnose DB</a></p>
 
 <ul class="guide-list">
     @foreach (var g in Model)

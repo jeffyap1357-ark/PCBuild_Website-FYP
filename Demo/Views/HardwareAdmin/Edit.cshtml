@@ -1,0 +1,148 @@
+@model HardwareEditVM
+@{
+    ViewBag.Title = "Admin | Edit hardware";
+    var categories = ViewBag.Categories as List<Category>;
+}
+
+<h2>Edit hardware</h2>
+<p class="admin-hint">Compatibility: Socket (CPU/Motherboard), DdrType (Motherboard/RAM), Form factor (Motherboard/Case), RAM slots (Motherboard), Power (CPU/GPU/PSU).</p>
+
+<form method="post" enctype="multipart/form-data" class="admin-form">
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+    <div class="form-group">
+        <label for="CategoryId">Category <span class="required">*</span></label>
+        <select id="CategoryId" name="CategoryId" required>
+            <option value="">— Select category —</option>
+            @if (categories != null)
+            {
+                foreach (var c in categories)
+                {
+                    if (Model.CategoryId == c.CategoryId)
+                    {
+                        <option value="@c.CategoryId" selected>@c.Type</option>
+                    }
+                    else
+                    {
+                        <option value="@c.CategoryId">@c.Type</option>
+                    }
+                }
+            }
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="Name">Name <span class="required">*</span></label>
+        <input type="text" id="Name" name="Name" value="@Model.Name" maxlength="200" required />
+        @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        <label for="Price">Price <span class="required">*</span></label>
+        <input type="number" id="Price" name="Price" value="@Model.Price" step="0.01" min="0" required />
+    </div>
+
+    <div class="form-group">
+        <label for="Detail">Detail</label>
+        <textarea id="Detail" name="Detail" rows="3" maxlength="2000">@Model.Detail</textarea>
+    </div>
+
+    <div class="form-group">
+        <label for="Brand">Brand</label>
+        <input type="text" id="Brand" name="Brand" value="@Model.Brand" maxlength="100" />
+    </div>
+
+    <div class="form-group">
+        <label for="PictureFile">Display image (replace)</label>
+        @if (!string.IsNullOrEmpty(Model.CurrentPicture))
+        {
+            <p class="current-file">Current: <img src="/hardware/@Model.CurrentPicture" alt="" style="max-height:40px; vertical-align:middle" /> @Model.CurrentPicture</p>
+        }
+        <input type="file" id="PictureFile" name="PictureFile" accept=".jpg,.jpeg,.png" />
+        <span class="field-hint">Leave empty to keep current. New file stored with unique name.</span>
+    </div>
+
+    <div class="form-group">
+        <label for="CleanPictureFile">Clean image (replace)</label>
+        @if (!string.IsNullOrEmpty(Model.CurrentCleanPicture))
+        {
+            <p class="current-file">Current: <img src="/implant/@Model.CurrentCleanPicture" alt="" style="max-height:40px; vertical-align:middle" /> @Model.CurrentCleanPicture</p>
+        }
+        <input type="file" id="CleanPictureFile" name="CleanPictureFile" accept=".jpg,.jpeg,.png" />
+        <span class="field-hint">Leave empty to keep current.</span>
+    </div>
+
+    <fieldset class="compat-fields">
+        <legend>Compatibility</legend>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="Socket">Socket</label>
+                <input type="text" id="Socket" name="Socket" value="@Model.Socket" maxlength="50" />
+            </div>
+            <div class="form-group">
+                <label for="DdrType">DDR type</label>
+                <input type="text" id="DdrType" name="DdrType" value="@Model.DdrType" maxlength="20" />
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="FormFactor">Form factor</label>
+                <input type="text" id="FormFactor" name="FormFactor" value="@Model.FormFactor" maxlength="50" />
+            </div>
+            <div class="form-group">
+                <label for="RamSlots">RAM slots</label>
+                <input type="number" id="RamSlots" name="RamSlots" value="@Model.RamSlots" min="0" max="8" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="PowerConsumption">Power (W)</label>
+            <input type="number" id="PowerConsumption" name="PowerConsumption" value="@Model.PowerConsumption" min="0" />
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>Scores &amp; optional</legend>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="ReleaseYear">Release year</label>
+                <input type="number" id="ReleaseYear" name="ReleaseYear" value="@Model.ReleaseYear" min="1990" max="2030" />
+            </div>
+            <div class="form-group">
+                <label for="Rating">Rating (1–5)</label>
+                <input type="number" id="Rating" name="Rating" value="@Model.Rating" min="1" max="5" />
+            </div>
+            <div class="form-group">
+                <label for="PerformanceScore">Performance score</label>
+                <input type="number" id="PerformanceScore" name="PerformanceScore" value="@Model.PerformanceScore" min="0" max="100" />
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="Special">Special</label>
+                <input type="number" id="Special" name="Special" value="@Model.Special" min="0" max="10" />
+            </div>
+            <div class="form-group">
+                <label for="GamingScore">Gaming</label>
+                <input type="number" id="GamingScore" name="GamingScore" value="@Model.GamingScore" min="0" max="10" />
+            </div>
+            <div class="form-group">
+                <label for="OfficeScore">Office</label>
+                <input type="number" id="OfficeScore" name="OfficeScore" value="@Model.OfficeScore" min="0" max="10" />
+            </div>
+            <div class="form-group">
+                <label for="EditingScore">Editing</label>
+                <input type="number" id="EditingScore" name="EditingScore" value="@Model.EditingScore" min="0" max="10" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="Reference">Reference URL</label>
+            <input type="url" id="Reference" name="Reference" value="@Model.Reference" maxlength="500" />
+        </div>
+    </fieldset>
+
+    <div class="form-actions">
+        <button type="submit" class="button">Update</button>
+        <a href="@Url.Action("Index")" class="button secondary">Cancel</a>
+    </div>
+</form>

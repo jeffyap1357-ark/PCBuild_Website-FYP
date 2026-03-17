@@ -21,11 +21,31 @@ public class BuildController : Controller
         return db.Users.Where(u => u.Username == name).Select(u => u.UserId).FirstOrDefault();
     }
 
+    private static readonly string[] BuildCategoryOrder = { "Motherboard", "CPU", "RAM", "GPU", "Storage", "Power supply unit", "CPU cooler", "PC case" };
+
+    /// <summary>Build category options with hardware from Categories (GPU duplicates filtered). Does not set selection state.</summary>
+    private static List<CategoryOptionVM> GetCategoryOptionsWithFilteredHardware(List<Category> categories)
+    {
+        return categories
+            .OrderBy(c => Array.IndexOf(BuildCategoryOrder, c.Type) >= 0 ? Array.IndexOf(BuildCategoryOrder, c.Type) : 99)
+            .ThenBy(c => c.CategoryId)
+            .Select(c => new CategoryOptionVM
+            {
+                CategoryId = c.CategoryId,
+                Type = c.Type,
+                Items = c.Type == "GPU"
+                    ? Helper.FilterDuplicateGpuFromDisplay(c.Hardware.OrderBy(h => h.Name).ToList(), "GPU")
+                    : c.Hardware.OrderBy(h => h.Name).ToList(),
+                SelectedHardwareId = null,
+                RamSlotSelections = c.Type == "RAM" ? new List<int?>(new int?[4]) : []
+            }).ToList();
+    }
+
     public IActionResult Configure(int? draftId = null)
     {
         var vm = new ConfigureBuildVM();
         var categories = db.Categories.Include(c => c.Hardware).OrderBy(c => c.CategoryId).ToList();
-        var order = new[] { "Motherboard", "CPU", "RAM", "GPU", "Storage", "Power supply unit", "CPU cooler", "PC case" };
+        var options = GetCategoryOptionsWithFilteredHardware(categories);
 
         if (draftId.HasValue)
         {
@@ -41,34 +61,20 @@ public class BuildController : Controller
                 var ramDetails = draft.Details.Where(dd => dd.Hardware.Category?.Type == "RAM").OrderBy(dd => dd.DraftBuildDetailId).ToList();
                 var ramSelections = ramDetails.Select(dd => (int?)dd.HardwareId).ToList();
                 while (ramSelections.Count < 4) ramSelections.Add(null);
-
-                vm.Categories = categories
-                    .OrderBy(c => Array.IndexOf(order, c.Type) >= 0 ? Array.IndexOf(order, c.Type) : 99)
-                    .ThenBy(c => c.CategoryId)
-                    .Select(c => new CategoryOptionVM
-                    {
-                        CategoryId = c.CategoryId,
-                        Type = c.Type,
-                        Items = c.Type == "GPU" ? Helper.FilterDuplicateGpuFromDisplay(c.Hardware.OrderBy(h => h.Name).ToList(), "GPU") : c.Hardware.OrderBy(h => h.Name).ToList(),
-                        SelectedHardwareId = c.Type == "RAM" ? null : draft.Details.Where(dd => dd.Hardware.CategoryId == c.CategoryId).Select(dd => (int?)dd.HardwareId).FirstOrDefault(),
-                        RamSlotSelections = c.Type == "RAM" ? ramSelections : []
-                    }).ToList();
+                foreach (var opt in options)
+                {
+                    if (opt.Type == "RAM")
+                        opt.RamSlotSelections = ramSelections;
+                    else
+                        opt.SelectedHardwareId = draft.Details.Where(dd => dd.Hardware.CategoryId == opt.CategoryId).Select(dd => (int?)dd.HardwareId).FirstOrDefault();
+                }
+                vm.Categories = options;
                 ViewBag.DraftId = draftId.Value;
                 return View(vm);
             }
         }
 
-        vm.Categories = categories
-            .OrderBy(c => Array.IndexOf(order, c.Type) >= 0 ? Array.IndexOf(order, c.Type) : 99)
-            .ThenBy(c => c.CategoryId)
-            .Select(c => new CategoryOptionVM
-            {
-                CategoryId = c.CategoryId,
-                Type = c.Type,
-                Items = c.Type == "GPU" ? Helper.FilterDuplicateGpuFromDisplay(c.Hardware.OrderBy(h => h.Name).ToList(), "GPU") : c.Hardware.OrderBy(h => h.Name).ToList(),
-                SelectedHardwareId = null,
-                RamSlotSelections = c.Type == "RAM" ? new List<int?>(new int?[4]) : []
-            }).ToList();
+        vm.Categories = options;
         return View(vm);
     }
 
@@ -78,24 +84,21 @@ public class BuildController : Controller
         var userId = GetCurrentUserId();
         if (userId == null) return RedirectToAction("Login", "Account");
 
-        var order = new[] { "Motherboard", "CPU", "RAM", "GPU", "Storage", "Power supply unit", "CPU cooler", "PC case" };
         var categories = db.Categories.Include(c => c.Hardware).OrderBy(c => c.CategoryId).ToList();
-        var ramCat = vm.Categories?.FirstOrDefault(x => x.Type == "RAM");
-        var mbCat = vm.Categories?.FirstOrDefault(x => x.Type == "Motherboard");
+        var incoming = vm.Categories;
+        var ramCat = incoming?.FirstOrDefault(x => x.Type == "RAM");
+        var mbCat = incoming?.FirstOrDefault(x => x.Type == "Motherboard");
         var mbId = mbCat?.SelectedHardwareId;
         var ramSlots = mbId.HasValue ? (db.Hardware.Find(mbId.Value)?.RamSlots ?? 4) : 4;
 
-        vm.Categories = categories
-            .OrderBy(c => Array.IndexOf(order, c.Type) >= 0 ? Array.IndexOf(order, c.Type) : 99)
-            .ThenBy(c => c.CategoryId)
-            .Select(c => new CategoryOptionVM
-            {
-                CategoryId = c.CategoryId,
-                Type = c.Type,
-                Items = c.Hardware.OrderBy(h => h.Name).ToList(),
-                SelectedHardwareId = c.Type == "RAM" ? null : vm.Categories?.FirstOrDefault(x => x.CategoryId == c.CategoryId)?.SelectedHardwareId,
-                RamSlotSelections = c.Type == "RAM" ? (ramCat?.RamSlotSelections ?? new List<int?>(new int?[4])) : []
-            }).ToList();
+        vm.Categories = GetCategoryOptionsWithFilteredHardware(categories);
+        foreach (var c in vm.Categories)
+        {
+            if (c.Type == "RAM")
+                c.RamSlotSelections = ramCat?.RamSlotSelections ?? new List<int?>(new int?[4]);
+            else
+                c.SelectedHardwareId = incoming?.FirstOrDefault(x => x.CategoryId == c.CategoryId)?.SelectedHardwareId;
+        }
 
         if (string.IsNullOrWhiteSpace(vm.BuildName))
             ModelState.AddModelError("BuildName", "Build name is required.");
@@ -161,11 +164,50 @@ public class BuildController : Controller
 
         var list = db.Builds
             .Include(b => b.Community)
+            .Include(b => b.BuildDetails)
+            .ThenInclude(bd => bd.Hardware)
+            .ThenInclude(h => h.Category)
             .Where(b => b.UserId == userId)
             .OrderByDescending(b => b.BuildId)
             .ToList();
 
+        var problemBuildIds = new HashSet<int>();
+        foreach (var b in list)
+        {
+            if (HasCompatibilityProblem(b)) problemBuildIds.Add(b.BuildId);
+        }
+        ViewBag.ProblemBuildIds = problemBuildIds;
+
         return View(list);
+    }
+
+    private static bool HasCompatibilityProblem(Build build)
+    {
+        if (build?.BuildDetails == null) return false;
+        var details = build.BuildDetails.Select(bd => bd.Hardware).Where(h => h?.Category != null).ToList();
+        var mb = details.FirstOrDefault(h => h.Category?.Type == "Motherboard");
+        var cpu = details.FirstOrDefault(h => h.Category?.Type == "CPU");
+        var rams = details.Where(h => h.Category?.Type == "RAM").ToList();
+        var pcCase = details.FirstOrDefault(h => h.Category?.Type == "PC case");
+
+        if (mb != null && cpu != null && !string.IsNullOrEmpty(mb.Socket) && !string.IsNullOrEmpty(cpu.Socket) && mb.Socket != cpu.Socket)
+            return true;
+        if (mb != null && rams.Any() && !string.IsNullOrEmpty(mb.DdrType))
+        {
+            if (rams.Any(r => !string.IsNullOrEmpty(r.DdrType) && r.DdrType != mb.DdrType))
+                return true;
+        }
+        if (mb != null && pcCase != null)
+        {
+            var mbForm = (mb.FormFactor ?? "").ToLowerInvariant();
+            if (mbForm.Contains("micro"))
+            {
+                var cf = (pcCase.FormFactor ?? "").ToLowerInvariant();
+                if (!string.IsNullOrEmpty(cf) && !cf.Contains("micro") && !cf.Contains("atx"))
+                    return true;
+            }
+        }
+        return false;
     }
 
     public IActionResult Detail(int id)
@@ -198,26 +240,23 @@ public class BuildController : Controller
 
         if (build == null) return RedirectToAction(nameof(Index));
 
-        var order = new[] { "Motherboard", "CPU", "RAM", "GPU", "Storage", "Power supply unit", "CPU cooler", "PC case" };
         var categories = db.Categories.Include(c => c.Hardware).OrderBy(c => c.CategoryId).ToList();
+        var options = GetCategoryOptionsWithFilteredHardware(categories);
         var ramDetails = build.BuildDetails.Where(bd => bd.Hardware.Category?.Type == "RAM").OrderBy(bd => bd.BuildDetailId).ToList();
         var ramSelections = ramDetails.Select(bd => (int?)bd.HardwareId).ToList();
         while (ramSelections.Count < 4) ramSelections.Add(null);
+        foreach (var opt in options)
+        {
+            if (opt.Type == "RAM")
+                opt.RamSlotSelections = ramSelections;
+            else
+                opt.SelectedHardwareId = build.BuildDetails.Where(bd => bd.Hardware.CategoryId == opt.CategoryId).Select(bd => (int?)bd.HardwareId).FirstOrDefault();
+        }
 
         var vm = new ConfigureBuildVM
         {
             BuildName = build.BuildName,
-            Categories = categories
-                .OrderBy(c => Array.IndexOf(order, c.Type) >= 0 ? Array.IndexOf(order, c.Type) : 99)
-                .ThenBy(c => c.CategoryId)
-                .Select(c => new CategoryOptionVM
-                {
-                    CategoryId = c.CategoryId,
-                    Type = c.Type,
-                    Items = c.Type == "GPU" ? Helper.FilterDuplicateGpuFromDisplay(c.Hardware.OrderBy(h => h.Name).ToList(), "GPU") : c.Hardware.OrderBy(h => h.Name).ToList(),
-                    SelectedHardwareId = c.Type == "RAM" ? null : build.BuildDetails.Where(bd => bd.Hardware.CategoryId == c.CategoryId).Select(bd => (int?)bd.HardwareId).FirstOrDefault(),
-                    RamSlotSelections = c.Type == "RAM" ? ramSelections : []
-                }).ToList()
+            Categories = options
         };
         ViewBag.BuildId = id;
         return View(vm);
@@ -232,24 +271,21 @@ public class BuildController : Controller
         var build = db.Builds.Include(b => b.BuildDetails).FirstOrDefault(b => b.BuildId == id && b.UserId == userId);
         if (build == null) return RedirectToAction(nameof(Index));
 
-        var ramCat = vm.Categories?.FirstOrDefault(x => x.Type == "RAM");
-        var mbCat = vm.Categories?.FirstOrDefault(x => x.Type == "Motherboard");
+        var incoming = vm.Categories;
+        var ramCat = incoming?.FirstOrDefault(x => x.Type == "RAM");
+        var mbCat = incoming?.FirstOrDefault(x => x.Type == "Motherboard");
         var mbId = mbCat?.SelectedHardwareId;
         var ramSlots = mbId.HasValue ? (db.Hardware.Find(mbId.Value)?.RamSlots ?? 4) : 4;
 
-        var order = new[] { "Motherboard", "CPU", "RAM", "GPU", "Storage", "Power supply unit", "CPU cooler", "PC case" };
         var categories = db.Categories.Include(c => c.Hardware).OrderBy(c => c.CategoryId).ToList();
-        vm.Categories = categories
-            .OrderBy(c => Array.IndexOf(order, c.Type) >= 0 ? Array.IndexOf(order, c.Type) : 99)
-            .ThenBy(c => c.CategoryId)
-            .Select(c => new CategoryOptionVM
-            {
-                CategoryId = c.CategoryId,
-                Type = c.Type,
-                Items = c.Type == "GPU" ? Helper.FilterDuplicateGpuFromDisplay(c.Hardware.OrderBy(h => h.Name).ToList(), "GPU") : c.Hardware.OrderBy(h => h.Name).ToList(),
-                SelectedHardwareId = c.Type == "RAM" ? null : vm.Categories?.FirstOrDefault(x => x.CategoryId == c.CategoryId)?.SelectedHardwareId,
-                RamSlotSelections = c.Type == "RAM" ? (ramCat?.RamSlotSelections ?? new List<int?>(new int?[4])) : []
-            }).ToList();
+        vm.Categories = GetCategoryOptionsWithFilteredHardware(categories);
+        foreach (var c in vm.Categories)
+        {
+            if (c.Type == "RAM")
+                c.RamSlotSelections = ramCat?.RamSlotSelections ?? new List<int?>(new int?[4]);
+            else
+                c.SelectedHardwareId = incoming?.FirstOrDefault(x => x.CategoryId == c.CategoryId)?.SelectedHardwareId;
+        }
 
         if (string.IsNullOrWhiteSpace(vm.BuildName))
             ModelState.AddModelError("BuildName", "Build name is required.");

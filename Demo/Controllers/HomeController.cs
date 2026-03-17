@@ -16,6 +16,16 @@ public class HomeController : Controller
     // GET: Home/Index
     public IActionResult Index()
     {
+        ViewBag.HideMainTitle = true;
+        ViewBag.IsHomePage = true;
+        // Higher rated hardware: 2 rows x 5 = 10 items for section two
+        var topRated = db.Hardware
+            .Include(h => h.Category)
+            .OrderByDescending(h => h.Rating ?? 0)
+            .ThenByDescending(h => h.PerformanceScore ?? 0)
+            .Take(10)
+            .ToList();
+        ViewBag.TopRatedHardware = topRated;
         return View();
     }
 }

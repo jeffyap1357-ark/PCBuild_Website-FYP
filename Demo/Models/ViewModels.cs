@@ -214,3 +214,50 @@ public class FeedbackReportVM
     public List<FeedbackDistributionItemVM> Distribution { get; set; } = [];
     public List<Feedback> Feedbacks { get; set; } = [];
 }
+
+public class HardwareEditVM
+{
+    public int HardwareId { get; set; }
+    [Required, StringLength(200), Display(Name = "Name")]
+    public string? Name { get; set; }
+    [Required, Display(Name = "Category")]
+    public int CategoryId { get; set; }
+    [Required, Range(0, double.MaxValue), Display(Name = "Price")]
+    public decimal Price { get; set; }
+    [StringLength(2000), Display(Name = "Detail")]
+    public string? Detail { get; set; }
+    [StringLength(100), Display(Name = "Brand")]
+    public string? Brand { get; set; }
+    [Display(Name = "Display image (required for new)")]
+    public IFormFile? PictureFile { get; set; }
+    [Display(Name = "Clean image for build diagram (required for new)")]
+    public IFormFile? CleanPictureFile { get; set; }
+    public string? CurrentPicture { get; set; }
+    public string? CurrentCleanPicture { get; set; }
+    [StringLength(50), Display(Name = "Socket (CPU/Motherboard)")]
+    public string? Socket { get; set; }
+    [StringLength(20), Display(Name = "DDR type (Motherboard/RAM)")]
+    public string? DdrType { get; set; }
+    [StringLength(50), Display(Name = "Form factor (Motherboard/Case)")]
+    public string? FormFactor { get; set; }
+    [Display(Name = "Special (1-10)")]
+    public int? Special { get; set; }
+    [Display(Name = "RAM slots (Motherboard)")]
+    public int? RamSlots { get; set; }
+    [Display(Name = "Release year")]
+    public int? ReleaseYear { get; set; }
+    [Display(Name = "Rating (1-5)")]
+    public int? Rating { get; set; }
+    [Display(Name = "Performance score (0-100)")]
+    public int? PerformanceScore { get; set; }
+    [Display(Name = "Power (W) (CPU/GPU/PSU)")]
+    public int? PowerConsumption { get; set; }
+    [Display(Name = "Gaming score (1-10)")]
+    public int? GamingScore { get; set; }
+    [Display(Name = "Office score (1-10)")]
+    public int? OfficeScore { get; set; }
+    [Display(Name = "Editing score (1-10)")]
+    public int? EditingScore { get; set; }
+    [StringLength(500), Display(Name = "Reference URL")]
+    public string? Reference { get; set; }
+}

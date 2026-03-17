@@ -2,11 +2,31 @@
 
 @{
     ViewBag.Title = "PC Build | My Builds";
+    var totalBuilds = Model?.Count ?? 0;
+    var grandTotal = Model?.Sum(b => b.TotalPrice) ?? 0m;
+    var problemBuildIds = ViewBag.ProblemBuildIds as HashSet<int> ?? new HashSet<int>();
 }
 
 <p>
     <a href="@Url.Action("Configure")" class="button">+ New PC Build</a>
 </p>
+
+@if (totalBuilds > 0)
+{
+    <section class="mybuild-summary">
+        <h2 class="mybuild-summary-title">Build summary</h2>
+        <div class="mybuild-summary-stats">
+            <div class="mybuild-summary-stat">
+                <span class="mybuild-summary-value">@totalBuilds</span>
+                <span class="mybuild-summary-label">Build@(totalBuilds == 1 ? "" : "s")</span>
+            </div>
+            <div class="mybuild-summary-stat">
+                <span class="mybuild-summary-value">@grandTotal.ToString("C")</span>
+                <span class="mybuild-summary-label">Total value</span>
+            </div>
+        </div>
+    </section>
+}
 
 @if (!Model.Any())
 {
@@ -14,39 +34,44 @@
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Build Name</th>
-                <th>Total Price</th>
-                <th>Status</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var b in Model)
-            {
-                <tr>
-                    <td><a href="@Url.Action("Detail", new { id = b.BuildId })">@b.BuildName</a></td>
-                    <td>@b.TotalPrice.ToString("C")</td>
-                    <td>@(b.IsShared ? "✓ Shared" : "—")</td>
-                    <td>
-                        <a href="@Url.Action("Detail", new { id = b.BuildId })" class="button">View</a>
-                        <a href="@Url.Action("Edit", new { id = b.BuildId })" class="button">Edit</a>
-                        @if (b.IsShared)
+    <div class="mybuild-card-grid">
+        @foreach (var b in Model)
+        {
+            var imgSrc = (b.IsShared && b.Community != null && !string.IsNullOrEmpty(b.Community.Image))
+                ? "/images/community/" + b.Community.Image
+                : "/images/default.png";
+            var hasProblem = problemBuildIds.Contains(b.BuildId);
+            <div class="mybuild-card">
+                <div class="mybuild-card-image-wrap">
+                    @if (hasProblem)
+                    {
+                        <img src="/images/problem.png" alt="Compatibility problem" class="mybuild-card-problem" title="This build has compatibility issues">
+                    }
+                    <a href="@Url.Action("Detail", new { id = b.BuildId })" class="mybuild-card-image">
+                        <img src="@imgSrc" alt="@b.BuildName" onerror="this.onerror=null;this.src='/images/default.png';">
+                    </a>
+                </div>
+                <div class="mybuild-card-body">
+                    <a href="@Url.Action("Detail", new { id = b.BuildId })" class="mybuild-card-name">@b.BuildName</a>
+                    <div class="mybuild-card-price">@b.TotalPrice.ToString("C")</div>
+                    <div class="mybuild-card-status">@(b.IsShared ? "✓ Shared" : "—")</div>
+                    <div class="mybuild-card-actions">
+                        <a href="@Url.Action("Detail", new { id = b.BuildId })" class="button small">View</a>
+                        <a href="@Url.Action("Edit", new { id = b.BuildId })" class="button small">Edit</a>
+                        @if (b.IsShared && b.Community != null)
                         {
-                            <a href="@Url.Action("Detail", "Community", new { id = b.Community?.CommunityId })" class="button">View in Community</a>
+                            <a href="@Url.Action("Detail", "Community", new { id = b.Community.CommunityId })" class="button small">Community</a>
                         }
                         else
                         {
-                            <a href="@Url.Action("Share", "Community", new { buildId = b.BuildId })" class="button">Share to Community</a>
+                            <a href="@Url.Action("Share", "Community", new { buildId = b.BuildId })" class="button small">Share</a>
                         }
                         <form method="post" action="@Url.Action("Delete", new { id = b.BuildId })" style="display:inline;" onsubmit="return confirm('Delete this build?');">
-                            <button type="submit" class="button">Delete</button>
+                            <button type="submit" class="button small">Delete</button>
                         </form>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
 }

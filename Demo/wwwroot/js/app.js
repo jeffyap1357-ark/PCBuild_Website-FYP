@@ -1,4 +1,4 @@
-﻿// Initiate GET request (AJAX-supported)
+// Initiate GET request (AJAX-supported)
 $(document).on('click', '[data-get]', e => {
     e.preventDefault();
     const url = e.target.dataset.get;
@@ -76,3 +76,20 @@ $('.upload input').on('change', e => {
     // Trigger input validation
     $(e.target).valid();
 });
+
+// Nav user dropdown: toggle on trigger click, close on outside click
+(function () {
+    var trigger = document.getElementById('nav-user-trigger');
+    var dropdown = document.getElementById('nav-user-dropdown');
+    if (!trigger || !dropdown) return;
+    trigger.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var isOpen = !dropdown.hidden;
+        dropdown.hidden = isOpen;
+        trigger.setAttribute('aria-expanded', !isOpen);
+    });
+    document.addEventListener('click', function () {
+        dropdown.hidden = true;
+        trigger.setAttribute('aria-expanded', 'false');
+    });
+})();

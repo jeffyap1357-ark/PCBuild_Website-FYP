@@ -10,7 +10,17 @@
     <link rel="stylesheet" href="/css/app.css" asp-append-version="true">
     @RenderSection("head", false)
 </head>
-<body>
+@{
+    var path = Context.Request.Path.Value ?? "";
+    var isAdminSite = User.IsInRole(Roles.Admin) && (
+        path.Equals("/Admin", StringComparison.OrdinalIgnoreCase) ||
+        path.StartsWith("/Admin/", StringComparison.OrdinalIgnoreCase) ||
+        path.StartsWith("/HardwareAdmin", StringComparison.OrdinalIgnoreCase) ||
+        path.StartsWith("/LearningAdmin", StringComparison.OrdinalIgnoreCase) ||
+        path.StartsWith("/QuizAdmin", StringComparison.OrdinalIgnoreCase) ||
+        path.StartsWith("/FeedbackAdmin", StringComparison.OrdinalIgnoreCase));
+}
+<body class="@(isAdminSite ? "body-admin-site" : "")">
     <div class="info">@Html.Raw(TempData["Info"])</div>
 
     <header>
@@ -18,59 +28,75 @@
 
         @if (User.Identity!.IsAuthenticated)
         {
-            <div>@User.Identity.Name</div>
+            <div class="header-user" id="nav-user">
+                <button type="button" class="header-user-trigger" id="nav-user-trigger" title="Account" aria-label="Account" aria-expanded="false" aria-haspopup="true">
+                    <span class="header-user-avatar" aria-hidden="true">@(User.Identity.Name?.Length > 0 ? User.Identity.Name[0].ToString().ToUpperInvariant() : "?")</span>
+                    <span class="header-user-name">@User.Identity.Name</span>
+                </button>
+                <div class="nav-user-dropdown" id="nav-user-dropdown" role="menu" hidden>
+                    <a href="/Account/UpdateProfile" role="menuitem">Update Profile</a>
+                    <a href="/Account/UpdatePassword" role="menuitem">Update Password</a>
+                    <a href="/Account/Logout" role="menuitem">Log out</a>
+                </div>
+            </div>
         }
     </header>
 
-    <nav>
-        <a href="/">Home</a>
-        <a href="/Hardware/List">Hardware List</a>
-        <a href="/Learning/Index">Learning & Guide</a>
-        <a href="/Community/Index">Community</a>
-        <a href="/Recommend">Recommend Build</a>
-        @if (User.Identity!.IsAuthenticated)
+    <nav class="nav-icons @(isAdminSite ? "nav-icons--admin-only" : "")">
+        @if (User.Identity!.IsAuthenticated && isAdminSite)
         {
-            <a href="/Build/Configure">PC Build Config</a>
-            <a href="/Build/Index">My Builds</a>
-            <a href="/Quiz/Index">Quiz</a>
-            <a href="/Performance/Index">Performance Build</a>
+            <a href="/Admin" title="Dashboard" aria-label="Dashboard">Dashboard</a>
+            <a href="/HardwareAdmin" title="Hardware CRUD" aria-label="Hardware CRUD">Hardware</a>
+            <a href="/LearningAdmin/Index" title="Learning maker" aria-label="Learning maker">Learning</a>
+            <a href="/QuizAdmin/Index" title="Quiz admin" aria-label="Quiz admin">Quiz</a>
+            <a href="/FeedbackAdmin/Index" title="Feedback admin" aria-label="Feedback admin">Feedback</a>
+            <div class="nav-spacer"></div>
+            <a href="/" class="nav-site-switch" title="Back to user site">User site</a>
         }
-
-        <div></div>
-
-        @if (User.Identity.IsAuthenticated)
+        else if (!User.Identity!.IsAuthenticated)
         {
-            @if (User.IsInRole(Roles.Admin))
-            {
-                <a href="/Admin">Admin</a>
-            }
-            <a href="/Account/Logout">Logout</a>
-            <a href="/Account/UpdatePassword">Update Password</a>
-            <a href="/Account/UpdateProfile">Update Profile</a>
-            <a href="/LearningAdmin/Index">Learning Material Maker</a>
-            @if (User.IsInRole(Roles.Admin))
-            {
-                <a href="/QuizAdmin/Index">Quiz Admin</a>
-                <a href="/FeedbackAdmin/Index">Feedback Admin</a>
-            }
-        }
-        else
-        {
+            <a href="/" title="Home" aria-label="Home"><img src="/icon/home.png" alt=""></a>
+            <a href="/Hardware/List" title="Hardware List" aria-label="Hardware List"><img src="/icon/hardwarelist.png" alt=""></a>
+            <a href="/Learning/Index" title="Learning & Guide" aria-label="Learning & Guide"><img src="/icon/learning.png" alt=""></a>
+            <a href="/Community/Index" title="Community" aria-label="Community"><img src="/icon/community.png" alt=""></a>
+            <a href="/Recommend" title="Recommend Build" aria-label="Recommend Build"><img src="/icon/recommend.png" alt=""></a>
+            <div class="nav-spacer"></div>
             <a href="/Account/Login">Login</a>
             <a href="/Account/Register">Register</a>
             <a href="/Account/ResetPassword">Reset Password</a>
         }
+        else
+        {
+            <a href="/" title="Home" aria-label="Home"><img src="/icon/home.png" alt=""></a>
+            <a href="/Hardware/List" title="Hardware List" aria-label="Hardware List"><img src="/icon/hardwarelist.png" alt=""></a>
+            <a href="/Learning/Index" title="Learning & Guide" aria-label="Learning & Guide"><img src="/icon/learning.png" alt=""></a>
+            <a href="/Community/Index" title="Community" aria-label="Community"><img src="/icon/community.png" alt=""></a>
+            <a href="/Recommend" title="Recommend Build" aria-label="Recommend Build"><img src="/icon/recommend.png" alt=""></a>
+            <a href="/Build/Configure" title="PC Build Config" aria-label="PC Build Config"><img src="/icon/pcbuild.png" alt=""></a>
+            <a href="/Build/Index" title="My Builds" aria-label="My Builds"><img src="/icon/mybuild.png" alt=""></a>
+            <a href="/Quiz/Index" title="Quiz" aria-label="Quiz"><img src="/icon/quizz.png" alt=""></a>
+            <a href="/Performance/Index" title="Performance Build" aria-label="Performance Build"><img src="/icon/perfomence.png" alt=""></a>
+            <div class="nav-spacer"></div>
+            @if (User.IsInRole(Roles.Admin))
+            {
+                <a href="/Admin" class="nav-site-switch" title="Admin site">Admin site</a>
+            }
+        }
     </nav>
 
-    <main>
-        <h1>@ViewBag.Title</h1>
+    <main class="@(ViewBag.IsHomePage == true ? "home-page" : "")">
+        @if (ViewBag.HideMainTitle != true)
+        {
+            <h1>@ViewBag.Title</h1>
+        }
         @RenderBody()
     </main>
 
-    <footer>
-        PC Build &middot;
-        Copyright &copy; @DateTime.Today.Year
-    </footer>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <footer>
+        </footer>
+    }
 
     <script src="/js/jquery.min.js"></script>
     <script src="/js/jquery.unobtrusive-ajax.min.js"></script>

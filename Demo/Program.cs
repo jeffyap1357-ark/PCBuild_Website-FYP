@@ -254,16 +254,17 @@ try
             UPDATE [Users] SET [IsRootAdmin] = 0 WHERE [IsRootAdmin] IS NULL;
         END;
     ");
+    var rootEmail = builder.Configuration["RootAdmin:Email"] ?? "admin@pcbuild.local";
+    var rootPassword = builder.Configuration["RootAdmin:Password"] ?? "Admin@123";
     var rootAdmin = dbUsers.Users.FirstOrDefault(u => u.IsRootAdmin);
     if (rootAdmin == null)
     {
-        var rootEmail = builder.Configuration["RootAdmin:Email"] ?? "admin@pcbuild.local";
-        var rootPassword = builder.Configuration["RootAdmin:Password"] ?? "Admin@123";
         var existingAdmin = dbUsers.Users.FirstOrDefault(u => u.Username == "admin");
         if (existingAdmin != null)
         {
             existingAdmin.IsRootAdmin = true;
             existingAdmin.Role = Roles.Admin;
+            existingAdmin.Email = rootEmail;
             existingAdmin.Password = helper.HashPassword(rootPassword);
         }
         else
@@ -278,7 +279,13 @@ try
             });
         }
         dbUsers.SaveChanges();
-        logger.LogInformation("Root admin account created. Username: admin");
+        logger.LogInformation("Root admin account created. Login with Email: {Email}", rootEmail);
+    }
+    else
+    {
+        rootAdmin.Email = rootEmail;
+        rootAdmin.Password = helper.HashPassword(rootPassword);
+        dbUsers.SaveChanges();
     }
 }
 catch (Exception ex)

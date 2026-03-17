@@ -13,7 +13,7 @@ public class HardwareController : Controller
     }
 
     // GET: Hardware/List
-    public IActionResult List(int? categoryId, string brand)
+    public IActionResult List(int? categoryId, string brand, string sortBy)
     {
         var query = db.Hardware.Include(h => h.Category).AsQueryable();
 
@@ -23,17 +23,19 @@ public class HardwareController : Controller
         if (!string.IsNullOrWhiteSpace(brand))
             query = query.Where(h => h.Brand != null && h.Brand.Trim().ToLower() == brand.Trim().ToLower());
 
-        var hardware = query.OrderBy(h => h.Category.Type).ThenBy(h => h.Name).ToList();
+        query = ApplySort(query, sortBy);
+        var hardware = query.ToList();
         ViewBag.Categories = db.Categories.OrderBy(c => c.CategoryId).ToList();
         ViewBag.SelectedCategoryId = categoryId;
         ViewBag.Brands = db.Hardware.Where(h => h.Brand != null && h.Brand.Trim() != "").Select(h => h.Brand!.Trim()).Distinct().OrderBy(b => b).ToList();
         ViewBag.SelectedBrand = brand;
+        ViewBag.SortBy = sortBy ?? "";
 
         return View(hardware);
     }
 
     // GET: Hardware/ListPartial (AJAX - returns partial HTML)
-    public IActionResult ListPartial(int? categoryId, string brand, string search)
+    public IActionResult ListPartial(int? categoryId, string brand, string search, string sortBy)
     {
         var query = db.Hardware.Include(h => h.Category).AsQueryable();
 
@@ -52,8 +54,21 @@ public class HardwareController : Controller
                 (h.Brand != null && h.Brand.ToLower().Contains(q)));
         }
 
-        var hardware = query.OrderBy(h => h.Category.Type).ThenBy(h => h.Name).ToList();
+        query = ApplySort(query, sortBy);
+        var hardware = query.ToList();
         return PartialView("_HardwareCardGrid", hardware);
+    }
+
+    private static IQueryable<Hardware> ApplySort(IQueryable<Hardware> query, string? sortBy)
+    {
+        return (sortBy?.ToLowerInvariant()) switch
+        {
+            "price" => query.OrderBy(h => h.Category!.Type).ThenBy(h => h.Price).ThenBy(h => h.Name),
+            "pricedesc" => query.OrderBy(h => h.Category!.Type).ThenByDescending(h => h.Price).ThenBy(h => h.Name),
+            "rating" => query.OrderBy(h => h.Category!.Type).ThenBy(h => h.Rating ?? 0).ThenBy(h => h.Name),
+            "ratingdesc" => query.OrderBy(h => h.Category!.Type).ThenByDescending(h => h.Rating ?? 0).ThenBy(h => h.Name),
+            _ => query.OrderBy(h => h.Category!.Type).ThenBy(h => h.Name)
+        };
     }
 
     // GET: Hardware/Detail/5
