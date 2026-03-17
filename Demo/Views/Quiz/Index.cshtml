@@ -6,54 +6,108 @@
 
 @if (!Model.IsSubmitted)
 {
-    <p>Answer the following 10 multiple-choice questions to test your PC build knowledge. Each question has options A–D.</p>
+    <div class="quiz-intro">
+        <p>Answer the following multiple-choice questions to test your PC build knowledge. Each question has options A–D.</p>
+        <p>You will answer <strong>one question per page</strong>. Use Next / Previous to navigate, then submit on the last question.</p>
+    </div>
 
-    <form method="post">
+    <form method="post" id="quiz-form">
         <div asp-validation-summary="ModelOnly"></div>
 
-        @for (var i = 0; i < Model.Questions.Count; i++)
-        {
-            var q = Model.Questions[i];
-            <fieldset class="quiz-question">
-                <legend>@(i + 1). @q.QuestionText</legend>
-                <input type="hidden" asp-for="Questions[i].QuizQuestionId" />
-                <input type="hidden" asp-for="Questions[i].QuestionText" />
-                <input type="hidden" asp-for="Questions[i].OptionA" />
-                <input type="hidden" asp-for="Questions[i].OptionB" />
-                <input type="hidden" asp-for="Questions[i].OptionC" />
-                <input type="hidden" asp-for="Questions[i].OptionD" />
-                <div>
-                    <label>
-                        <input type="radio" asp-for="Questions[i].SelectedOption" value="A" />
-                        A) @q.OptionA
-                    </label>
-                </div>
-                <div>
-                    <label>
-                        <input type="radio" asp-for="Questions[i].SelectedOption" value="B" />
-                        B) @q.OptionB
-                    </label>
-                </div>
-                <div>
-                    <label>
-                        <input type="radio" asp-for="Questions[i].SelectedOption" value="C" />
-                        C) @q.OptionC
-                    </label>
-                </div>
-                <div>
-                    <label>
-                        <input type="radio" asp-for="Questions[i].SelectedOption" value="D" />
-                        D) @q.OptionD
-                    </label>
-                </div>
-            </fieldset>
-        }
+        <div id="quiz-progress">
+            Question <span id="quiz-current">1</span> / <span id="quiz-total">@Model.Questions.Count</span>
+        </div>
 
-        <p>
-            <button type="submit" class="button">Submit Answers</button>
-            <a href="@Url.Action("History")" class="button secondary">View History</a>
-        </p>
+        <div id="quiz-questions-container">
+            @for (var i = 0; i < Model.Questions.Count; i++)
+            {
+                var q = Model.Questions[i];
+                <section class="quiz-question-card" data-index="@i" style="display:@(i == 0 ? "block" : "none")">
+                    <header class="quiz-question-header">
+                        <span class="quiz-question-number">@((i + 1).ToString("00"))</span>
+                        <h2>@q.QuestionText</h2>
+                    </header>
+
+                    <input type="hidden" asp-for="Questions[i].QuizQuestionId" />
+                    <input type="hidden" asp-for="Questions[i].QuestionText" />
+                    <input type="hidden" asp-for="Questions[i].OptionA" />
+                    <input type="hidden" asp-for="Questions[i].OptionB" />
+                    <input type="hidden" asp-for="Questions[i].OptionC" />
+                    <input type="hidden" asp-for="Questions[i].OptionD" />
+
+                    <div class="quiz-options-grid">
+                        <label class="quiz-option-card">
+                            <input type="radio" asp-for="Questions[i].SelectedOption" value="A" />
+                            <span class="quiz-option-label">A</span>
+                            <span class="quiz-option-text">@q.OptionA</span>
+                        </label>
+                        <label class="quiz-option-card">
+                            <input type="radio" asp-for="Questions[i].SelectedOption" value="B" />
+                            <span class="quiz-option-label">B</span>
+                            <span class="quiz-option-text">@q.OptionB</span>
+                        </label>
+                        <label class="quiz-option-card">
+                            <input type="radio" asp-for="Questions[i].SelectedOption" value="C" />
+                            <span class="quiz-option-label">C</span>
+                            <span class="quiz-option-text">@q.OptionC</span>
+                        </label>
+                        <label class="quiz-option-card">
+                            <input type="radio" asp-for="Questions[i].SelectedOption" value="D" />
+                            <span class="quiz-option-label">D</span>
+                            <span class="quiz-option-text">@q.OptionD</span>
+                        </label>
+                    </div>
+                </section>
+            }
+        </div>
+
+        <div class="quiz-nav">
+            <button type="button" id="quiz-prev" class="button secondary" disabled>Previous</button>
+            <button type="button" id="quiz-next" class="button">Next</button>
+            <button type="submit" id="quiz-submit" class="button" style="display:none;">Submit Answers</button>
+
+            <a href="@Url.Action("History")" class="button secondary quiz-history-link">View History</a>
+        </div>
     </form>
+
+    <script>
+        (function () {
+            const cards = Array.from(document.querySelectorAll('.quiz-question-card'));
+            if (!cards.length) return;
+
+            let current = 0;
+            const total = cards.length;
+            const currentSpan = document.getElementById('quiz-current');
+            const prevBtn = document.getElementById('quiz-prev');
+            const nextBtn = document.getElementById('quiz-next');
+            const submitBtn = document.getElementById('quiz-submit');
+
+            function updateView() {
+                cards.forEach((c, i) => c.style.display = i === current ? 'block' : 'none');
+                currentSpan.textContent = (current + 1).toString();
+                prevBtn.disabled = current === 0;
+                const onLast = current === total - 1;
+                nextBtn.style.display = onLast ? 'none' : 'inline-block';
+                submitBtn.style.display = onLast ? 'inline-block' : 'none';
+            }
+
+            prevBtn.addEventListener('click', () => {
+                if (current > 0) {
+                    current--;
+                    updateView();
+                }
+            });
+
+            nextBtn.addEventListener('click', () => {
+                if (current < total - 1) {
+                    current++;
+                    updateView();
+                }
+            });
+
+            updateView();
+        })();
+    </script>
 }
 else
 {
