@@ -3914,12 +3914,18 @@ main hr {
     color: #1e40af;
 }
 
+/* Performance Report: full-width, centered below the two-column layout */
+.perf-report-wrap {
+    margin-top: 2em;
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+}
 .perf-result-card {
     background: linear-gradient(165deg, #f0fdf4 0%, #dcfce7 40%, #f8fafc 100%);
     border: 1px solid rgba(34, 197, 94, 0.25);
     border-radius: 14px;
     padding: 22px;
-    margin-top: 20px;
     box-shadow: 0 4px 16px rgba(34, 197, 94, 0.08);
 }
 .perf-result-card h3 {

@@ -62,48 +62,50 @@
                 <strong>Estimated Total:</strong> <span id="total-price">@Model.TotalPrice.ToString("C")</span>
             </p>
         </div>
-
-        @if (Model.HasResult && parts.Any())
-        {
-            <div class="perf-result-card">
-                <h3>Performance Report</h3>
-                <div class="perf-result-main @(score >= 85 ? "perf-grade-excellent" : score >= 70 ? "perf-grade-good" : score >= 55 ? "perf-grade-ok" : "perf-grade-entry")">
-                    <span class="perf-result-grade">@(assessment?.Rating ?? "—")</span>
-                    <span class="perf-result-score">Score: @score</span>
-                </div>
-                <p class="perf-result-meta">
-                    Total: @Model.TotalPrice.ToString("C")
-                </p>
-                @if (assessment != null)
-                {
-                    <p class="perf-result-comment">@assessment.Comment</p>
-                    <p class="perf-result-detail"><strong>Strengths:</strong> @assessment.Strengths</p>
-                    <p class="perf-result-detail"><strong>Weaknesses:</strong> @assessment.Weaknesses</p>
-                }
-                <table class="table perf-result-table">
-                    <thead>
-                        <tr><th>Component</th><th>Part</th><th>Price</th><th>Score</th></tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var p in parts.OrderBy(p => p.Category?.Type))
-                        {
-                            <tr>
-                                <td>@p.Category?.Type</td>
-                                <td><a href="/Hardware/Detail/@p.HardwareId">@p.Name</a></td>
-                                <td>@p.Price.ToString("C")</td>
-                                <td>@(p.PerformanceScore ?? p.Special ?? 5)</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-                @if (savedId.HasValue)
-                {
-                    <p><em>Report saved. <a href="@Url.Action("History")">View History</a></em></p>
-                }
-            </div>
-        }
     </div>
 </div>
+
+@if (Model.HasResult && parts.Any())
+{
+    <div class="perf-report-wrap">
+        <div class="perf-result-card">
+            <h3>Performance Report</h3>
+            <div class="perf-result-main @(score >= 85 ? "perf-grade-excellent" : score >= 70 ? "perf-grade-good" : score >= 55 ? "perf-grade-ok" : "perf-grade-entry")">
+                <span class="perf-result-grade">@(assessment?.Rating ?? "—")</span>
+                <span class="perf-result-score">Score: @score</span>
+            </div>
+            <p class="perf-result-meta">
+                Total: @Model.TotalPrice.ToString("C")
+            </p>
+            @if (assessment != null)
+            {
+                <p class="perf-result-comment">@assessment.Comment</p>
+                <p class="perf-result-detail"><strong>Strengths:</strong> @assessment.Strengths</p>
+                <p class="perf-result-detail"><strong>Weaknesses:</strong> @assessment.Weaknesses</p>
+            }
+            <table class="table perf-result-table">
+                <thead>
+                    <tr><th>Component</th><th>Part</th><th>Price</th><th>Score</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in parts.OrderBy(p => p.Category?.Type))
+                    {
+                        <tr>
+                            <td>@p.Category?.Type</td>
+                            <td><a href="/Hardware/Detail/@p.HardwareId">@p.Name</a></td>
+                            <td>@p.Price.ToString("C")</td>
+                            <td>@(p.PerformanceScore ?? p.Special ?? 5)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            @if (savedId.HasValue)
+            {
+                <p><em>Report saved. <a href="@Url.Action("History")">View History</a></em></p>
+            }
+        </div>
+    </div>
+}
 
 @section foot {
     <script>
