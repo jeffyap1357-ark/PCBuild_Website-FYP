@@ -4,60 +4,62 @@
     ViewBag.Title = "PC Build | Edit Quiz Question";
 }
 
-<form method="post">
+<form method="post" class="admin-form quiz-admin-form">
     <div asp-validation-summary="ModelOnly"></div>
 
-    <p>
-        <label asp-for="QuestionText"></label><br />
+    <div class="form-group">
+        <label asp-for="QuestionText"></label>
         <textarea asp-for="QuestionText" rows="3"></textarea>
         <span asp-validation-for="QuestionText"></span>
-    </p>
+    </div>
 
-    <p>
-        <label asp-for="OptionA"></label><br />
-        <input asp-for="OptionA" />
-        <span asp-validation-for="OptionA"></span>
-    </p>
-    <p>
-        <label asp-for="OptionB"></label><br />
-        <input asp-for="OptionB" />
-        <span asp-validation-for="OptionB"></span>
-    </p>
-    <p>
-        <label asp-for="OptionC"></label><br />
-        <input asp-for="OptionC" />
-        <span asp-validation-for="OptionC"></span>
-    </p>
-    <p>
-        <label asp-for="OptionD"></label><br />
-        <input asp-for="OptionD" />
-        <span asp-validation-for="OptionD"></span>
-    </p>
+    <div class="quiz-admin-options">
+        <div class="form-group">
+            <label asp-for="OptionA">Option A</label>
+            <input asp-for="OptionA" />
+            <span asp-validation-for="OptionA"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="OptionB">Option B</label>
+            <input asp-for="OptionB" />
+            <span asp-validation-for="OptionB"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="OptionC">Option C</label>
+            <input asp-for="OptionC" />
+            <span asp-validation-for="OptionC"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="OptionD">Option D</label>
+            <input asp-for="OptionD" />
+            <span asp-validation-for="OptionD"></span>
+        </div>
+    </div>
 
-    <p>
-        <label asp-for="CorrectOption"></label><br />
-        <input asp-for="CorrectOption" maxlength="1" placeholder="A/B/C/D" />
-        <span asp-validation-for="CorrectOption"></span>
-    </p>
+    <div class="form-row quiz-admin-meta">
+        <div class="form-group">
+            <label asp-for="CorrectOption">Correct Option</label>
+            <input asp-for="CorrectOption" maxlength="1" placeholder="A/B/C/D" />
+            <span asp-validation-for="CorrectOption"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Level"></label>
+            <select asp-for="Level">
+                <option value="">Beginner (default)</option>
+                <option value="Beginner">Beginner</option>
+                <option value="Normal">Normal</option>
+                <option value="Professional">Professional</option>
+            </select>
+        </div>
+        <div class="form-group quiz-admin-active">
+            <label asp-for="IsActive"></label>
+            <input asp-for="IsActive" type="checkbox" />
+        </div>
+    </div>
 
-    <p>
-        <label asp-for="Level"></label><br />
-        <select asp-for="Level">
-            <option value="">Beginner (default)</option>
-            <option value="Beginner">Beginner</option>
-            <option value="Normal">Normal</option>
-            <option value="Professional">Professional</option>
-        </select>
-    </p>
-
-    <p>
-        <label asp-for="IsActive"></label>
-        <input asp-for="IsActive" type="checkbox" />
-    </p>
-
-    <p>
+    <div class="form-actions">
         <button type="submit" class="button">Save</button>
         <a href="@Url.Action("Index")" class="button secondary">Cancel</a>
-    </p>
+    </div>
 </form>
 

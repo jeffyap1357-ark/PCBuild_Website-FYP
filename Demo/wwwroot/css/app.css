@@ -1071,6 +1071,24 @@ a.button.secondary:hover {
 .admin-form .current-file { font-size: 0.9rem; margin-bottom: 6px; }
 .admin-form .form-actions { margin-top: 1.5rem; }
 .admin-form .form-actions .button { margin-right: 10px; }
+
+/* Quiz Admin form: 2x2 options grid, meta row */
+.quiz-admin-form textarea { max-width: none; }
+.quiz-admin-options {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 1rem; margin-bottom: 1rem;
+}
+.quiz-admin-options .form-group input { max-width: none; width: 100%; }
+.quiz-admin-meta { align-items: flex-end; }
+.quiz-admin-meta .form-group { min-width: 120px; }
+.quiz-admin-meta input, .quiz-admin-meta select { max-width: 160px; }
+.quiz-admin-active { display: flex; align-items: center; gap: 8px; }
+.quiz-admin-active label { margin-bottom: 0; margin-right: 4px; }
+.quiz-admin-active input { width: auto; max-width: none; }
+@media (max-width: 600px) {
+    .quiz-admin-options { grid-template-columns: 1fr; }
+}
+
 button.link-button {
     background: none;
     border: none;
