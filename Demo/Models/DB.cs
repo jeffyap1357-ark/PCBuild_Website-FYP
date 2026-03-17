@@ -458,6 +458,10 @@ public class QuizQuestion
     [MaxLength(20)]
     public string? Level { get; set; }
 
+    /// <summary>Optional explanation shown after answering (e.g. why the answer is correct).</summary>
+    [MaxLength(1000)]
+    public string? Explanation { get; set; }
+
     public bool IsActive { get; set; } = true;
 }
 

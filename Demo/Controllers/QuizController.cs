@@ -37,6 +37,8 @@ public class QuizController : Controller
 
     private static string BuildExplanation(QuizQuestion q, string correctOpt)
     {
+        if (!string.IsNullOrWhiteSpace(q.Explanation))
+            return q.Explanation.Trim();
         var text = q.QuestionText ?? string.Empty;
         correctOpt = correctOpt.ToUpperInvariant();
         if (text.Contains("brain", StringComparison.OrdinalIgnoreCase))

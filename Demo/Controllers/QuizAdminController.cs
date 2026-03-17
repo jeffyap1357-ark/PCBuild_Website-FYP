@@ -53,6 +53,7 @@ public class QuizAdminController : Controller
         else if (!string.IsNullOrEmpty(level))
             q.Level = Levels.First(x => x.Equals(level, StringComparison.OrdinalIgnoreCase));
 
+        q.Explanation = string.IsNullOrWhiteSpace(q.Explanation) ? null : q.Explanation.Trim();
         if (ModelState.IsValid)
         {
             q.IsActive = true;
@@ -99,6 +100,7 @@ public class QuizAdminController : Controller
             q.OptionC = form.OptionC;
             q.OptionD = form.OptionD;
             q.CorrectOption = correct;
+            q.Explanation = string.IsNullOrWhiteSpace(form.Explanation) ? null : form.Explanation.Trim();
             q.IsActive = form.IsActive;
             db.SaveChanges();
             TempData["Info"] = "Question updated.";

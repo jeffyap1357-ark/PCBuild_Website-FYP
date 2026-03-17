@@ -13,6 +13,11 @@
         <span asp-validation-for="QuestionText"></span>
     </div>
 
+    <div class="form-group">
+        <label asp-for="Explanation">Description / Explanation</label>
+        <textarea asp-for="Explanation" rows="2" placeholder="Optional: shown after user answers (e.g. why the answer is correct)"></textarea>
+    </div>
+
     <div class="quiz-admin-options">
         <div class="form-group">
             <label asp-for="OptionA">Option A</label>
