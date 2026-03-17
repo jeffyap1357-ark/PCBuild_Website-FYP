@@ -2,21 +2,36 @@
 
 @{
     ViewBag.Title = "PC Build | Update Profile";
+    ViewBag.HideMainTitle = true;
 }
 
-<form class="form" method="post">
-    <div asp-validation-summary="ModelOnly"></div>
+<div class="auth-page">
+    <div class="auth-card">
+        <h2>Update Profile</h2>
+        <form class="auth-form" method="post">
+            <div asp-validation-summary="ModelOnly"></div>
 
-    <label asp-for="Username"></label>
-    <input asp-for="Username" autofocus>
-    <span asp-validation-for="Username"></span>
+            <div class="form-group">
+                <label asp-for="Username">Username</label>
+                <input asp-for="Username" placeholder="Username" autofocus>
+                <span asp-validation-for="Username"></span>
+            </div>
 
-    <label asp-for="Email"></label>
-    <input asp-for="Email">
-    <span asp-validation-for="Email"></span>
+            <div class="form-group">
+                <label asp-for="Email">Email</label>
+                <input asp-for="Email" type="email" placeholder="your@email.com">
+                <span asp-validation-for="Email"></span>
+            </div>
 
-    <section>
-        <button>Update</button>
-        <button type="reset">Reset</button>
-    </section>
-</form>
+            <div class="form-actions">
+                <button type="submit" class="button">Update</button>
+                <a href="/" class="button secondary">Cancel</a>
+            </div>
+        </form>
+
+        <div class="auth-links">
+            <a href="/Account/UpdatePassword">Change password</a> &nbsp;|&nbsp;
+            <a href="/Account/Logout">Log out</a>
+        </div>
+    </div>
+</div>

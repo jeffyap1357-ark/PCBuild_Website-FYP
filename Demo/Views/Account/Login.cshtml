@@ -1,33 +1,42 @@
-﻿@model LoginVM
+@model LoginVM
 
 @{
     ViewBag.Title = "Account | Login";
+    ViewBag.HideMainTitle = true;
 }
 
-<form class="form" method="post">
-    <div asp-validation-summary="ModelOnly"></div>
+<div class="auth-page">
+    <div class="auth-card">
+        <h2>Sign In</h2>
+        <form class="auth-form" method="post">
+            <div asp-validation-summary="ModelOnly"></div>
 
-    <label asp-for="Email"></label>
-    <input asp-for="Email" autofocus>
-    <span asp-validation-for="Email"></span>
+            <div class="form-group">
+                <label asp-for="Email">Email</label>
+                <input asp-for="Email" type="email" placeholder="your@email.com" autofocus>
+                <span asp-validation-for="Email"></span>
+            </div>
 
-    <label asp-for="Password"></label>
-    <input asp-for="Password">
-    <span asp-validation-for="Password"></span>
+            <div class="form-group">
+                <label asp-for="Password">Password</label>
+                <input asp-for="Password" placeholder="Password">
+                <span asp-validation-for="Password"></span>
+            </div>
 
-    <br>
-    <label>
-        <input asp-for="RememberMe">Remember Me
-    </label>
-    <br>
+            <div class="checkbox-wrap">
+                <input asp-for="RememberMe" type="checkbox">
+                <label asp-for="RememberMe">Remember me</label>
+            </div>
 
-    <section>
-        <button>Login</button>
-        <button type="reset">Reset</button>
-    </section>
-</form>
+            <div class="form-actions">
+                <button type="submit" class="button">Sign In</button>
+                <a href="/" class="button secondary">Cancel</a>
+            </div>
+        </form>
 
-<p>
-    [ <a href="/Account/Register">Register</a> |
-      <a href="/Account/ResetPassword">Reset Password</a> ]
-</p>
+        <div class="auth-links">
+            <a href="/Account/Register">Create account</a> &nbsp;|&nbsp;
+            <a href="/Account/ResetPassword">Forgot password?</a>
+        </div>
+    </div>
+</div>

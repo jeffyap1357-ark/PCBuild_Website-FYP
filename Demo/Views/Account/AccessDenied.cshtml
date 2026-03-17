@@ -1,5 +1,15 @@
-﻿@{
+@{
     ViewBag.Title = "Account | Access Denied";
+    ViewBag.HideMainTitle = true;
 }
 
-<p>You are <b>NOT AUTHORIZED</b> to access the page.</p>
+<div class="auth-page">
+    <div class="auth-card">
+        <h2>Access Denied</h2>
+        <p style="margin: 0 0 20px 0; color: var(--text-muted);">You are not authorized to access this page.</p>
+        <div class="form-actions">
+            <a href="/" class="button">Back to Home</a>
+            <a href="/Account/Login" class="button secondary">Sign In</a>
+        </div>
+    </div>
+</div>
