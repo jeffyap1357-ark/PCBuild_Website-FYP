@@ -82,10 +82,6 @@ public class PerformanceController : Controller
         }
 
         var totalPrice = parts.Sum(p => p.Price);
-        if (vm.Budget > 0 && totalPrice > vm.Budget)
-        {
-            ModelState.AddModelError("", $"Total price RM {totalPrice:N2} exceeds your budget RM {vm.Budget:N2}.");
-        }
 
         if (!ModelState.IsValid)
         {

@@ -9,21 +9,17 @@
     var assessment = parts.Any() ? BuildAssessmentService.GetAssessment(score, parts) : null;
 }
 
-<p>Set your budget, pick compatible components, and the system will calculate a performance score for your custom PC build.</p>
+<p>Pick compatible components and the system will calculate a performance score for your custom PC build.</p>
 
 <div class="perf-layout">
     <div class="perf-form-col">
         <form method="post" id="performance-form">
+            <input type="hidden" asp-for="Budget" value="500000" />
             <div asp-validation-summary="ModelOnly"></div>
 
-            <p>
-                <label asp-for="Budget"></label>
-                <input asp-for="Budget" type="number" min="1000" max="50000" step="100" />
-                <span asp-validation-for="Budget"></span>
-            </p>
+            <p class="perf-instruction"><em>Choose CPU first to filter compatible motherboards, then RAM and case will be filtered automatically.</em></p>
 
-            <p><strong>Select components by category:</strong> <em>Choose CPU first to filter compatible motherboards, then RAM and case will be filtered automatically.</em></p>
-
+            <div class="perf-selects">
             @for (var i = 0; i < Model.Categories.Count; i++)
             {
                 var cat = Model.Categories[i];
@@ -75,7 +71,7 @@
                     <span class="perf-result-score">Score: @score</span>
                 </div>
                 <p class="perf-result-meta">
-                    Budget: @Model.Budget.ToString("C") · Total: @Model.TotalPrice.ToString("C")
+                    Total: @Model.TotalPrice.ToString("C")
                 </p>
                 @if (assessment != null)
                 {

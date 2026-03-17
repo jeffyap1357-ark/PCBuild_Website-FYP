@@ -3778,6 +3778,14 @@ main hr {
 .perf-form-col { min-width: 0; }
 .perf-side-col { min-width: 0; }
 
+.perf-instruction { margin-bottom: 1.2em; color: var(--text-muted); font-size: 0.95rem; }
+.perf-selects { display: flex; flex-direction: column; gap: 14px; }
+.perf-select-item { padding: 12px 16px; background: var(--bg-card, #f8f9fa); border-radius: 10px; border: 1px solid var(--border); }
+.perf-select-item label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.9rem; }
+.perf-select { width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.95rem; }
+.perf-select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-dim); }
+.perf-actions { margin-top: 1.5em; }
+
 .perf-summary-card {
     background: var(--bg-card, #f8f9fa);
     border: 1px solid var(--border);

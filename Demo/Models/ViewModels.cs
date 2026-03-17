@@ -139,8 +139,7 @@ public class RecommendBuildVM
 // Performance evaluation (user-selected build with budget and score)
 public class PerformanceBuildVM
 {
-    [Required, Range(1000, 50000), Display(Name = "Budget (RM)")]
-    public decimal Budget { get; set; } = 5000;
+    public decimal Budget { get; set; } = 500000;
 
     public List<CategoryOptionVM> Categories { get; set; } = [];
 
