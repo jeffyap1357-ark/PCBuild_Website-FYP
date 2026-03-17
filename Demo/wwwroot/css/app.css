@@ -3767,11 +3767,12 @@ main hr {
 /* Performance Test: two-column layout, summary card, grade card */
 .perf-layout {
     display: grid;
-    grid-template-columns: 1fr 340px;
-    gap: 24px;
+    grid-template-columns: minmax(0, 1fr) 380px;
+    gap: 28px;
     margin: 1.5em 0;
+    align-items: start;
 }
-@media (max-width: 900px) {
+@media (max-width: 1000px) {
     .perf-layout { grid-template-columns: 1fr; }
 }
 .perf-form-col { min-width: 0; }
@@ -3781,10 +3782,12 @@ main hr {
     background: var(--bg-card, #f8f9fa);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 16px;
+    padding: 18px;
     margin-bottom: 16px;
     position: sticky;
     top: 16px;
+    min-height: 120px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
 .perf-summary-card h3 { margin: 0 0 12px 0; font-size: 1rem; }
 .perf-summary-card ul { margin: 0; padding: 0; list-style: none; font-size: 0.9rem; max-height: 200px; overflow-y: auto; }
