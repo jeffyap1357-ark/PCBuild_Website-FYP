@@ -41,6 +41,16 @@
     </p>
 
     <p>
+        <label asp-for="Level"></label><br />
+        <select asp-for="Level">
+            <option value="">Beginner (default)</option>
+            <option value="Beginner">Beginner</option>
+            <option value="Normal">Normal</option>
+            <option value="Professional">Professional</option>
+        </select>
+    </p>
+
+    <p>
         <label asp-for="IsActive"></label>
         <input asp-for="IsActive" type="checkbox" />
     </p>

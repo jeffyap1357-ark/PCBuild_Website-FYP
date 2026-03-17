@@ -41,6 +41,16 @@
     </p>
 
     <p>
+        <label asp-for="Level"></label><br />
+        <select asp-for="Level">
+            <option value="">Beginner (default)</option>
+            <option value="Beginner">Beginner</option>
+            <option value="Normal">Normal</option>
+            <option value="Professional">Professional</option>
+        </select>
+    </p>
+
+    <p>
         <button type="submit" class="button">Save</button>
         <a href="@Url.Action("Index")" class="button secondary">Cancel</a>
     </p>
