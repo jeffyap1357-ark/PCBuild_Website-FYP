@@ -203,6 +203,61 @@ catch (Exception ex)
     logger.LogWarning(ex, "Could not ensure Quiz tables exist.");
 }
 
+// Seed Normal and Professional quiz questions if none exist
+try
+{
+    using var scopeQuiz = app.Services.CreateScope();
+    var dbQuiz = scopeQuiz.ServiceProvider.GetRequiredService<DB>();
+    var hasNormal = dbQuiz.QuizQuestions.Any(q => q.Level == "Normal");
+    var hasProfessional = dbQuiz.QuizQuestions.Any(q => q.Level == "Professional");
+    if (!hasNormal || !hasProfessional)
+    {
+        var toAdd = new List<QuizQuestion>();
+        if (!hasNormal)
+        {
+            toAdd.AddRange(new[]
+            {
+                new QuizQuestion { QuestionText = "What TDP range is typical for a mid-range gaming CPU?", OptionA = "35-65W", OptionB = "65-125W", OptionC = "125-250W", OptionD = "250W+", CorrectOption = "B", Level = "Normal", Explanation = "Most gaming CPUs (e.g. Ryzen 5, Core i5) sit in the 65-125W TDP range. High-end chips can exceed 125W.", IsActive = true },
+                new QuizQuestion { QuestionText = "Which PCIe slot is typically used for the primary GPU?", OptionA = "x1", OptionB = "x4", OptionC = "x8", OptionD = "x16", CorrectOption = "D", Level = "Normal", Explanation = "The top x16 slot offers full bandwidth for the GPU. Use the slot closest to the CPU for best performance.", IsActive = true },
+                new QuizQuestion { QuestionText = "What does \"dual channel\" mean for RAM?", OptionA = "Two sticks in one slot", OptionB = "Two sticks in paired slots for doubled bandwidth", OptionC = "Two different RAM brands", OptionD = "RAM with two colors", CorrectOption = "B", Level = "Normal", Explanation = "Dual channel uses two matched sticks in the correct slots (often A2+B2) to double memory bandwidth.", IsActive = true },
+                new QuizQuestion { QuestionText = "Which PSU efficiency rating is best for a gaming build?", OptionA = "80 Plus", OptionB = "80 Plus Bronze", OptionC = "80 Plus Gold", OptionD = "80 Plus Titanium", CorrectOption = "D", Level = "Normal", Explanation = "Titanium is the highest 80 Plus tier. Gold is a good balance of efficiency and cost for most builds.", IsActive = true },
+                new QuizQuestion { QuestionText = "What is the main benefit of an M.2 NVMe SSD over SATA?", OptionA = "Larger capacity", OptionB = "Much faster read/write speeds", OptionC = "Lower price", OptionD = "Easier installation", CorrectOption = "B", Level = "Normal", Explanation = "NVMe uses PCIe lanes for far higher throughput than SATA. Gen4 NVMe can exceed 7000 MB/s.", IsActive = true },
+                new QuizQuestion { QuestionText = "Which CPU cooler type is best for heavy overclocking?", OptionA = "Stock cooler", OptionB = "Low-profile air", OptionC = "Tower air or 240mm+ AIO", OptionD = "No cooler", CorrectOption = "C", Level = "Normal", Explanation = "Overclocking increases heat. A beefy tower or 240mm+ AIO provides the thermal headroom needed.", IsActive = true },
+                new QuizQuestion { QuestionText = "What does \"ATX\" refer to in a motherboard?", OptionA = "CPU socket type", OptionB = "Form factor / size standard", OptionC = "RAM type", OptionD = "GPU interface", CorrectOption = "B", Level = "Normal", Explanation = "ATX is a form factor that defines board dimensions and mounting. Common sizes: ATX, micro-ATX, Mini-ITX.", IsActive = true },
+                new QuizQuestion { QuestionText = "Why might you need a BIOS update before installing a new CPU?", OptionA = "To add more RAM", OptionB = "To support newer CPU generations on the same socket", OptionC = "To enable RGB", OptionD = "To fix GPU drivers", CorrectOption = "B", Level = "Normal", Explanation = "Motherboards may need a BIOS update to recognize newer CPUs on the same socket (e.g. Ryzen 5000 on B450).", IsActive = true },
+                new QuizQuestion { QuestionText = "What is the purpose of case airflow?", OptionA = "To look good", OptionB = "To remove heat from components", OptionC = "To power the PC", OptionD = "To store data", CorrectOption = "B", Level = "Normal", Explanation = "Good airflow (intake + exhaust fans) moves hot air out and cool air in, keeping temps stable.", IsActive = true },
+                new QuizQuestion { QuestionText = "Which factor most affects RAM compatibility with a motherboard?", OptionA = "Brand", OptionB = "DDR generation and speed", OptionC = "Color", OptionD = "Price", CorrectOption = "B", Level = "Normal", Explanation = "DDR4/DDR5 are not interchangeable. The board's QVL lists tested speeds and capacities.", IsActive = true }
+            });
+        }
+        if (!hasProfessional)
+        {
+            toAdd.AddRange(new[]
+            {
+                new QuizQuestion { QuestionText = "What does CPU \"boost clock\" vs \"base clock\" indicate?", OptionA = "Same thing", OptionB = "Base = sustained, Boost = short burst max", OptionC = "Boost is for gaming only", OptionD = "Base is overclocked", CorrectOption = "B", Level = "Professional", Explanation = "Base clock is the guaranteed all-core speed. Boost allows higher single/light-thread speeds for short periods.", IsActive = true },
+                new QuizQuestion { QuestionText = "Which PCIe generation roughly doubles bandwidth over the previous?", OptionA = "Same gen, different slot", OptionB = "Each new gen (3.0→4.0→5.0) doubles bandwidth", OptionC = "Only 5.0 matters", OptionD = "Gen does not affect bandwidth", CorrectOption = "B", Level = "Professional", Explanation = "PCIe 4.0 doubles 3.0; 5.0 doubles 4.0. x16 Gen4 = 32 GB/s; Gen5 = 64 GB/s.", IsActive = true },
+                new QuizQuestion { QuestionText = "What is \"thermal throttling\"?", OptionA = "CPU runs faster when hot", OptionB = "CPU slows down to prevent overheating", OptionC = "Cooler stops working", OptionD = "GPU takes over", CorrectOption = "B", Level = "Professional", Explanation = "When temps hit the limit, the CPU reduces clock speed to stay within safe thermal envelope.", IsActive = true },
+                new QuizQuestion { QuestionText = "Why might a 750W PSU be insufficient for a high-end build?", OptionA = "Always enough", OptionB = "Peak power spikes (e.g. RTX 4090) can exceed rated wattage", OptionC = "PSUs lose power over time", OptionD = "Voltage matters more", CorrectOption = "B", Level = "Professional", Explanation = "High-end GPUs have transient spikes. A 4090 + 13900K can momentarily draw well over 750W.", IsActive = true },
+                new QuizQuestion { QuestionText = "What does \"CL\" in RAM timings (e.g. CL16) mean?", OptionA = "Capacity Level", OptionB = "Cas Latency - cycles to first data", OptionC = "Clock Level", OptionD = "Compatibility Level", CorrectOption = "B", Level = "Professional", Explanation = "CAS Latency is the delay (in cycles) from request to first data. Lower CL = faster response at same speed.", IsActive = true },
+                new QuizQuestion { QuestionText = "Which cooling solution is best for extreme overclocking (LN2 aside)?", OptionA = "Stock cooler", OptionB = "120mm AIO", OptionC = "Custom loop or 360mm+ AIO", OptionD = "Passive heatsink", CorrectOption = "C", Level = "Professional", Explanation = "Custom loops and large AIOs dissipate the most heat, essential for pushing clocks on high-TDP chips.", IsActive = true },
+                new QuizQuestion { QuestionText = "What is the main trade-off with smaller form factors (e.g. ITX)?", OptionA = "Cheaper", OptionB = "Limited expansion and cooling options", OptionC = "Faster performance", OptionD = "More RAM slots", CorrectOption = "B", Level = "Professional", Explanation = "ITX boards have fewer slots, smaller coolers fit, and cable management is tighter. Trade size for flexibility.", IsActive = true },
+                new QuizQuestion { QuestionText = "Why might you use a \"curve optimizer\" or per-core offset?", OptionA = "To reduce FPS", OptionB = "To fine-tune voltage/clock per core for better efficiency", OptionC = "To disable cores", OptionD = "To change RAM speed", CorrectOption = "B", Level = "Professional", Explanation = "Curve optimizer (AMD) or per-core offsets (Intel) let you undervolt or tweak individual cores for stability and temps.", IsActive = true },
+                new QuizQuestion { QuestionText = "What does \"resizable BAR\" (ReBAR) do?", OptionA = "Increases RAM size", OptionB = "Lets CPU access full GPU VRAM at once for better performance", OptionC = "Fixes driver bugs", OptionD = "Enables RGB sync", CorrectOption = "B", Level = "Professional", Explanation = "ReBAR allows the CPU to access the entire GPU frame buffer at once instead of 256MB chunks, improving some games.", IsActive = true },
+                new QuizQuestion { QuestionText = "Which factor most affects 1% low FPS in games?", OptionA = "Monitor refresh rate", OptionB = "CPU single-thread and RAM latency", OptionC = "GPU brand", OptionD = "Case airflow", CorrectOption = "B", Level = "Professional", Explanation = "1% lows (frame time consistency) are often CPU and memory-bound. Fast RAM and strong single-thread help.", IsActive = true }
+            });
+        }
+        if (toAdd.Count > 0)
+        {
+            dbQuiz.QuizQuestions.AddRange(toAdd);
+            dbQuiz.SaveChanges();
+            logger.LogInformation("Seeded {Count} quiz questions for Normal/Professional levels.", toAdd.Count);
+        }
+    }
+}
+catch (Exception ex)
+{
+    logger.LogWarning(ex, "Could not seed Normal/Professional quiz questions.");
+}
+
 // Ensure Feedback table exists (fallback)
 try
 {
