@@ -323,16 +323,17 @@ public class Helper
         string user = cf["Smtp:User"] ?? "";
         string pass = cf["Smtp:Pass"] ?? "";
         string name = cf["Smtp:Name"] ?? "";
-        string host = cf["Smtp:Host"] ?? "";
+        string host = cf["Smtp:Host"] ?? "smtp.gmail.com";
         int port = cf.GetValue<int>("Smtp:Port");
+        if (port <= 0) port = 587;
 
         mail.From = new MailAddress(user, name);
 
-        using var smtp = new SmtpClient
+        using var smtp = new SmtpClient(host, port)
         {
-            Host = host,
-            Port = port,
             EnableSsl = true,
+            UseDefaultCredentials = false,
+            DeliveryMethod = SmtpDeliveryMethod.Network,
             Credentials = new NetworkCredential(user, pass),
         };
 
