@@ -1,3 +1,6 @@
+using MailKit.Net.Smtp;
+using MailKit.Security;
+using MimeKit;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using SixLabors.ImageSharp;
@@ -327,17 +330,18 @@ public class Helper
         int port = cf.GetValue<int>("Smtp:Port");
         if (port <= 0) port = 587;
 
-        mail.From = new MailAddress(user, name);
+        var msg = new MimeMessage();
+        msg.From.Add(new MailboxAddress(name, user));
+        foreach (var to in mail.To)
+            msg.To.Add(new MailboxAddress(to.DisplayName, to.Address));
+        msg.Subject = mail.Subject;
+        msg.Body = new TextPart(mail.IsBodyHtml ? "html" : "plain") { Text = mail.Body };
 
-        using var smtp = new SmtpClient(host, port)
-        {
-            EnableSsl = true,
-            UseDefaultCredentials = false,
-            DeliveryMethod = SmtpDeliveryMethod.Network,
-            Credentials = new NetworkCredential(user, pass),
-        };
-
-        smtp.Send(mail);
+        using var client = new MailKit.Net.Smtp.SmtpClient();
+        client.Connect(host, port, SecureSocketOptions.StartTls);
+        client.Authenticate(user, pass);
+        client.Send(msg);
+        client.Disconnect(true);
     }
 
 
