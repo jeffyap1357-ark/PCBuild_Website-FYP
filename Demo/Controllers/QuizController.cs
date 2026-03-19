@@ -78,9 +78,7 @@ public class QuizController : Controller
             if (attempt.TotalQuestions <= 0 || attempt.CorrectCount != attempt.TotalQuestions)
                 continue;
             var levelNames = attempt.Details
-                .Select(d => d.Question?.Level)
-                .Where(l => !string.IsNullOrWhiteSpace(l))
-                .Select(NormalizeLevel)
+                .Select(d => NormalizeLevel(d.Question?.Level))
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
             if (levelNames.Count == 1)
@@ -267,9 +265,7 @@ public class QuizController : Controller
         foreach (var attempt in list)
         {
             var levelNames = attempt.Details
-                .Select(d => d.Question?.Level)
-                .Where(l => !string.IsNullOrWhiteSpace(l))
-                .Select(NormalizeLevel)
+                .Select(d => NormalizeLevel(d.Question?.Level))
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
             attempt.Level = levelNames.Count == 1 ? levelNames[0] : "Mixed";
@@ -291,9 +287,7 @@ public class QuizController : Controller
         if (attempt == null) return RedirectToAction(nameof(History));
 
         var levelNames = attempt.Details
-            .Select(d => d.Question?.Level)
-            .Where(l => !string.IsNullOrWhiteSpace(l))
-            .Select(NormalizeLevel)
+            .Select(d => NormalizeLevel(d.Question?.Level))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
         attempt.Level = levelNames.Count == 1 ? levelNames[0] : "Mixed";
