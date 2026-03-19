@@ -134,6 +134,54 @@ public class RecommendBuildVM
 
     [Display(Name = "Optimization type")]
     public OptimizationType OptimizationType { get; set; } = OptimizationType.Balanced;
+
+    /// <summary>Category type -> HardwareId for components to keep when regenerating (lock).</summary>
+    public Dictionary<string, int>? LockedHardware { get; set; }
+
+    /// <summary>Current build category -> HardwareId (posted by regenerate form so server can exclude unchanged unlocked combo).</summary>
+    public Dictionary<string, int>? CurrentHardware { get; set; }
+}
+
+/// <summary>Request body for AJAX regenerate (generate more combos).</summary>
+public class RegenerateRequest
+{
+    public decimal Budget { get; set; }
+    public OptimizationType OptimizationType { get; set; }
+    public Dictionary<string, int>? LockedHardware { get; set; }
+    /// <summary>Current build unlocked components (category -> hardwareId) to exclude so regenerate changes unlocked combo.</summary>
+    public Dictionary<string, int>? ExcludeUnlockedHardware { get; set; }
+}
+
+/// <summary>JSON response for Regenerate API.</summary>
+public class RegenerateResponse
+{
+    public bool Success { get; set; }
+    public decimal TotalPrice { get; set; }
+    public List<string> Warnings { get; set; } = [];
+    public List<RegeneratePartDto> Parts { get; set; } = [];
+    public string CaseLayout { get; set; } = "default";
+    public string MbLayout { get; set; } = "default";
+    public int Score { get; set; }
+    public RegenerateAssessmentDto? Assessment { get; set; }
+    public string? Message { get; set; }
+}
+
+public class RegeneratePartDto
+{
+    public int HardwareId { get; set; }
+    public string Name { get; set; } = "";
+    public decimal Price { get; set; }
+    public string CategoryType { get; set; } = "";
+    public string ImagePath { get; set; } = "";
+    public string? RamDisplayImage { get; set; }
+}
+
+public class RegenerateAssessmentDto
+{
+    public string Rating { get; set; } = "";
+    public string Comment { get; set; } = "";
+    public string Strengths { get; set; } = "";
+    public string Weaknesses { get; set; } = "";
 }
 
 // Performance evaluation (user-selected build with budget and score)

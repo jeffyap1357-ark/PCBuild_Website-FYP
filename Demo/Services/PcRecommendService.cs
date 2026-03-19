@@ -19,7 +19,16 @@ public class PcRecommendService
 
     public PcRecommendService(Models.DB db) => _db = db;
 
-    public async Task<RecommendResult> RecommendAsync(decimal budget, OptimizationType optimizationType = OptimizationType.Balanced)
+    /// <summary>Recommend a build. Optionally keep some components locked and vary the rest. Optionally exclude a build so a different combo is returned.</summary>
+    /// <param name="lockedByCategory">Category type (e.g. "CPU", "GPU") to HardwareId for components to keep fixed.</param>
+    /// <param name="excludePartIds">If set, the best build that equals this set of hardware IDs is skipped so a different combo is returned.</param>
+    /// <param name="excludeUnlockedByCategory">If set, candidate builds that keep all unlocked categories identical are skipped.</param>
+    public async Task<RecommendResult> RecommendAsync(
+        decimal budget,
+        OptimizationType optimizationType = OptimizationType.Balanced,
+        IReadOnlyDictionary<string, int>? lockedByCategory = null,
+        IReadOnlySet<int>? excludePartIds = null,
+        IReadOnlyDictionary<string, int>? excludeUnlockedByCategory = null)
     {
         var warnings = new List<string>();
         var cats = await _db.Categories.Include(c => c.Hardware).ToDictionaryAsync(c => c.Type, StringComparer.OrdinalIgnoreCase);
@@ -27,7 +36,30 @@ public class PcRecommendService
         if (!cats.TryGetValue("Motherboard", out var mbCat) || !mbCat.Hardware.Any())
             return new RecommendResult([], 0, false, ["No motherboard available in database."]);
 
+        Dictionary<string, Hardware>? lockedParts = null;
+        if (lockedByCategory != null && lockedByCategory.Count > 0)
+        {
+            var ids = lockedByCategory.Values.Distinct().ToList();
+            var lockedList = await _db.Hardware.Include(h => h.Category)
+                .Where(h => ids.Contains(h.HardwareId))
+                .ToListAsync();
+            lockedParts = lockedList
+                .Where(h => h.Category != null && lockedByCategory.TryGetValue(h.Category.Type, out var id) && id == h.HardwareId)
+                .ToDictionary(h => h.Category!.Type, h => h, StringComparer.OrdinalIgnoreCase);
+        }
+
         var mbList = mbCat.Hardware.Where(h => h.Socket != null).OrderByDescending(h => h.PerformanceScore ?? h.Special ?? 0).ToList();
+
+        if (lockedParts != null)
+        {
+            if (lockedParts.TryGetValue("CPU", out var lockedCpu))
+                mbList = mbList.Where(m => string.IsNullOrEmpty(lockedCpu.Socket) || m.Socket == lockedCpu.Socket).ToList();
+            if (lockedParts.TryGetValue("RAM", out var lockedRam))
+                mbList = mbList.Where(m => string.IsNullOrEmpty(lockedRam.DdrType) || m.DdrType == lockedRam.DdrType).ToList();
+            if (lockedParts.TryGetValue("Motherboard", out var lockedMb))
+                mbList = mbList.Where(m => m.HardwareId == lockedMb.HardwareId).ToList();
+        }
+
         var cpuCat = cats.GetValueOrDefault("CPU")?.Hardware.ToList() ?? [];
         var ramCat = cats.GetValueOrDefault("RAM")?.Hardware.ToList() ?? [];
         var gpuCat = cats.GetValueOrDefault("GPU")?.Hardware.ToList() ?? [];
@@ -52,17 +84,28 @@ public class PcRecommendService
             var rams = ramCat.Where(r => string.IsNullOrEmpty(ddrType) || r.DdrType == ddrType).ToList();
             var cases = caseCat.Where(c => mbForm.Contains("Micro") ? (c.FormFactor?.Contains("Micro") == true || c.FormFactor == null) : true).ToList();
 
-            if (!cpus.Any() || !rams.Any())
+            Hardware? cpu = lockedParts?.TryGetValue("CPU", out var lc) == true ? lc : PickBest(cpus, "CPU", null, weights, optimizationType);
+            if (cpu != null && cpus.All(c => c.HardwareId != cpu.HardwareId))
+                cpu = null;
+            Hardware? ram = lockedParts?.TryGetValue("RAM", out var lr) == true ? lr : PickBest(rams, "RAM", null, weights, optimizationType);
+            if (ram != null && rams.All(r => r.HardwareId != ram.HardwareId))
+                ram = null;
+            if (!cpus.Any() && cpu == null || !rams.Any() && ram == null)
                 continue;
+            if (cpu == null && cpus.Any() == false) continue;
+            if (ram == null && rams.Any() == false) continue;
+            if (cpu == null) cpu = PickBest(cpus, "CPU", null, weights, optimizationType);
+            if (ram == null) ram = PickBest(rams, "RAM", null, weights, optimizationType);
+            if (cpu == null || ram == null) continue;
 
-            var gpu = PickBest(gpuCat, "GPU", null, weights, optimizationType);
-            var cpu = PickBest(cpus, "CPU", gpu, weights, optimizationType);
-            var ram = PickBest(rams, "RAM", null, weights, optimizationType);
-            var storage = PickBest(storageCat, "Storage", null, weights, optimizationType);
-            var psu = PickBest(psuCat, "Power supply unit", null, weights, optimizationType);
-            var pcCase = PickBest(cases, "PC case", null, weights, optimizationType);
+            var gpu = lockedParts?.TryGetValue("GPU", out var lg) == true ? lg : PickBest(gpuCat, "GPU", null, weights, optimizationType);
+            var storage = lockedParts?.TryGetValue("Storage", out var ls) == true ? ls : PickBest(storageCat, "Storage", null, weights, optimizationType);
+            var psu = lockedParts?.TryGetValue("Power supply unit", out var lp) == true ? lp : PickBest(psuCat, "Power supply unit", null, weights, optimizationType);
+            var pcCase = lockedParts?.TryGetValue("PC case", out var lcase) == true ? lcase : PickBest(cases, "PC case", null, weights, optimizationType);
+            if (pcCase != null && cases.Any() && cases.All(c => c.HardwareId != pcCase.HardwareId))
+                pcCase = PickBest(cases, "PC case", null, weights, optimizationType);
 
-            if (cpu == null || ram == null || gpu == null || storage == null || psu == null || pcCase == null)
+            if (gpu == null || storage == null || psu == null || pcCase == null)
                 continue;
 
             var parts = new List<Hardware> { mb, cpu, ram, gpu, storage, psu, pcCase };
@@ -71,16 +114,23 @@ public class PcRecommendService
             {
                 var remaining = budget - mb.Price - cpu.Price - ram.Price;
                 if (remaining < 500) continue;
-                gpu = PickBest(gpuCat.Where(g => g.Price <= remaining).ToList(), "GPU", null, weights, optimizationType);
+                if (lockedParts?.ContainsKey("GPU") != true)
+                    gpu = PickBest(gpuCat.Where(g => g.Price <= remaining).ToList(), "GPU", null, weights, optimizationType);
+                else if (gpu.Price > remaining) continue;
                 if (gpu == null) continue;
                 remaining -= gpu.Price;
-                storage = PickBest(storageCat.Where(s => s.Price <= remaining).ToList(), "Storage", null, weights, optimizationType);
+                if (lockedParts?.ContainsKey("Storage") != true)
+                    storage = PickBest(storageCat.Where(s => s.Price <= remaining).ToList(), "Storage", null, weights, optimizationType);
+                else if (storage.Price > remaining) continue;
                 if (storage == null) continue;
                 remaining -= storage.Price;
-                psu = PickBest(psuCat.Where(p => p.Price <= remaining).ToList(), "Power supply unit", null, weights, optimizationType);
+                if (lockedParts?.ContainsKey("Power supply unit") != true)
+                    psu = PickBest(psuCat.Where(p => p.Price <= remaining).ToList(), "Power supply unit", null, weights, optimizationType);
+                else if (psu.Price > remaining) continue;
                 if (psu == null) continue;
                 remaining -= psu.Price;
-                pcCase = PickBest(cases.Where(c => c.Price <= Math.Max(remaining, 0)).ToList(), "PC case", null, weights, optimizationType);
+                if (lockedParts?.ContainsKey("PC case") != true)
+                    pcCase = PickBest(cases.Where(c => c.Price <= Math.Max(remaining, 0)).ToList(), "PC case", null, weights, optimizationType);
                 if (pcCase == null) continue;
                 parts = [mb, cpu, ram, gpu, storage, psu, pcCase];
                 total = parts.Sum(p => p.Price);
@@ -90,6 +140,22 @@ public class PcRecommendService
             var bestScore = best != null ? ComputeBuildScore(best.Parts, weights, optimizationType) : double.NegativeInfinity;
             if (best == null || score > bestScore)
             {
+                if (excludePartIds != null && excludePartIds.Count > 0)
+                {
+                    var partIds = parts.Select(p => p.HardwareId).ToHashSet();
+                    if (partIds.SetEquals(excludePartIds))
+                        continue;
+                }
+                if (excludeUnlockedByCategory != null && excludeUnlockedByCategory.Count > 0)
+                {
+                    var partByCategory = parts
+                        .Where(p => p.Category?.Type != null)
+                        .ToDictionary(p => p.Category!.Type, p => p.HardwareId, StringComparer.OrdinalIgnoreCase);
+                    var sameUnlocked = excludeUnlockedByCategory.All(x =>
+                        partByCategory.TryGetValue(x.Key, out var id) && id == x.Value);
+                    if (sameUnlocked)
+                        continue;
+                }
                 var resultWarnings = new List<string>(warnings);
                 var psuWatt = ParsePsuWattage(psu.Detail ?? psu.Name);
                 var estPower = EstimatePower(cpu, gpu);
@@ -102,7 +168,11 @@ public class PcRecommendService
         }
 
         if (best == null)
+        {
+            if ((excludePartIds != null && excludePartIds.Count > 0) || (excludeUnlockedByCategory != null && excludeUnlockedByCategory.Count > 0))
+                return new RecommendResult([], 0, false, ["No different combination found. Try unlocking some components or increasing your budget."]);
             return new RecommendResult([], 0, false, ["Could not build a compatible PC within budget. Try increasing your budget or check if hardware data is loaded."]);
+        }
 
         return best;
     }

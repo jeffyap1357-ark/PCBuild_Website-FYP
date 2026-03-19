@@ -2091,6 +2091,7 @@ button.link-button:hover { color: var(--accent-hover); }
 /* Guide detail: article */
 .guide-article {
     max-width: 800px;
+    margin: 0 auto;
 }
 
 .guide-header {
@@ -2135,6 +2136,49 @@ button.link-button:hover { color: var(--accent-hover); }
 
 .guide-content h3:first-child {
     margin-top: 0;
+}
+
+/* Guide detail: video modules */
+.guide-video {
+    margin: 1.25rem auto;
+    max-width: 720px;
+    position: relative;
+    padding-top: 56.25%; /* 16:9 */
+    background: #000;
+}
+
+.guide-video iframe,
+.guide-video video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+    background: #000;
+}
+
+.guide-video a {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    text-decoration: underline;
+    font-weight: 600;
+}
+
+.guide-video-caption {
+    margin-top: 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.4;
+    text-align: center;
 }
 
 .guide-content h4 {
@@ -2213,6 +2257,42 @@ button.link-button:hover { color: var(--accent-hover); }
 
 .recommend-page {
     max-width: 720px;
+}
+
+.recommend-page.recommend-page-with-preview {
+    max-width: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    align-items: start;
+}
+
+.recommend-main {
+    min-width: 0;
+}
+
+.recommend-preview {
+    position: sticky;
+    top: 20px;
+}
+
+.recommend-preview .build-diagram-section {
+    margin-bottom: 0;
+    max-width: 100%;
+}
+
+@media (max-width: 960px) {
+    .recommend-page.recommend-page-with-preview {
+        grid-template-columns: 1fr;
+    }
+
+    .recommend-preview {
+        position: static;
+    }
+
+    .recommend-preview .build-diagram-section {
+        max-width: 720px;
+    }
 }
 
 .recommend-intro {
@@ -2345,6 +2425,55 @@ button.link-button:hover { color: var(--accent-hover); }
 .recommend-price {
     font-weight: 600;
     color: var(--accent);
+}
+
+.recommend-lock-hint {
+    margin: 0 0 12px;
+    font-size: 0.9em;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.recommend-lock-col {
+    width: 72px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.recommend-lock-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+.recommend-lock-label input {
+    margin: 0;
+}
+
+.recommend-lock-text {
+    user-select: none;
+}
+
+.recommend-regen-message {
+    margin-bottom: 12px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 0.95em;
+}
+
+.recommend-regen-message-error {
+    background: rgba(229, 115, 115, 0.15);
+    border: 1px solid #e57373;
+    color: #e57373;
+}
+
+.recommend-regen-actions {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
 }
 
 .recommend-actions {

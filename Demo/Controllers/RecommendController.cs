@@ -31,7 +31,24 @@ public class RecommendController : Controller
             return View(vm);
         }
 
-        var result = await _recommend.RecommendAsync(vm.Budget, vm.OptimizationType);
+        // When regenerating: exclude current unlocked components so we get a different combo
+        IReadOnlyDictionary<string, int>? excludeUnlocked = null;
+        if (vm.CurrentHardware != null && vm.CurrentHardware.Count > 0)
+        {
+            var locked = vm.LockedHardware ?? new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            excludeUnlocked = vm.CurrentHardware
+                .Where(kv => !locked.ContainsKey(kv.Key))
+                .ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.OrdinalIgnoreCase);
+            if (excludeUnlocked.Count == 0)
+                excludeUnlocked = null;
+        }
+
+        var result = await _recommend.RecommendAsync(
+            vm.Budget,
+            vm.OptimizationType,
+            vm.LockedHardware,
+            null,
+            excludeUnlocked);
         ViewBag.Result = result;
         ViewBag.Budget = vm.Budget;
         return View(vm);

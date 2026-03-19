@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 namespace Demo.Controllers;
 
@@ -7,10 +8,12 @@ namespace Demo.Controllers;
 public class LearningAdminController : Controller
 {
     private readonly DB _db;
+    private readonly Helper _helper;
 
-    public LearningAdminController(DB db)
+    public LearningAdminController(DB db, Helper helper)
     {
         _db = db;
+        _helper = helper;
     }
 
     public IActionResult Index()
@@ -44,7 +47,13 @@ public class LearningAdminController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Save(int guideId, string guideName, string guideDesc, int sortOrder, string modulesJson)
+    public IActionResult Save(
+        int guideId,
+        string guideName,
+        string guideDesc,
+        int sortOrder,
+        string modulesJson,
+        List<IFormFile> moduleImageFiles)
     {
         guideName = (guideName ?? "").Trim();
         if (string.IsNullOrEmpty(guideName))
@@ -53,10 +62,17 @@ public class LearningAdminController : Controller
             return View("Edit", new Guide { GuideId = guideId, GuideName = guideName, GuideDesc = guideDesc ?? "", ContentModules = modulesJson ?? "[]", SortOrder = sortOrder });
         }
 
+        var jsonOptions = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        };
+
         List<GuideModule>? modules = null;
         try
         {
-            modules = string.IsNullOrWhiteSpace(modulesJson) ? new List<GuideModule>() : JsonSerializer.Deserialize<List<GuideModule>>(modulesJson);
+            modules = string.IsNullOrWhiteSpace(modulesJson)
+                ? new List<GuideModule>()
+                : JsonSerializer.Deserialize<List<GuideModule>>(modulesJson, jsonOptions);
         }
         catch
         {
@@ -65,6 +81,31 @@ public class LearningAdminController : Controller
 
         if (modules == null)
             modules = new List<GuideModule>();
+
+        // Save uploaded guide images (unique filename rename to avoid duplicates).
+        // The JS assigns `fileSlot` based on the visible order of image modules with selected files.
+        var imageFiles = moduleImageFiles ?? [];
+        for (var i = 0; i < modules.Count; i++)
+        {
+            var m = modules[i];
+            if (!string.Equals(m.Type, "image", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            if (!m.FileSlot.HasValue)
+                continue;
+
+            var slot = m.FileSlot.Value;
+            if (slot < 0 || slot >= imageFiles.Count)
+                continue;
+
+            var file = imageFiles[slot];
+            if (file == null || file.Length <= 0)
+                continue;
+
+            var savedName = _helper.SaveHardwareImage(file, "guide-images");
+            m.Value = "/guide-images/" + savedName;
+            m.FileSlot = null; // not needed after persisting
+        }
 
         var html = BuildContentHtml(modules);
 
@@ -134,9 +175,63 @@ public class LearningAdminController : Controller
                         ? ""
                         : "<figure class=\"guide-fig\"><img src=\"" + System.Net.WebUtility.HtmlEncode(value.Trim()) + "\" alt=\"" + alt + "\"><figcaption>" + System.Net.WebUtility.HtmlEncode(caption) + "</figcaption></figure>");
                     break;
+                case "video":
+                    var link = (value ?? "").Trim();
+                    if (!string.IsNullOrWhiteSpace(link))
+                    {
+                        var captionHtml = string.IsNullOrWhiteSpace(caption)
+                            ? ""
+                            : "<div class=\"guide-video-caption\">" + System.Net.WebUtility.HtmlEncode(caption) + "</div>";
+
+                        var youtubeId = ExtractYoutubeId(link);
+                        if (!string.IsNullOrWhiteSpace(youtubeId))
+                        {
+                            parts.Add("<div class=\"guide-video\">" +
+                                      "<iframe " +
+                                      "src=\"https://www.youtube-nocookie.com/embed/" + System.Net.WebUtility.HtmlEncode(youtubeId) + "\" " +
+                                      "title=\"YouTube video\" " +
+                                      "frameborder=\"0\" " +
+                                      "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" " +
+                                      "allowfullscreen></iframe>" +
+                                      "</div>" +
+                                      captionHtml);
+                        }
+                        else
+                        {
+                            // For non-YouTube: provide safe link fallback.
+                            parts.Add("<div class=\"guide-video\">" +
+                                      "<a href=\"" + System.Net.WebUtility.HtmlEncode(link) + "\" target=\"_blank\" rel=\"noopener\">Open video</a>" +
+                                      "</div>" +
+                                      captionHtml);
+                        }
+                    }
+                    break;
             }
         }
         return string.Join("", parts);
+    }
+
+    private static string? ExtractYoutubeId(string url)
+    {
+        if (string.IsNullOrWhiteSpace(url)) return null;
+        var trimmed = url.Trim();
+
+        // Common YouTube URL formats:
+        // - watch?v=<id>
+        // - youtu.be/<id>
+        // - /embed/<id>
+        // - /shorts/<id>
+        // - /live/<id>
+        // YouTube video id is 11 chars: [A-Za-z0-9_-]
+        var m = System.Text.RegularExpressions.Regex.Match(
+            trimmed,
+            @"(?:v=|youtu\.be/|\/embed\/|\/shorts\/|\/live\/)([A-Za-z0-9_-]{11})",
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+        if (m.Success)
+            return m.Groups[1].Value;
+
+        return null;
     }
 }
 
@@ -145,4 +240,5 @@ public class GuideModule
     public string? Type { get; set; }
     public string? Value { get; set; }
     public string? Caption { get; set; }
+    public int? FileSlot { get; set; }
 }

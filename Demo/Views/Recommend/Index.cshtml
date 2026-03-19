@@ -1,6 +1,7 @@
 @model RecommendBuildVM
 @using Demo.Models
 @using Demo.Services
+@inject Demo.Helper Helper
 
 @{
     ViewBag.Title = "PC Build | Recommend Build";
@@ -8,9 +9,30 @@
     var budget = ViewBag.Budget as decimal? ?? Model.Budget;
     var score = result?.Success == true && result.Parts?.Any() == true ? BuildAssessmentService.ComputeScore(result.Parts) : 0;
     var assessment = result?.Success == true && result.Parts?.Any() == true ? BuildAssessmentService.GetAssessment(score, result.Parts) : null;
+    var partsByCategory = result?.Success == true && result.Parts != null
+        ? result.Parts
+            .GroupBy(p => p.Category?.Type ?? "")
+            .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase)
+        : new Dictionary<string, List<Hardware>>(StringComparer.OrdinalIgnoreCase);
+
+    Hardware? GetPart(string type) => partsByCategory.TryGetValue(type, out var list) && list.Count > 0 ? list[0] : null;
+    string BuildImg(Hardware? part) => part == null ? "" : "/" + Helper.GetBuildImagePath(part.Picture, part.Name, part.CleanPicture).TrimStart('/');
+    string RamImg(int index)
+    {
+        if (!partsByCategory.TryGetValue("RAM", out var rams) || index < 0 || index >= rams.Count) return "";
+        var ram = rams[index];
+        return "/" + Demo.Helper.GetRamDisplayImage(ram.Brand, ram.Name).TrimStart('/');
+    }
+
+    var casePart = GetPart("PC case");
+    var mbPart = GetPart("Motherboard");
+    var caseLayout = casePart != null ? Demo.Helper.GetCaseLayoutKey(casePart.Name) : "default";
+    var mbLayout = mbPart != null ? Demo.Helper.GetMotherboardLayoutKey(mbPart.Name) : "default";
+    var hasPreview = result?.Success == true && result.Parts?.Any() == true;
 }
 
-<div class="recommend-page">
+<div class="recommend-page @(hasPreview ? "recommend-page-with-preview" : "")">
+    <div class="recommend-main">
     <div class="recommend-intro">
         <p>Enter your budget and optimization preference. The system filters components by compatibility and applies a weighted scoring formula to recommend the best build for your needs.</p>
     </div>
@@ -42,12 +64,12 @@
 
     @if (result != null)
     {
-        <div class="recommend-result">
+        <div class="recommend-result" id="recommend-result">
             @if (result.Success)
             {
                 @if (result.Warnings.Any())
                 {
-                    <div class="recommend-warnings">
+                    <div class="recommend-warnings" id="recommend-warnings">
                         @foreach (var w in result.Warnings)
                         {
                             <p class="warning">@w</p>
@@ -76,25 +98,47 @@
                     </div>
                 }
                 <div class="recommend-parts-card">
-                    <table class="recommend-table">
-                        <thead>
-                            <tr>
-                                <th>Component</th>
-                                <th>Part</th>
-                                <th>Price</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var p in result.Parts.OrderBy(p => p.Category?.Type))
-                            {
+                    <form method="post" action="@Url.Action("Index")" class="recommend-regen-form">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="Budget" value="@budget" />
+                        <input type="hidden" name="OptimizationType" value="@((int)Model.OptimizationType)" />
+                        @foreach (var p in result.Parts.OrderBy(p => p.Category?.Type))
+                        {
+                            var catType = p.Category?.Type ?? "";
+                            <input type="hidden" name="CurrentHardware[@catType]" value="@p.HardwareId" />
+                        }
+                        <p class="recommend-lock-hint">Lock components you want to keep, then click <strong>Generate more combos</strong> to get a new recommendation with the rest varied.</p>
+                        <table class="recommend-table">
+                            <thead>
                                 <tr>
-                                    <td class="recommend-component">@p.Category?.Type</td>
-                                    <td><a href="/Hardware/Detail/@p.HardwareId">@p.Name</a></td>
-                                    <td class="recommend-price">@p.Price.ToString("C")</td>
+                                    <th>Component</th>
+                                    <th>Part</th>
+                                    <th>Price</th>
+                                    <th class="recommend-lock-col">Lock</th>
                                 </tr>
-                            }
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @foreach (var p in result.Parts.OrderBy(p => p.Category?.Type))
+                                {
+                                    var catType = p.Category?.Type ?? "";
+                                    <tr>
+                                        <td class="recommend-component">@catType</td>
+                                        <td><a href="/Hardware/Detail/@p.HardwareId">@p.Name</a></td>
+                                        <td class="recommend-price">@p.Price.ToString("C")</td>
+                                        <td class="recommend-lock-col">
+                                            <label class="recommend-lock-label">
+                                                <input type="checkbox" name="LockedHardware[@catType]" value="@p.HardwareId" title="Lock this component when generating more combos" />
+                                                <span class="recommend-lock-text">Lock</span>
+                                            </label>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                        <div class="recommend-regen-actions">
+                            <button type="submit" class="button">Generate more combos</button>
+                        </div>
+                    </form>
                 </div>
                 @if (User.Identity?.IsAuthenticated == true)
                 {
@@ -139,5 +183,50 @@
                 </div>
             }
         </div>
+    }
+    </div>
+
+    @if (hasPreview)
+    {
+        <aside class="recommend-preview">
+            <section class="build-section build-diagram-section">
+                <h2 class="build-section-title"><span class="build-accent"></span>Build Preview</h2>
+                <div class="build-diagram-wrap build-diagram-case-view" id="build-diagram-case-view" data-case="@caseLayout" data-mb-layout="@mbLayout">
+                    <div class="build-diagram-bg build-diagram-case" id="build-diagram-case" style="@(casePart != null ? "background-image:url('" + BuildImg(casePart) + "');" : "")"></div>
+                    <div class="build-diagram-display-box build-display-overlay">
+                        <div class="build-diagram-box build-diagram-box-mb build-drop-target" id="build-case-box-mb" data-drop-category="Motherboard">
+                            <div class="build-diagram-component build-diagram-mb-fixed"><img src="@BuildImg(mbPart)" alt="" id="build-case-img-mb" style="@(string.IsNullOrEmpty(BuildImg(mbPart)) ? "display:none;" : "")"></div>
+                            <div class="build-diagram-box build-diagram-box-cpu build-drop-target" id="build-case-box-cpu" data-drop-category="CPU">
+                                <div class="build-diagram-component"><img src="@BuildImg(GetPart("CPU"))" alt="" id="build-case-img-cpu" style="@(string.IsNullOrEmpty(BuildImg(GetPart("CPU"))) ? "display:none;" : "")"></div>
+                            </div>
+                            <div class="build-diagram-box build-diagram-box-ram build-drop-target" id="build-case-box-ram1" data-drop-category="RAM" data-drop-slot="0">
+                                <div class="build-diagram-component"><img src="@RamImg(0)" alt="" id="build-case-img-ram1" style="@(string.IsNullOrEmpty(RamImg(0)) ? "display:none;" : "")"></div>
+                            </div>
+                            <div class="build-diagram-box build-diagram-box-ram build-drop-target" id="build-case-box-ram2" data-drop-category="RAM" data-drop-slot="1">
+                                <div class="build-diagram-component"><img src="@RamImg(1)" alt="" id="build-case-img-ram2" style="@(string.IsNullOrEmpty(RamImg(1)) ? "display:none;" : "")"></div>
+                            </div>
+                            <div class="build-diagram-box build-diagram-box-ram build-drop-target" id="build-case-box-ram3" data-drop-category="RAM" data-drop-slot="2">
+                                <div class="build-diagram-component"><img src="@RamImg(2)" alt="" id="build-case-img-ram3" style="@(string.IsNullOrEmpty(RamImg(2)) ? "display:none;" : "")"></div>
+                            </div>
+                            <div class="build-diagram-box build-diagram-box-ram build-drop-target" id="build-case-box-ram4" data-drop-category="RAM" data-drop-slot="3">
+                                <div class="build-diagram-component"><img src="@RamImg(3)" alt="" id="build-case-img-ram4" style="@(string.IsNullOrEmpty(RamImg(3)) ? "display:none;" : "")"></div>
+                            </div>
+                            <div class="build-diagram-box build-diagram-box-gpu build-drop-target" id="build-case-box-gpu" data-drop-category="GPU">
+                                <div class="build-diagram-component"><img src="@BuildImg(GetPart("GPU"))" alt="" id="build-case-img-gpu" style="@(string.IsNullOrEmpty(BuildImg(GetPart("GPU"))) ? "display:none;" : "")"></div>
+                            </div>
+                            <div class="build-diagram-box build-diagram-box-storage build-drop-target" id="build-case-box-storage" data-drop-category="Storage">
+                                <div class="build-diagram-component"><img src="@BuildImg(GetPart("Storage"))" alt="" id="build-case-img-storage" style="@(string.IsNullOrEmpty(BuildImg(GetPart("Storage"))) ? "display:none;" : "")"></div>
+                            </div>
+                            <div class="build-diagram-box build-diagram-box-cooler build-drop-target" id="build-case-box-cooler" data-drop-category="CPU cooler">
+                                <div class="build-diagram-component"><img src="@BuildImg(GetPart("CPU cooler"))" alt="" id="build-case-img-cooler" style="@(string.IsNullOrEmpty(BuildImg(GetPart("CPU cooler"))) ? "display:none;" : "")"></div>
+                            </div>
+                        </div>
+                        <div class="build-diagram-box build-diagram-box-psu build-drop-target" id="build-case-box-psu" data-drop-category="Power supply unit">
+                            <div class="build-diagram-component"><img src="@BuildImg(GetPart("Power supply unit"))" alt="" id="build-case-img-psu" style="@(string.IsNullOrEmpty(BuildImg(GetPart("Power supply unit"))) ? "display:none;" : "")"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </aside>
     }
 </div>

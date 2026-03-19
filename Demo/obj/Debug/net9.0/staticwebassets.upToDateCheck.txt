@@ -108,11 +108,11 @@ wwwroot\js\jquery.validate.unobtrusive.min.js
 wwwroot\layout_testing\test.png
 wwwroot\learning\README.txt
 wwwroot\logo\logo.png
+C:\Users\User\Desktop\new_origin\Demo\Demo\wwwroot\css\app.css
 C:\Users\User\Desktop\new_origin\Demo\Demo\wwwroot\css\pager.css
-C:\Users\User\Desktop\new_origin\Demo\Demo\wwwroot\js\app.js
-C:\Users\User\Desktop\new_origin\Demo\Demo\wwwroot\js\jquery.validate.unobtrusive.min.js
 C:\Users\User\Desktop\new_origin\Demo\Demo\wwwroot\js\jquery.validate.min.js
 C:\Users\User\Desktop\new_origin\Demo\Demo\wwwroot\js\jquery.unobtrusive-ajax.min.js
 C:\Users\User\Desktop\new_origin\Demo\Demo\wwwroot\js\jquery.min.js
-C:\Users\User\Desktop\new_origin\Demo\Demo\wwwroot\css\app.css
+C:\Users\User\Desktop\new_origin\Demo\Demo\wwwroot\js\app.js
 C:\Users\User\Desktop\new_origin\Demo\Demo\wwwroot\learning\README.txt
+C:\Users\User\Desktop\new_origin\Demo\Demo\wwwroot\js\jquery.validate.unobtrusive.min.js

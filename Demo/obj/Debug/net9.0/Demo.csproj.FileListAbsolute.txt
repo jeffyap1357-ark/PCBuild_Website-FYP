@@ -171,7 +171,7 @@ C:\Users\User\Desktop\new_origin\Demo\Demo\bin\Debug\net9.0\Demo.dll
 C:\Users\User\Desktop\new_origin\Demo\Demo\bin\Debug\net9.0\Demo.pdb
 C:\Users\User\Desktop\new_origin\Demo\Demo\obj\Debug\net9.0\Demo.genruntimeconfig.cache
 C:\Users\User\Desktop\new_origin\Demo\Demo\obj\Debug\net9.0\ref\Demo.dll
-C:\Users\User\Desktop\new_origin\Demo\Demo\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt
 C:\Users\User\Desktop\new_origin\Demo\Demo\obj\Debug\net9.0\compressed\7ws6osq9ig-b6gzs38fza.gz
-C:\Users\User\Desktop\new_origin\Demo\Demo\obj\Debug\net9.0\compressed\ch7szu10ds-vtekcgo87q.gz
-C:\Users\User\Desktop\new_origin\Demo\Demo\obj\Debug\net9.0\compressed\moxlhvdfuc-667g4cbbp3.gz
+C:\Users\User\Desktop\new_origin\Demo\Demo\obj\Debug\net9.0\compressed\ch7szu10ds-jmvtfo1j4r.gz
+C:\Users\User\Desktop\new_origin\Demo\Demo\obj\Debug\net9.0\compressed\moxlhvdfuc-znt7hjydkt.gz
+C:\Users\User\Desktop\new_origin\Demo\Demo\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt

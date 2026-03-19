@@ -7,12 +7,13 @@
     {
         try
         {
-            modules = System.Text.Json.JsonSerializer.Deserialize<List<GuideModule>>(Model.ContentModules) ?? new List<GuideModule>();
+            var options = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            modules = System.Text.Json.JsonSerializer.Deserialize<List<GuideModule>>(Model.ContentModules, options) ?? new List<GuideModule>();
         }
         catch { }
     }
 }
-<form method="post" action="@Url.Action("Save")" id="learning-admin-form">
+<form method="post" action="@Url.Action("Save")" id="learning-admin-form" enctype="multipart/form-data">
     @Html.AntiForgeryToken()
     <input type="hidden" name="guideId" value="@Model.GuideId" />
 
@@ -31,11 +32,12 @@
 
     <div class="form-block learning-modules-block">
         <label>Content modules</label>
-        <p class="hint">Add blocks in order: Title, Content (paragraph), or Image. Reorder with Up/Down.</p>
+        <p class="hint">Add blocks in order: Title, Content (paragraph), Image (upload), or Video (link). Reorder with Up/Down.</p>
         <div class="module-toolbar">
             <button type="button" class="button small add-module" data-type="title">+ Title</button>
             <button type="button" class="button small add-module" data-type="content">+ Content</button>
             <button type="button" class="button small add-module" data-type="image">+ Image</button>
+            <button type="button" class="button small add-module" data-type="video">+ Video</button>
         </div>
         <div id="modules-list" class="modules-list">
             @foreach (var m in modules)
@@ -48,7 +50,13 @@
                     }
                     else if ((m.Type ?? "").ToLowerInvariant() == "image")
                     {
-                        <input type="text" class="module-value" placeholder="Image URL (e.g. /hardware/xxx.jpg)" value="@m.Value" />
+                        <input type="hidden" class="module-value" value="@m.Value" />
+                        <input type="file" class="module-image-file" name="moduleImageFiles" accept="image/*" />
+                        <input type="text" class="module-caption" placeholder="Caption (optional)" value="@m.Caption" />
+                    }
+                    else if ((m.Type ?? "").ToLowerInvariant() == "video")
+                    {
+                        <input type="text" class="module-value" placeholder="Video link (YouTube URL)" value="@m.Value" />
                         <input type="text" class="module-caption" placeholder="Caption (optional)" value="@m.Caption" />
                     }
                     else
@@ -80,6 +88,7 @@
     var hidden = document.getElementById('modulesJson');
 
     function addModule(type, value, caption) {
+        type = (type || 'content').toLowerCase().trim();
         value = value || '';
         caption = caption || '';
         var div = document.createElement('div');
@@ -90,7 +99,12 @@
         if (type === 'title') {
             div.innerHTML += '<input type="text" class="module-value" placeholder="Title text" value="' + escapeAttr(value) + '" />';
         } else if (type === 'image') {
-            div.innerHTML += '<input type="text" class="module-value" placeholder="Image URL (e.g. /hardware/xxx.jpg)" value="' + escapeAttr(value) + '" />';
+            // Store existing image path in hidden value; uploading replaces it on save.
+            div.innerHTML += '<input type="hidden" class="module-value" value="' + escapeAttr(value) + '" />';
+            div.innerHTML += '<input type="file" class="module-image-file" name="moduleImageFiles" accept="image/*" />';
+            div.innerHTML += '<input type="text" class="module-caption" placeholder="Caption (optional)" value="' + escapeAttr(caption) + '" />';
+        } else if (type === 'video') {
+            div.innerHTML += '<input type="text" class="module-value" placeholder="Video link (YouTube URL)" value="' + escapeAttr(value) + '" />';
             div.innerHTML += '<input type="text" class="module-caption" placeholder="Caption (optional)" value="' + escapeAttr(caption) + '" />';
         } else {
             div.innerHTML += '<textarea class="module-value" rows="3" placeholder="Paragraph text">' + escapeHtml(value) + '</textarea>';
@@ -115,19 +129,37 @@
     }
     function collectModules() {
         var arr = [];
+        var imageFileSlot = 0;
         list.querySelectorAll('.module-item').forEach(function(div) {
             var type = (div.getAttribute('data-type') || 'content').toLowerCase();
             var valueEl = div.querySelector('.module-value');
             var captionEl = div.querySelector('.module-caption');
             var value = valueEl ? valueEl.value : '';
             var caption = captionEl ? captionEl.value : '';
-            arr.push({ type: type, value: value, caption: type === 'image' ? caption : undefined });
+
+            if (type === 'image') {
+                var fileInput = div.querySelector('.module-image-file');
+                var hasFile = fileInput && fileInput.files && fileInput.files.length > 0;
+                var fileSlot = hasFile ? imageFileSlot++ : null;
+                arr.push({ type: type, value: value, caption: caption, fileSlot: fileSlot });
+            } else if (type === 'video') {
+                arr.push({ type: type, value: value, caption: caption });
+            } else if (type === 'title') {
+                arr.push({ type: type, value: value });
+            } else {
+                arr.push({ type: type, value: value });
+            }
         });
         return arr;
     }
-    form.onsubmit = function() {
+    function syncHiddenModules() {
         hidden.value = JSON.stringify(collectModules());
-    };
+    }
+    form.onsubmit = syncHiddenModules;
+    form.addEventListener('submit', syncHiddenModules);
+    list.addEventListener('input', syncHiddenModules, true);
+    list.addEventListener('change', syncHiddenModules, true);
+    syncHiddenModules();
 
     document.querySelectorAll('.add-module').forEach(function(btn) {
         btn.onclick = function() { addModule(btn.getAttribute('data-type'), '', ''); };
