@@ -61,16 +61,18 @@ public class AccountController : Controller
         return View();
     }
 
-    // GET: Account/CheckEmail
-    public bool CheckEmail(string email)
+    // GET: Account/CheckEmail (for Remote validation)
+    public IActionResult CheckEmail(string email)
     {
-        return !db.Users.Any(u => u.Email == email);
+        if (string.IsNullOrWhiteSpace(email)) return Json(true);
+        return Json(!db.Users.Any(u => u.Email == email));
     }
 
-    // GET: Account/CheckUsername
-    public bool CheckUsername(string username)
+    // GET: Account/CheckUsername (for Remote validation)
+    public IActionResult CheckUsername(string username)
     {
-        return !db.Users.Any(u => u.Username == username);
+        if (string.IsNullOrWhiteSpace(username)) return Json(true);
+        return Json(!db.Users.Any(u => u.Username == username));
     }
 
     // GET: Account/Register
@@ -84,9 +86,9 @@ public class AccountController : Controller
     public IActionResult Register(RegisterVM vm)
     {
         if (ModelState.IsValid("Email") && db.Users.Any(u => u.Email == vm.Email))
-            ModelState.AddModelError("Email", "Duplicated Email.");
+            ModelState.AddModelError("Email", "This email is already registered.");
         if (ModelState.IsValid("Username") && db.Users.Any(u => u.Username == vm.Username))
-            ModelState.AddModelError("Username", "Duplicated Username.");
+            ModelState.AddModelError("Username", "This username is already taken.");
 
         if (ModelState.IsValid)
         {

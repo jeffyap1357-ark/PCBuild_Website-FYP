@@ -24,13 +24,13 @@ public class LoginVM
 public class RegisterVM
 {
     [StringLength(100)]
-    [Remote("CheckUsername", "Account", ErrorMessage = "Duplicated {0}.")]
+    [Remote("CheckUsername", "Account", ErrorMessage = "This username is already taken.")]
     [Display(Name = "Username")]
     public string Username { get; set; }
 
     [StringLength(256)]
     [EmailAddress]
-    [Remote("CheckEmail", "Account", ErrorMessage = "Duplicated {0}.")]
+    [Remote("CheckEmail", "Account", ErrorMessage = "This email is already registered.")]
     public string Email { get; set; }
 
     [StringLength(256, MinimumLength = 5)]
