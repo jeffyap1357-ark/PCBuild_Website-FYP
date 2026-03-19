@@ -543,7 +543,7 @@ main.home-page {
     color: #6b7280;
 }
 
-/* Section 3: Test Your Knowledge – book (main left), title + Beginner (middle), Normal & Expert (right) */
+/* Section 3: Test Your Knowledge – centered icon + title, then 3 equal cards */
 .home-quiz-section {
     background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
     padding: 48px 24px 56px;
@@ -556,8 +556,23 @@ main.home-page {
     margin: 0 auto;
 }
 
+.home-quiz-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 28px;
+}
+
+.home-quiz-image {
+    width: 72px;
+    height: auto;
+    margin-bottom: 12px;
+    object-fit: contain;
+    filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.1));
+}
+
 .home-quiz-title {
-    margin: 0 0 24px 0;
+    margin: 0;
     font-size: 1.6rem;
     font-weight: 800;
     color: #0f172a;
@@ -566,34 +581,13 @@ main.home-page {
 }
 
 .home-quiz-row {
-    display: flex;
-    flex-direction: row;
-    align-items: stretch;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 20px;
+    align-items: stretch;
 }
-
-.home-quiz-left {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 240px;
-    max-width: 280px;
-}
-
-.home-quiz-image {
-    max-width: 100%;
-    max-height: 380px;
-    width: auto;
-    height: auto;
-    display: block;
-    object-fit: contain;
-    filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.12));
-}
-
 
 .home-quiz-row .home-quiz-box {
-    flex: 1;
     min-width: 0;
 }
 
@@ -651,6 +645,10 @@ main.home-page {
     background: #f1f5f9;
     color: #1e3a5f;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+@media (max-width: 700px) {
+    .home-quiz-row { grid-template-columns: 1fr; }
 }
 
 /* Section 4: Why US – black background, white text, 3 black boxes with white images */
