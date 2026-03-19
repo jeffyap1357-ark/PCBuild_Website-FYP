@@ -28,6 +28,11 @@ public class AdminController : Controller
             .Select(g => new { rating = g.Key, count = g.Count() })
             .OrderBy(x => x.rating)
             .ToList();
+        var usersByRole = _db.Users
+            .GroupBy(u => string.IsNullOrEmpty(u.Role) ? "User" : u.Role)
+            .Select(g => new { label = g.Key, count = g.Count() })
+            .OrderByDescending(x => x.count)
+            .ToList();
 
         var vm = new AdminDashboardVM
         {
@@ -43,6 +48,7 @@ public class AdminController : Controller
         };
         ViewBag.HardwareChartData = JsonSerializer.Serialize(hardwareByCat);
         ViewBag.FeedbackChartData = JsonSerializer.Serialize(feedbackByRating);
+        ViewBag.UsersByRoleData = JsonSerializer.Serialize(usersByRole);
         return View(vm);
     }
 }
