@@ -4177,3 +4177,6 @@ main hr {
 .admin-links li { margin-bottom: 0.5rem; }
 .admin-links a { color: var(--accent); font-weight: 500; }
 .admin-links a:hover { text-decoration: underline; }
+
+.feedback-admin-chart-wrap { max-width: 480px; margin-bottom: 1.5rem; }
+.feedback-admin-chart-wrap canvas { max-height: 220px; }

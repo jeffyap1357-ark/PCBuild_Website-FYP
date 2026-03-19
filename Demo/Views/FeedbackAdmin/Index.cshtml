@@ -18,6 +18,9 @@ else
     </p>
 
     <h3>Rating distribution</h3>
+    <div class="feedback-admin-chart-wrap">
+        <canvas id="chart-feedback-admin" width="400" height="220"></canvas>
+    </div>
     <table class="table">
         <thead>
             <tr>
@@ -62,5 +65,44 @@ else
             }
         </tbody>
     </table>
+}
+
+@section head {
+@if (Model.TotalCount > 0)
+{
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+}
+}
+
+@section foot {
+@if (Model.TotalCount > 0)
+{
+<script>
+(function() {
+    var data = @Html.Raw(ViewBag.ChartData ?? "[]");
+    if (data.length > 0 && typeof Chart !== 'undefined') {
+        new Chart(document.getElementById('chart-feedback-admin'), {
+            type: 'bar',
+            data: {
+                labels: data.map(function(x) { return 'Rating ' + x.rating; }),
+                datasets: [{
+                    label: 'Count',
+                    data: data.map(function(x) { return x.count; }),
+                    backgroundColor: ['rgba(239, 68, 68, 0.6)', 'rgba(249, 115, 22, 0.6)', 'rgba(234, 179, 8, 0.6)', 'rgba(34, 197, 94, 0.6)', 'rgba(59, 130, 246, 0.6)'],
+                    borderColor: ['rgba(239, 68, 68, 1)', 'rgba(249, 115, 22, 1)', 'rgba(234, 179, 8, 1)', 'rgba(34, 197, 94, 1)', 'rgba(59, 130, 246, 1)'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+            }
+        });
+    }
+})();
+</script>
+}
 }
 
