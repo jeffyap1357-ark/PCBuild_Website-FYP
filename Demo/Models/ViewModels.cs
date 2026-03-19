@@ -87,6 +87,39 @@ public class ResetPasswordVM
     public string Email { get; set; }
 }
 
+// Admin account management (admin can add sub-admin accounts)
+public class AdminCreateVM
+{
+    [Required, StringLength(100), Display(Name = "Username")]
+    public string Username { get; set; }
+
+    [Required, StringLength(256), EmailAddress, Display(Name = "Email")]
+    public string Email { get; set; }
+
+    [Required, StringLength(256, MinimumLength = 5), DataType(DataType.Password), Display(Name = "Password")]
+    public string Password { get; set; }
+
+    [Required, StringLength(256, MinimumLength = 5), Compare("Password"), DataType(DataType.Password), Display(Name = "Confirm Password")]
+    public string Confirm { get; set; }
+}
+
+public class AdminEditVM
+{
+    public int UserId { get; set; }
+
+    [Required, StringLength(100), Display(Name = "Username")]
+    public string Username { get; set; }
+
+    [Required, StringLength(256), EmailAddress, Display(Name = "Email")]
+    public string Email { get; set; }
+
+    [StringLength(256, MinimumLength = 5), DataType(DataType.Password), Display(Name = "New Password (leave blank to keep)")]
+    public string? NewPassword { get; set; }
+
+    [Compare("NewPassword"), DataType(DataType.Password), Display(Name = "Confirm New Password")]
+    public string? ConfirmNewPassword { get; set; }
+}
+
 // PC Build configuration
 public class ConfigureBuildVM
 {

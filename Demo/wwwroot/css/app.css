@@ -1007,6 +1007,8 @@ input::placeholder, textarea::placeholder {
     text-align: center;
     font-weight: 600;
 }
+.badge-root { background: #64748b; margin-left: 6px; font-size: 0.75rem; padding: 2px 6px; }
+.text-muted { color: var(--text-muted); }
 
 /* Button --------------------------------------------------------------------- */
 

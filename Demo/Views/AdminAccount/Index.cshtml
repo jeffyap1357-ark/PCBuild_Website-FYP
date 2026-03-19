@@ -1,0 +1,59 @@
+@model List<User>
+@{
+    ViewBag.Title = "Admin | Admin Accounts";
+}
+
+<p>Manage admin accounts. The root admin (admin@gmail.com) cannot be edited or deleted.</p>
+
+<p>
+    <a href="@Url.Action("Create")" class="button">Add Admin Account</a>
+</p>
+
+@if (!Model.Any())
+{
+    <p>No admin accounts.</p>
+}
+else
+{
+    <table class="table admin-table">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var u in Model)
+            {
+                <tr>
+                    <td>@u.Username</td>
+                    <td>@u.Email</td>
+                    <td>
+                        @u.Role
+                        @if (u.IsRootAdmin)
+                        {
+                            <span class="badge badge-root">Root Admin</span>
+                        }
+                    </td>
+                    <td>
+                        @if (u.IsRootAdmin)
+                        {
+                            <span class="text-muted">—</span>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("Edit", new { id = u.UserId })">Edit</a>
+                            <span> | </span>
+                            <form method="post" action="@Url.Action("Delete", new { id = u.UserId })" style="display:inline" onsubmit="return confirm('Delete this admin account?');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="link-button">Delete</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
