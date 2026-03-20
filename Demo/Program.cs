@@ -203,6 +203,23 @@ catch (Exception ex)
     logger.LogWarning(ex, "Could not ensure Quiz tables exist.");
 }
 
+// Ensure QuizQuestions has Level and Explanation (EF model / quiz seeds require these)
+try
+{
+    using var scopeQuizCols = app.Services.CreateScope();
+    var dbQuizCols = scopeQuizCols.ServiceProvider.GetRequiredService<DB>();
+    dbQuizCols.Database.ExecuteSqlRaw(@"
+        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('QuizQuestions') AND name = 'Level')
+            ALTER TABLE [QuizQuestions] ADD [Level] nvarchar(20) NULL;
+        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('QuizQuestions') AND name = 'Explanation')
+            ALTER TABLE [QuizQuestions] ADD [Explanation] nvarchar(1000) NULL;
+    ");
+}
+catch (Exception ex)
+{
+    logger.LogWarning(ex, "Could not ensure QuizQuestions Level/Explanation columns.");
+}
+
 // Seed Normal and Professional quiz questions if none exist
 try
 {
