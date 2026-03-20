@@ -24,13 +24,13 @@ public class LoginVM
 public class RegisterVM
 {
     [StringLength(100)]
-    [Remote("CheckUsername", "Account", ErrorMessage = "Duplicated {0}.")]
+    [Remote("CheckUsername", "Account", ErrorMessage = "This username is already taken.")]
     [Display(Name = "Username")]
     public string Username { get; set; }
 
     [StringLength(256)]
     [EmailAddress]
-    [Remote("CheckEmail", "Account", ErrorMessage = "Duplicated {0}.")]
+    [Remote("CheckEmail", "Account", ErrorMessage = "This email is already registered.")]
     public string Email { get; set; }
 
     [StringLength(256, MinimumLength = 5)]
@@ -71,6 +71,13 @@ public class UpdateProfileVM
     [StringLength(256)]
     [EmailAddress]
     public string Email { get; set; }
+
+    [MaxLength(20)]
+    [Display(Name = "Gender")]
+    public string? Gender { get; set; }
+
+    [Display(Name = "Profile Picture")]
+    public IFormFile? AvatarFile { get; set; }
 }
 
 public class ResetPasswordVM
@@ -78,6 +85,39 @@ public class ResetPasswordVM
     [StringLength(256)]
     [EmailAddress]
     public string Email { get; set; }
+}
+
+// Admin account management (admin can add sub-admin accounts)
+public class AdminCreateVM
+{
+    [Required, StringLength(100), Display(Name = "Username")]
+    public string Username { get; set; }
+
+    [Required, StringLength(256), EmailAddress, Display(Name = "Email")]
+    public string Email { get; set; }
+
+    [Required, StringLength(256, MinimumLength = 5), DataType(DataType.Password), Display(Name = "Password")]
+    public string Password { get; set; }
+
+    [Required, StringLength(256, MinimumLength = 5), Compare("Password"), DataType(DataType.Password), Display(Name = "Confirm Password")]
+    public string Confirm { get; set; }
+}
+
+public class AdminEditVM
+{
+    public int UserId { get; set; }
+
+    [Required, StringLength(100), Display(Name = "Username")]
+    public string Username { get; set; }
+
+    [Required, StringLength(256), EmailAddress, Display(Name = "Email")]
+    public string Email { get; set; }
+
+    [StringLength(256, MinimumLength = 5), DataType(DataType.Password), Display(Name = "New Password (leave blank to keep)")]
+    public string? NewPassword { get; set; }
+
+    [Compare("NewPassword"), DataType(DataType.Password), Display(Name = "Confirm New Password")]
+    public string? ConfirmNewPassword { get; set; }
 }
 
 // PC Build configuration
@@ -187,8 +227,7 @@ public class RegenerateAssessmentDto
 // Performance evaluation (user-selected build with budget and score)
 public class PerformanceBuildVM
 {
-    [Required, Range(1000, 50000), Display(Name = "Budget (RM)")]
-    public decimal Budget { get; set; } = 5000;
+    public decimal Budget { get; set; } = 500000;
 
     public List<CategoryOptionVM> Categories { get; set; } = [];
 
@@ -218,10 +257,12 @@ public class QuizQuestionAnswerVM
     // Filled after grading
     public string CorrectOption { get; set; }
     public bool IsCorrect { get; set; }
+    public string? Explanation { get; set; }
 }
 
 public class QuizTakeVM
 {
+    public string Level { get; set; } = "Beginner";
     public List<QuizQuestionAnswerVM> Questions { get; set; } = [];
 
     public int TotalQuestions => Questions.Count;
@@ -261,6 +302,19 @@ public class FeedbackReportVM
     public int TotalCount { get; set; }
     public List<FeedbackDistributionItemVM> Distribution { get; set; } = [];
     public List<Feedback> Feedbacks { get; set; } = [];
+}
+
+public class AdminDashboardVM
+{
+    public int UserCount { get; set; }
+    public int BuildCount { get; set; }
+    public int HardwareCount { get; set; }
+    public int QuizAttemptCount { get; set; }
+    public int PerformanceReportCount { get; set; }
+    public int FeedbackCount { get; set; }
+    public int CommunityCount { get; set; }
+    public List<KeyValuePair<string, int>> HardwareByCategory { get; set; } = [];
+    public List<KeyValuePair<int, int>> FeedbackByRating { get; set; } = [];
 }
 
 public class HardwareEditVM

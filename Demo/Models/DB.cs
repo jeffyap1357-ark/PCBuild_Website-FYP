@@ -62,6 +62,12 @@ public class User
     /// <summary>Root admin cannot be deleted or have role changed by others.</summary>
     public bool IsRootAdmin { get; set; }
 
+    [MaxLength(100)]
+    public string? Avatar { get; set; }
+
+    [MaxLength(20)]
+    public string? Gender { get; set; }
+
     public List<Build> Builds { get; set; } = [];
     public List<UserGuideProgress> GuideProgresses { get; set; } = [];
 }
@@ -449,6 +455,13 @@ public class QuizQuestion
     [Required, MaxLength(1)]
     public string CorrectOption { get; set; }
 
+    [MaxLength(20)]
+    public string? Level { get; set; }
+
+    /// <summary>Optional explanation shown after answering (e.g. why the answer is correct).</summary>
+    [MaxLength(1000)]
+    public string? Explanation { get; set; }
+
     public bool IsActive { get; set; } = true;
 }
 
@@ -471,6 +484,9 @@ public class QuizAttempt
     public User User { get; set; }
 
     public List<QuizAttemptDetail> Details { get; set; } = [];
+
+    [NotMapped]
+    public string? Level { get; set; }
 }
 
 // QuizAttemptDetail: per-question answer for an attempt

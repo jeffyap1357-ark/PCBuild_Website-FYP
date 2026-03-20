@@ -123,7 +123,7 @@ public class CommunityController : Controller
         db.SaveChanges();
 
         TempData["Info"] = "Build shared to Community.";
-        return RedirectToAction(nameof(Detail), new { id = community.CommunityId });
+        return RedirectToAction(nameof(Detail), new { id = community.CommunityId, showFeedback = 1 });
     }
 
     [Authorize]

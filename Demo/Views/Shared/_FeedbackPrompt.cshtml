@@ -1,14 +1,19 @@
 @model FeedbackCreateVM
 
 @{
-    // Only show once per session via JS; this is the inline form.
+    // Show only after completing a module, once per day (triggered by TempData or ?showFeedback=1).
     var controller = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
     var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
     var moduleName = $"{controller}/{action}";
     var returnUrl = Context.Request.Path + Context.Request.QueryString;
 }
 
-<div id="feedback-panel" class="feedback-panel" style="display:none;">
+@{
+    var feedbackUserKey = User.Identity?.Name ?? "guest";
+}
+<div id="feedback-panel-wrap" class="feedback-modal-wrap" style="display:none;" data-trigger="@(ViewBag.ShowFeedback == true ? "1" : "0")" data-user="@feedbackUserKey">
+    <div class="feedback-modal-backdrop" id="feedback-backdrop"></div>
+    <div id="feedback-panel" class="feedback-modal">
     <form asp-controller="Feedback" asp-action="Create" method="post">
         @Html.AntiForgeryToken()
         <input type="hidden" asp-for="ModuleName" value="@moduleName" />
@@ -37,23 +42,32 @@
         </p>
     </form>
 </div>
+</div>
 
-@section foot {
-    <script>
-        (function () {
-            if (!window.sessionStorage) return;
-            var panel = document.getElementById('feedback-panel');
-            if (!panel) return;
-            if (sessionStorage.getItem('feedbackLater') === '1') return;
-            panel.style.display = 'block';
-            var laterBtn = document.getElementById('feedback-later');
-            if (laterBtn) {
-                laterBtn.addEventListener('click', function () {
-                    sessionStorage.setItem('feedbackLater', '1');
-                    panel.style.display = 'none';
-                });
-            }
-        })();
-    </script>
-}
+<script>
+(function () {
+    if (!window.localStorage) return;
+    var wrap = document.getElementById('feedback-panel-wrap');
+    if (!wrap) return;
+    if (wrap.getAttribute('data-trigger') !== '1') return;
+    var userKey = wrap.getAttribute('data-user') || 'guest';
+    var storageKey = 'feedbackLastShownDate_' + userKey;
+    var today = new Date().toISOString().slice(0, 10);
+    if (localStorage.getItem(storageKey) === today) return;
+    localStorage.setItem(storageKey, today);
+    wrap.style.display = 'flex';
+    var laterBtn = document.getElementById('feedback-later');
+    if (laterBtn) {
+        laterBtn.addEventListener('click', function () {
+            wrap.style.display = 'none';
+        });
+    }
+    var backdrop = document.getElementById('feedback-backdrop');
+    if (backdrop) {
+        backdrop.addEventListener('click', function () {
+            wrap.style.display = 'none';
+        });
+    }
+})();
+</script>
 

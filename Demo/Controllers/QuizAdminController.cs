@@ -13,11 +13,22 @@ public class QuizAdminController : Controller
         this.db = db;
     }
 
-    public IActionResult Index()
+    private static readonly string[] Levels = ["Beginner", "Normal", "Professional"];
+
+    public IActionResult Index(string? level)
     {
-        var list = db.QuizQuestions
-            .OrderBy(q => q.QuizQuestionId)
-            .ToList();
+        var query = db.QuizQuestions.AsQueryable();
+        if (!string.IsNullOrWhiteSpace(level) && Levels.Contains(level, StringComparer.OrdinalIgnoreCase))
+        {
+            var lv = Levels.First(x => x.Equals(level, StringComparison.OrdinalIgnoreCase));
+            if (lv == "Beginner")
+                query = query.Where(q => q.Level == null || q.Level == "" || q.Level == "Beginner");
+            else
+                query = query.Where(q => q.Level != null && q.Level == lv);
+        }
+        var list = query.OrderBy(q => q.QuizQuestionId).ToList();
+        ViewBag.Levels = Levels;
+        ViewBag.SelectedLevel = level;
         return View(list);
     }
 
@@ -36,6 +47,13 @@ public class QuizAdminController : Controller
         if (!new[] { "A", "B", "C", "D" }.Contains(q.CorrectOption))
             ModelState.AddModelError("CorrectOption", "Correct option must be A, B, C, or D.");
 
+        var level = (q.Level ?? "").Trim();
+        if (!string.IsNullOrEmpty(level) && !Levels.Contains(level, StringComparer.OrdinalIgnoreCase))
+            q.Level = null;
+        else if (!string.IsNullOrEmpty(level))
+            q.Level = Levels.First(x => x.Equals(level, StringComparison.OrdinalIgnoreCase));
+
+        q.Explanation = string.IsNullOrWhiteSpace(q.Explanation) ? null : q.Explanation.Trim();
         if (ModelState.IsValid)
         {
             q.IsActive = true;
@@ -68,6 +86,12 @@ public class QuizAdminController : Controller
         if (!new[] { "A", "B", "C", "D" }.Contains(correct))
             ModelState.AddModelError("CorrectOption", "Correct option must be A, B, C, or D.");
 
+        var level = (form.Level ?? "").Trim();
+        if (!string.IsNullOrEmpty(level) && Levels.Contains(level, StringComparer.OrdinalIgnoreCase))
+            q.Level = Levels.First(x => x.Equals(level, StringComparison.OrdinalIgnoreCase));
+        else
+            q.Level = null;
+
         if (ModelState.IsValid)
         {
             q.QuestionText = form.QuestionText;
@@ -76,6 +100,7 @@ public class QuizAdminController : Controller
             q.OptionC = form.OptionC;
             q.OptionD = form.OptionD;
             q.CorrectOption = correct;
+            q.Explanation = string.IsNullOrWhiteSpace(form.Explanation) ? null : form.Explanation.Trim();
             q.IsActive = form.IsActive;
             db.SaveChanges();
             TempData["Info"] = "Question updated.";

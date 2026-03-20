@@ -2,21 +2,88 @@
 
 @{
     ViewBag.Title = "PC Build | Update Profile";
+    ViewBag.HideMainTitle = true;
+    var avatarUrl = ViewBag.AvatarUrl as string;
 }
 
-<form class="form" method="post">
-    <div asp-validation-summary="ModelOnly"></div>
+<div class="profile-page">
+    <div class="profile-card">
+        <h2>Update Profile</h2>
+        <p class="profile-subtitle">Edit your account details</p>
 
-    <label asp-for="Username"></label>
-    <input asp-for="Username" autofocus>
-    <span asp-validation-for="Username"></span>
+        <div class="profile-avatar-wrap">
+            <div class="profile-avatar-preview">
+                <img src="@(avatarUrl ?? "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7")" alt="Avatar" id="avatar-preview" class="@(string.IsNullOrEmpty(avatarUrl) ? "hidden" : "")" />
+                <span class="profile-avatar-placeholder @(string.IsNullOrEmpty(avatarUrl) ? "" : "hidden")" id="avatar-placeholder">@(Model.Username?.Length > 0 ? Model.Username[0].ToString().ToUpperInvariant() : "?")</span>
+            </div>
+        </div>
 
-    <label asp-for="Email"></label>
-    <input asp-for="Email">
-    <span asp-validation-for="Email"></span>
+        <form class="auth-form profile-form" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly"></div>
 
-    <section>
-        <button>Update</button>
-        <button type="reset">Reset</button>
-    </section>
-</form>
+            <div class="form-group">
+                <label asp-for="AvatarFile">Profile Picture</label>
+                <input asp-for="AvatarFile" type="file" accept="image/jpeg,image/png" class="profile-file-input">
+                <span class="form-hint">JPG or PNG, max 1MB</span>
+                <span asp-validation-for="AvatarFile"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Username">Username</label>
+                <input asp-for="Username" placeholder="Username" autofocus>
+                <span asp-validation-for="Username"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Email">Email</label>
+                <input asp-for="Email" type="email" placeholder="your@email.com">
+                <span asp-validation-for="Email"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Gender">Gender</label>
+                <select asp-for="Gender">
+                    <option value="">-- Select --</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
+                <span asp-validation-for="Gender"></span>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="button">Save Changes</button>
+                <a href="/" class="button secondary">Cancel</a>
+            </div>
+        </form>
+
+        <div class="auth-links">
+            <a href="/Account/UpdatePassword">Change password</a> &nbsp;|&nbsp;
+            <a href="/Account/Logout">Log out</a>
+        </div>
+    </div>
+</div>
+
+@section foot {
+<script>
+(function() {
+    var fileInput = document.querySelector('.profile-file-input');
+    var preview = document.getElementById('avatar-preview');
+    var placeholder = document.getElementById('avatar-placeholder');
+    if (fileInput && preview && placeholder) {
+        fileInput.addEventListener('change', function() {
+            var f = this.files[0];
+            if (f && f.type.match(/^image\/(jpeg|png)$/)) {
+                var r = new FileReader();
+                r.onload = function() {
+                    preview.src = r.result;
+                    preview.classList.remove('hidden');
+                    placeholder.classList.add('hidden');
+                };
+                r.readAsDataURL(f);
+            }
+        });
+    }
+})();
+</script>
+}

@@ -1,0 +1,35 @@
+@{
+    ViewBag.Title = "PC Build | Knowledge Test";
+    var levels = ViewBag.Levels as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
+}
+
+<h2>PC Knowledge Test</h2>
+<p>Choose a level. Complete a level with a full score to unlock the next.</p>
+
+<div class="quiz-levels-grid">
+    @foreach (var item in levels)
+    {
+        var name = (string)item.Name;
+        var unlocked = (bool)item.Unlocked;
+        var completed = (bool)item.Completed;
+        var levelClass = name.Equals("Beginner", StringComparison.OrdinalIgnoreCase) ? "quiz-level-beginner"
+            : name.Equals("Normal", StringComparison.OrdinalIgnoreCase) ? "quiz-level-normal"
+            : "quiz-level-professional";
+        <article class="quiz-level-card @levelClass @(unlocked ? "" : "quiz-level-locked") @(completed ? "quiz-level-completed" : "")">
+            <h3>@name</h3>
+            <p>@(completed ? "Completed" : unlocked ? "Available" : "Locked")</p>
+            @if (unlocked)
+            {
+                <a href="@Url.Action("Index", new { level = name })" class="button">Start</a>
+            }
+            else
+            {
+                <span class="button secondary" disabled>Locked</span>
+            }
+        </article>
+    }
+</div>
+
+<p>
+    <a href="@Url.Action("History")" class="button secondary">View History</a>
+</p>

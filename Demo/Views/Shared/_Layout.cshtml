@@ -18,9 +18,10 @@
         path.StartsWith("/HardwareAdmin", StringComparison.OrdinalIgnoreCase) ||
         path.StartsWith("/LearningAdmin", StringComparison.OrdinalIgnoreCase) ||
         path.StartsWith("/QuizAdmin", StringComparison.OrdinalIgnoreCase) ||
-        path.StartsWith("/FeedbackAdmin", StringComparison.OrdinalIgnoreCase));
+        path.StartsWith("/FeedbackAdmin", StringComparison.OrdinalIgnoreCase) ||
+        path.StartsWith("/AdminAccount", StringComparison.OrdinalIgnoreCase));
 }
-<body class="@(isAdminSite ? "body-admin-site" : "")">
+<body class="@(isAdminSite ? "body-admin-site" : "") @(User.Identity?.IsAuthenticated == true ? "chatbot-logged-in" : "")">
     <div class="info">@Html.Raw(TempData["Info"])</div>
 
     <header>
@@ -30,7 +31,7 @@
         {
             <div class="header-user" id="nav-user">
                 <button type="button" class="header-user-trigger" id="nav-user-trigger" title="Account" aria-label="Account" aria-expanded="false" aria-haspopup="true">
-                    <span class="header-user-avatar" aria-hidden="true">@(User.Identity.Name?.Length > 0 ? User.Identity.Name[0].ToString().ToUpperInvariant() : "?")</span>
+                    @await Component.InvokeAsync("UserAvatar")
                     <span class="header-user-name">@User.Identity.Name</span>
                 </button>
                 <div class="nav-user-dropdown" id="nav-user-dropdown" role="menu" hidden>
@@ -50,6 +51,7 @@
             <a href="/LearningAdmin/Index" title="Learning maker" aria-label="Learning maker">Learning</a>
             <a href="/QuizAdmin/Index" title="Quiz admin" aria-label="Quiz admin">Quiz</a>
             <a href="/FeedbackAdmin/Index" title="Feedback admin" aria-label="Feedback admin">Feedback</a>
+            <a href="/AdminAccount/Index" title="Admin accounts" aria-label="Admin accounts">Admin Accounts</a>
             <div class="nav-spacer"></div>
             <a href="/" class="nav-site-switch" title="Back to user site">User site</a>
         }
@@ -74,7 +76,7 @@
             <a href="/Recommend" title="Recommend Build" aria-label="Recommend Build"><img src="/icon/recommend.png" alt=""></a>
             <a href="/Build/Configure" title="PC Build Config" aria-label="PC Build Config"><img src="/icon/pcbuild.png" alt=""></a>
             <a href="/Build/Index" title="My Builds" aria-label="My Builds"><img src="/icon/mybuild.png" alt=""></a>
-            <a href="/Quiz/Index" title="Quiz" aria-label="Quiz"><img src="/icon/quizz.png" alt=""></a>
+            <a href="/Quiz/LevelsView" title="Quiz" aria-label="Quiz"><img src="/icon/quizz.png" alt=""></a>
             <a href="/Performance/Index" title="Performance Build" aria-label="Performance Build"><img src="/icon/perfomence.png" alt=""></a>
             <div class="nav-spacer"></div>
             @if (User.IsInRole(Roles.Admin))
@@ -96,6 +98,17 @@
     {
         <footer>
         </footer>
+    }
+
+    @if (!isAdminSite)
+    {
+        @await Html.PartialAsync("_Chatbot")
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            ViewBag.ShowFeedback = TempData["ShowFeedback"] as bool? == true ||
+                string.Equals(Context.Request.Query["showFeedback"], "1", StringComparison.OrdinalIgnoreCase);
+            @await Html.PartialAsync("_FeedbackPrompt", new Demo.Models.FeedbackCreateVM())
+        }
     }
 
     <script src="/js/jquery.min.js"></script>

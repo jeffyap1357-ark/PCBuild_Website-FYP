@@ -1,0 +1,31 @@
+@* Chatbot: keyword-based help, introduces all webpage features *@
+<div id="chatbot-wrap" class="chatbot-wrap" aria-hidden="true">
+    <div class="chatbot-panel" id="chatbot-panel">
+        <div class="chatbot-header">
+            <h3>PC Build Help</h3>
+            <button type="button" class="chatbot-close" id="chatbot-close" aria-label="Close">×</button>
+        </div>
+        <div class="chatbot-messages" id="chatbot-messages">
+            <div class="chatbot-msg chatbot-msg-bot">
+                <p>Hi! I'm your PC Build assistant. Type <strong>help</strong> for features. Ask about PC building: compatibility, cpu, motherboard, ram, gpu, psu, cooling, storage, assembly.</p>
+            </div>
+        </div>
+        <div class="chatbot-quick-btns" id="chatbot-quick-btns">
+            <button type="button" class="chatbot-quick-btn" data-ask="help">Help</button>
+            <button type="button" class="chatbot-quick-btn" data-ask="compatibility">Compatibility</button>
+            <button type="button" class="chatbot-quick-btn" data-ask="cpu">CPU</button>
+            <button type="button" class="chatbot-quick-btn" data-ask="ram">RAM</button>
+            <button type="button" class="chatbot-quick-btn" data-ask="gpu">GPU</button>
+            <button type="button" class="chatbot-quick-btn" data-ask="psu">PSU</button>
+            <button type="button" class="chatbot-quick-btn" data-ask="assembly">Assembly</button>
+        </div>
+        <div class="chatbot-input-wrap">
+            <input type="text" class="chatbot-input" id="chatbot-input" placeholder="Type a question..." maxlength="200" autocomplete="off">
+            <button type="button" class="chatbot-send" id="chatbot-send" aria-label="Send">Send</button>
+        </div>
+    </div>
+    <button type="button" class="chatbot-toggle" id="chatbot-toggle" aria-label="Open help chat" title="Help">
+        <span class="chatbot-toggle-icon">?</span>
+    </button>
+</div>
+<script src="/js/chatbot.js" asp-append-version="true"></script>

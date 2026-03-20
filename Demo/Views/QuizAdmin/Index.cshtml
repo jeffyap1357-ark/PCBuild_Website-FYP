@@ -1,10 +1,29 @@
 @model List<QuizQuestion>
-
 @{
     ViewBag.Title = "PC Build | Manage Quiz Questions";
+    var levels = ViewBag.Levels as string[] ?? new[] { "Beginner", "Normal", "Professional" };
+    var selectedLevel = ViewBag.SelectedLevel as string;
 }
 
-<p>Manage quiz questions used in the PC Knowledge Test.</p>
+<p>Manage quiz questions used in the PC Knowledge Test. Filter by level:</p>
+
+<div class="admin-filter">
+    <label>Level:</label>
+    <select onchange="location.href='/QuizAdmin/Index' + (this.value ? '?level=' + encodeURIComponent(this.value) : '')">
+        <option value="">All</option>
+        @foreach (var lv in levels)
+        {
+            if (string.Equals(selectedLevel, lv, StringComparison.OrdinalIgnoreCase))
+            {
+                <option value="@lv" selected>@lv</option>
+            }
+            else
+            {
+                <option value="@lv">@lv</option>
+            }
+        }
+    </select>
+</div>
 
 <p>
     <a href="@Url.Action("Create")" class="button">Add New Question</a>
@@ -16,10 +35,11 @@
 }
 else
 {
-    <table class="table">
+    <table class="table admin-table">
         <thead>
             <tr>
                 <th>ID</th>
+                <th>Level</th>
                 <th>Question</th>
                 <th>Correct</th>
                 <th>Active</th>
@@ -31,6 +51,7 @@ else
             {
                 <tr>
                     <td>@q.QuizQuestionId</td>
+                    <td>@(string.IsNullOrEmpty(q.Level) ? "Beginner" : q.Level)</td>
                     <td>@q.QuestionText</td>
                     <td>@q.CorrectOption</td>
                     <td>@(q.IsActive ? "Yes" : "No")</td>

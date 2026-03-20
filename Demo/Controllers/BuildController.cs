@@ -150,7 +150,7 @@ public class BuildController : Controller
             }
 
             TempData["Info"] = "Build saved.";
-            return RedirectToAction(nameof(Detail), new { id = build.BuildId });
+            return RedirectToAction(nameof(Detail), new { id = build.BuildId, showFeedback = 1 });
         }
 
         ViewBag.DraftId = draftId;
@@ -321,7 +321,7 @@ public class BuildController : Controller
             db.SaveChanges();
 
             TempData["Info"] = "Build updated.";
-            return RedirectToAction(nameof(Detail), new { id = build.BuildId });
+            return RedirectToAction(nameof(Detail), new { id = build.BuildId, showFeedback = 1 });
         }
 
         ViewBag.BuildId = id;

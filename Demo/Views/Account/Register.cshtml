@@ -2,29 +2,47 @@
 
 @{
     ViewBag.Title = "PC Build | Register";
+    ViewBag.HideMainTitle = true;
 }
 
-<form class="form" method="post">
-    <div asp-validation-summary="ModelOnly"></div>
+<div class="auth-page">
+    <div class="auth-card">
+        <h2>Create Account</h2>
+        <form class="auth-form" method="post">
+            <div asp-validation-summary="All" class="validation-errors"></div>
 
-    <label asp-for="Username"></label>
-    <input asp-for="Username" autofocus>
-    <span asp-validation-for="Username"></span>
+            <div class="form-group">
+                <label asp-for="Username">Username</label>
+                <input asp-for="Username" placeholder="Username" autofocus>
+                <span asp-validation-for="Username"></span>
+            </div>
 
-    <label asp-for="Email"></label>
-    <input asp-for="Email">
-    <span asp-validation-for="Email"></span>
+            <div class="form-group">
+                <label asp-for="Email">Email</label>
+                <input asp-for="Email" type="email" placeholder="your@email.com">
+                <span asp-validation-for="Email"></span>
+            </div>
 
-    <label asp-for="Password"></label>
-    <input asp-for="Password">
-    <span asp-validation-for="Password"></span>
+            <div class="form-group">
+                <label asp-for="Password">Password</label>
+                <input asp-for="Password" placeholder="At least 5 characters">
+                <span asp-validation-for="Password"></span>
+            </div>
 
-    <label asp-for="Confirm"></label>
-    <input asp-for="Confirm">
-    <span asp-validation-for="Confirm"></span>
+            <div class="form-group">
+                <label asp-for="Confirm">Confirm Password</label>
+                <input asp-for="Confirm" placeholder="Confirm password">
+                <span asp-validation-for="Confirm"></span>
+            </div>
 
-    <section>
-        <button>Register</button>
-        <button type="reset">Reset</button>
-    </section>
-</form>
+            <div class="form-actions">
+                <button type="submit" class="button">Register</button>
+                <a href="/" class="button secondary">Cancel</a>
+            </div>
+        </form>
+
+        <div class="auth-links">
+            Already have an account? <a href="/Account/Login">Sign in</a>
+        </div>
+    </div>
+</div>

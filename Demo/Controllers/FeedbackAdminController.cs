@@ -39,6 +39,7 @@ public class FeedbackAdminController : Controller
             Feedbacks = all
         };
 
+        ViewBag.ChartData = System.Text.Json.JsonSerializer.Serialize(dist.Select(d => new { rating = d.Rating, count = d.Count }));
         return View(vm);
     }
 }

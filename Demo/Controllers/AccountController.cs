@@ -61,16 +61,18 @@ public class AccountController : Controller
         return View();
     }
 
-    // GET: Account/CheckEmail
-    public bool CheckEmail(string email)
+    // GET: Account/CheckEmail (for Remote validation)
+    public IActionResult CheckEmail(string email)
     {
-        return !db.Users.Any(u => u.Email == email);
+        if (string.IsNullOrWhiteSpace(email)) return Json(true);
+        return Json(!db.Users.Any(u => u.Email == email));
     }
 
-    // GET: Account/CheckUsername
-    public bool CheckUsername(string username)
+    // GET: Account/CheckUsername (for Remote validation)
+    public IActionResult CheckUsername(string username)
     {
-        return !db.Users.Any(u => u.Username == username);
+        if (string.IsNullOrWhiteSpace(username)) return Json(true);
+        return Json(!db.Users.Any(u => u.Username == username));
     }
 
     // GET: Account/Register
@@ -84,9 +86,9 @@ public class AccountController : Controller
     public IActionResult Register(RegisterVM vm)
     {
         if (ModelState.IsValid("Email") && db.Users.Any(u => u.Email == vm.Email))
-            ModelState.AddModelError("Email", "Duplicated Email.");
+            ModelState.AddModelError("Email", "This email is already registered.");
         if (ModelState.IsValid("Username") && db.Users.Any(u => u.Username == vm.Username))
-            ModelState.AddModelError("Username", "Duplicated Username.");
+            ModelState.AddModelError("Username", "This username is already taken.");
 
         if (ModelState.IsValid)
         {
@@ -145,7 +147,9 @@ public class AccountController : Controller
         {
             Username = u.Username,
             Email = u.Email,
+            Gender = u.Gender,
         };
+        ViewBag.AvatarUrl = !string.IsNullOrEmpty(u.Avatar) ? $"/avatars/{u.Avatar}" : null;
         return View(vm);
     }
 
@@ -162,15 +166,32 @@ public class AccountController : Controller
         if (ModelState.IsValid("Username") && vm.Username != u.Username && db.Users.Any(x => x.Username == vm.Username))
             ModelState.AddModelError("Username", "Duplicated Username.");
 
+        if (vm.AvatarFile != null)
+        {
+            var err = hp.ValidatePhoto(vm.AvatarFile);
+            if (!string.IsNullOrEmpty(err))
+                ModelState.AddModelError("AvatarFile", err);
+        }
+
         if (ModelState.IsValid)
         {
             u.Username = vm.Username;
             u.Email = vm.Email;
+            u.Gender = string.IsNullOrWhiteSpace(vm.Gender) ? null : vm.Gender.Trim();
+
+            if (vm.AvatarFile != null)
+            {
+                if (!string.IsNullOrEmpty(u.Avatar))
+                    hp.DeletePhoto(u.Avatar, "avatars");
+                u.Avatar = hp.SavePhoto(vm.AvatarFile, "avatars");
+            }
+
             db.SaveChanges();
             TempData["Info"] = "Profile updated.";
             return RedirectToAction("Index", "Home");
         }
 
+        ViewBag.AvatarUrl = !string.IsNullOrEmpty(u.Avatar) ? $"/avatars/{u.Avatar}" : null;
         return View(vm);
     }
 
