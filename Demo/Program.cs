@@ -308,6 +308,10 @@ try
         BEGIN
             UPDATE [Users] SET [IsRootAdmin] = 0 WHERE [IsRootAdmin] IS NULL;
         END;
+        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Users') AND name = 'Avatar')
+            ALTER TABLE [Users] ADD [Avatar] nvarchar(100) NULL;
+        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Users') AND name = 'Gender')
+            ALTER TABLE [Users] ADD [Gender] nvarchar(20) NULL;
     ");
     var rootEmail = builder.Configuration["RootAdmin:Email"] ?? "admin@pcbuild.local";
     var rootPassword = builder.Configuration["RootAdmin:Password"] ?? "Admin@123";
