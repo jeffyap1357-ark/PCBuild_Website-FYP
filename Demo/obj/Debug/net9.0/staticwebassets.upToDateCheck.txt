@@ -1,4 +1,4 @@
-wwwroot\css\app.css
+wwwroot\avatars\6c1ce6db73d943859788c756aec40fb2.jpg
 wwwroot\css\pager.css
 wwwroot\hardware\970evo.jpg
 wwwroot\hardware\980pro.jpg
@@ -109,11 +109,14 @@ wwwroot\layout_testing\test.png
 wwwroot\learning\README.txt
 wwwroot\logo\logo.png
 wwwroot\guide-images\77e1540b68754d9ca074310d7e990846.png
-C:\Users\User\Desktop\new_origin\Demo\Demo\wwwroot\css\app.css
+wwwroot\css\app.css
+wwwroot\js\chatbot.js
 C:\Users\User\Desktop\new_origin\Demo\Demo\wwwroot\css\pager.css
-C:\Users\User\Desktop\new_origin\Demo\Demo\wwwroot\js\jquery.validate.min.js
-C:\Users\User\Desktop\new_origin\Demo\Demo\wwwroot\js\jquery.validate.unobtrusive.min.js
-C:\Users\User\Desktop\new_origin\Demo\Demo\wwwroot\js\jquery.min.js
 C:\Users\User\Desktop\new_origin\Demo\Demo\wwwroot\js\app.js
+C:\Users\User\Desktop\new_origin\Demo\Demo\wwwroot\js\jquery.min.js
+C:\Users\User\Desktop\new_origin\Demo\Demo\wwwroot\js\jquery.validate.min.js
 C:\Users\User\Desktop\new_origin\Demo\Demo\wwwroot\learning\README.txt
 C:\Users\User\Desktop\new_origin\Demo\Demo\wwwroot\js\jquery.unobtrusive-ajax.min.js
+C:\Users\User\Desktop\new_origin\Demo\Demo\wwwroot\js\jquery.validate.unobtrusive.min.js
+C:\Users\User\Desktop\new_origin\Demo\Demo\wwwroot\css\app.css
+C:\Users\User\Desktop\new_origin\Demo\Demo\wwwroot\js\chatbot.js
