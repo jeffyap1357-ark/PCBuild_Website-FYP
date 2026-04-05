@@ -4,10 +4,29 @@
     ViewBag.Title = "PC Build | Community | " + Model.BuildName;
     var userId = ViewBag.UserId as int?;
     var userRating = ViewBag.UserRating as int?;
+    var authorAvatar = !string.IsNullOrWhiteSpace(Model.User?.Avatar) ? "/avatars/" + Model.User.Avatar : null;
+    var authorInitial = (Model.User?.Username is { Length: > 0 } n ? n[0].ToString().ToUpperInvariant() : "?");
 }
 
 <h2>@Model.BuildName</h2>
-<p class="community-meta">Shared by <strong>@Model.User.Username</strong> on @Model.SharedAt.ToString("yyyy-MM-dd") &middot; <strong>@Model.TotalPrice.ToString("C")</strong></p>
+<p class="community-meta">
+    <span class="community-user-chip">
+        @if (!string.IsNullOrEmpty(authorAvatar))
+        {
+            <img src="@authorAvatar" alt="@Model.User?.Username avatar" class="community-user-chip-avatar" />
+        }
+        else
+        {
+            <span class="community-user-chip-fallback" aria-hidden="true">@authorInitial</span>
+        }
+        <span>Shared by <strong>@Model.User?.Username</strong></span>
+        @if (!string.IsNullOrWhiteSpace(Model.User?.Gender))
+        {
+            <span class="community-user-gender">(@Model.User.Gender)</span>
+        }
+    </span>
+    <span>on @Model.SharedAt.ToString("yyyy-MM-dd") &middot; <strong>@Model.TotalPrice.ToString("C")</strong></span>
+</p>
 @if (Model.AverageRating.HasValue)
 {
     <p>★ @Model.AverageRating.Value.ToString("F1") (@Model.RatingCount rating@(Model.RatingCount == 1 ? "" : "s"))</p>
@@ -59,8 +78,25 @@
     <ul class="community-comments">
         @foreach (var cc in Model.CommunityComments)
         {
+            var commentAvatar = !string.IsNullOrWhiteSpace(cc.User?.Avatar) ? "/avatars/" + cc.User.Avatar : null;
+            var commentInitial = (cc.User?.Username is { Length: > 0 } commentName ? commentName[0].ToString().ToUpperInvariant() : "?");
             <li>
-                <strong>@cc.User?.Username</strong> <span class="comment-date">@cc.CreatedAt.ToString("yyyy-MM-dd HH:mm")</span>
+                <div class="community-comment-header">
+                    @if (!string.IsNullOrEmpty(commentAvatar))
+                    {
+                        <img src="@commentAvatar" alt="@cc.User?.Username avatar" class="community-user-chip-avatar" />
+                    }
+                    else
+                    {
+                        <span class="community-user-chip-fallback" aria-hidden="true">@commentInitial</span>
+                    }
+                    <strong>@cc.User?.Username</strong>
+                    @if (!string.IsNullOrWhiteSpace(cc.User?.Gender))
+                    {
+                        <span class="community-user-gender">(@cc.User.Gender)</span>
+                    }
+                    <span class="comment-date">@cc.CreatedAt.ToString("yyyy-MM-dd HH:mm")</span>
+                </div>
                 <p>@cc.CommentText</p>
             </li>
         }

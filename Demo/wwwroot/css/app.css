@@ -1,3 +1,4 @@
+
 /* ==========================================================================
    PC Build - Light theme (white background)
    ========================================================================== */
@@ -449,6 +450,83 @@ main.home-page {
     box-shadow: 0 4px 14px rgba(13, 110, 253, 0.4);
 }
 
+/* Learn more: external links (white bar) */
+.home-learn-more {
+    background: #ffffff;
+    width: 100%;
+    padding: 28px 24px 32px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.home-learn-more-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.home-learn-more-title {
+    margin: 0 0 6px 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+    text-align: center;
+}
+
+.home-learn-more-kicker {
+    margin: 0 0 22px 0;
+    font-size: 0.95rem;
+    color: #6b7280;
+    text-align: center;
+}
+
+.home-learn-more-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: stretch;
+    gap: 16px 20px;
+    margin: 0;
+    padding: 0;
+}
+
+/* Vertical rectangle tiles: click anywhere to open link */
+.home-learn-more-box {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 148px;
+    min-height: 220px;
+    padding: 16px 14px;
+    text-align: center;
+    text-decoration: none;
+    color: #111827;
+    font-weight: 600;
+    font-size: 0.95rem;
+    line-height: 1.35;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    transition: border-color 0.2s, box-shadow 0.2s, color 0.2s;
+}
+
+.home-learn-more-box:hover {
+    border-color: #0d6efd;
+    box-shadow: 0 4px 14px rgba(13, 110, 253, 0.15);
+    color: #0d6efd;
+}
+
+.home-learn-more-box:focus-visible {
+    outline: 2px solid #0d6efd;
+    outline-offset: 3px;
+}
+
+.home-learn-more-box-text {
+    display: block;
+    max-width: 11em;
+    word-break: break-word;
+}
+
 /* Section two: white bar with higher rated hardware (2 rows × 5) */
 .home-rated-bar {
     background: #ffffff;
@@ -463,8 +541,69 @@ main.home-page {
     margin: 0 auto;
 }
 
+/* Category filter: one pill button per category (below title) */
+.home-rated-nav {
+    margin: 0 0 28px 0;
+    padding: 0 12px;
+    text-align: center;
+}
+
+.home-rated-cat-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 10px 12px;
+}
+
+.home-rated-cat-btn {
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    padding: 10px 22px;
+    border-radius: 9999px;
+    border: 2px solid #e8dcb0;
+    background: #ffffff;
+    color: #b8952e;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.home-rated-cat-btn:hover {
+    background: #ffffff;
+    border-color: #dcc88a;
+    box-shadow: 0 2px 8px rgba(200, 180, 120, 0.2);
+}
+
+.home-rated-cat-btn.is-active {
+    background: linear-gradient(180deg, #f0e2a8 0%, #e0cc7a 50%, #d4b85c 100%);
+    color: #ffffff;
+    border-color: #cbb06a;
+    box-shadow: 0 2px 10px rgba(180, 150, 70, 0.35);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+}
+
+.home-rated-cat-btn:focus-visible {
+    outline: 2px solid #c9a227;
+    outline-offset: 3px;
+}
+
+.home-top-rated-panel[aria-busy="true"] {
+    opacity: 0.55;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+}
+
+.home-rated-empty {
+    text-align: center;
+    color: #6b7280;
+    font-size: 0.95rem;
+    margin: 1rem 0 0;
+    padding: 1rem;
+}
+
 .home-rated-bar-title {
-    margin: 0 0 24px 0;
+    margin: 0 0 18px 0;
     font-size: 1.5rem;
     font-weight: 700;
     color: #111827;
@@ -1081,6 +1220,74 @@ a.button.secondary:hover {
 .admin-form .form-actions { margin-top: 1.5rem; }
 .admin-form .form-actions .button { margin-right: 10px; }
 
+/* Admin hardware list: readable text + simple action spacing */
+.admin-hardware-table th,
+.admin-hardware-table td {
+    color: #000;
+}
+
+.admin-hardware-table th {
+    background: #f3f4f6;
+}
+
+.admin-hardware-table td {
+    background: #fff;
+}
+
+.admin-hardware-table tr:hover td {
+    background: #f9fafb;
+}
+
+.button.button-danger {
+    background: #b91c1c;
+    color: #fff;
+    border: none;
+}
+.button.button-danger:hover {
+    background: #991b1b;
+    color: #fff;
+}
+
+.users-admin-table .users-admin-form {
+    display: inline;
+    margin: 0;
+}
+.users-admin-table .users-admin-muted {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+.users-admin-badge {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    vertical-align: middle;
+}
+.users-admin-badge--root {
+    background: #1e3a5f;
+    color: #fff;
+}
+.users-admin-status {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+.users-admin-status--active {
+    color: #15803d;
+}
+.users-admin-status--blocked {
+    color: #b91c1c;
+}
+.users-admin-row-blocked td:not(.admin-hardware-actions) {
+    opacity: 0.92;
+}
+
+.admin-hardware-actions .button.small {
+    margin-right: 6px;
+}
+
 /* Quiz Admin form: 2x2 options grid, meta row */
 .quiz-admin-form textarea { max-width: none; }
 .quiz-admin-options {
@@ -1404,10 +1611,16 @@ button.link-button:hover { color: var(--accent-hover); }
 
 /* Hardware Detail ------------------------------------------------------------ */
 
+.hardware-detail {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
 .hardware-detail-layout {
     display: flex;
     gap: 32px;
-    align-items: flex-start;
+    align-items: center;
+    justify-content: center;
     margin-bottom: 24px;
 }
 
@@ -1450,6 +1663,8 @@ button.link-button:hover { color: var(--accent-hover); }
 .hardware-detail-info {
     flex: 1;
     min-width: 0;
+    display: flex;
+    justify-content: center;
 }
 
 @media (max-width: 700px) {
@@ -1473,6 +1688,7 @@ button.link-button:hover { color: var(--accent-hover); }
     grid-template-columns: auto 1fr;
     gap: 12px 28px;
     max-width: 500px;
+    margin: 0 auto;
 }
 
 .detail-list dt {
@@ -1486,12 +1702,50 @@ button.link-button:hover { color: var(--accent-hover); }
     color: var(--text);
 }
 
+.hardware-detail-actions {
+    text-align: center;
+}
+
 /* Hardware Compare ----------------------------------------------------------- */
 
 .hardware-compare-title {
     margin: 0 0 24px;
     font-size: 1.5rem;
     color: var(--text);
+}
+
+.hardware-compare-category-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 10px 14px;
+    margin: 0 auto 20px;
+    max-width: 560px;
+}
+
+.hardware-compare-category-label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #111;
+}
+
+.hardware-compare-category-select {
+    min-width: 220px;
+    max-width: 100%;
+    padding: 10px 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font: inherit;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+.hardware-compare-category-select:focus {
+    outline: none;
+    border-color: var(--accent);
 }
 
 .hardware-compare-dropdown-row {
@@ -1537,7 +1791,10 @@ button.link-button:hover { color: var(--accent-hover); }
     width: 100%;
     min-width: 0;
     font-weight: 600;
-    font-size: 0.85em;
+    font-size: 0.875rem;
+    padding: 10px 12px;
+    border-radius: 6px;
+    box-sizing: border-box;
 }
 
 .hardware-compare-empty {
@@ -1556,20 +1813,36 @@ button.link-button:hover { color: var(--accent-hover); }
 }
 
 .hardware-compare-thumb {
-    width: 180px;
+    /* Same column width as hardware list filter selects feel (full-width select inside card) */
+    width: 100%;
+    max-width: 280px;
     text-align: center;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
 }
 
 .hardware-compare-thumb-img {
-    width: 80px;
-    height: 80px;
-    margin: 0 auto 8px;
+    width: 100%;
+    aspect-ratio: 1;
+    min-height: 200px;
+    max-height: 260px;
+    margin: 0;
     background: var(--bg-elevated);
-    border-radius: 8px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    border: 1px solid var(--border);
+    box-sizing: border-box;
 }
 
 .hardware-compare-thumb-img img {
@@ -1593,58 +1866,112 @@ button.link-button:hover { color: var(--accent-hover); }
 .hardware-compare-vs {
     font-weight: 700;
     font-size: 1rem;
-    color: var(--accent);
+    color: #111;
 }
 
 /* Detail comparison table - focus on differences */
+.hardware-compare-table-wrap {
+    max-width: 1100px;
+    margin: 0 auto 24px;
+    width: 100%;
+}
+
 .hardware-compare-table {
     width: 100%;
+    table-layout: fixed;
     border-collapse: collapse;
-    margin-bottom: 24px;
+    margin-bottom: 0;
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 8px;
     overflow: hidden;
+    font-size: 1.05rem;
+    line-height: 1.5;
+}
+
+.hardware-compare-col-spec {
+    width: 24%;
+}
+
+.hardware-compare-col-a,
+.hardware-compare-col-b {
+    width: 38%;
 }
 
 .hardware-compare-table th,
 .hardware-compare-table td {
-    padding: 12px 16px;
+    padding: 14px 18px;
     text-align: left;
     border-bottom: 1px solid var(--border);
     vertical-align: top;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
 }
 
 .hardware-compare-table th {
     background: var(--bg-elevated);
     font-weight: 600;
-    color: var(--text-muted);
-    font-size: 0.9em;
+    color: #111;
+    font-size: 1rem;
 }
 
 .hardware-compare-table td.hardware-compare-label {
     font-weight: 600;
-    color: var(--text-muted);
-    width: 140px;
+    color: #111;
 }
 
 .hardware-compare-table td.hardware-compare-val {
     color: var(--text);
 }
 
+/* Vertical divider between the two component columns */
+.hardware-compare-table th:nth-child(2),
+.hardware-compare-table td.hardware-compare-val-a {
+    border-right: 2px solid var(--border);
+}
+
 .hardware-compare-table tr.hardware-compare-diff td.hardware-compare-val {
     background: var(--accent-dim);
-    color: var(--accent);
+    color: #111;
 }
 
 .hardware-compare-table tr:last-child td {
     border-bottom: none;
 }
 
-.hardware-compare-links {
-    display: flex;
-    gap: 12px;
-    margin: 0 0 24px;
+.hardware-compare-view-btn {
+    display: block;
+    margin-top: 0;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.hardware-compare-thumb--empty .hardware-compare-view-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.hardware-compare-thumb-img--empty {
+    background: var(--bg-elevated);
+    border: 2px dashed var(--border);
+    color: var(--text-muted);
+}
+
+.hardware-compare-empty-inline {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.hardware-compare-table th.hardware-compare-col-empty {
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.hardware-compare-val--empty {
+    color: var(--text-muted);
 }
 
 .hardware-compare-back {
@@ -1758,6 +2085,38 @@ button.link-button:hover { color: var(--accent-hover); }
 .community-card-meta {
     font-size: 0.9em;
     color: var(--text-muted);
+}
+
+.community-user-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.community-user-chip-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--border);
+}
+
+.community-user-chip-fallback {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #121212;
+    background: var(--accent);
+}
+
+.community-user-gender {
+    color: var(--text-muted);
+    font-size: 0.9em;
 }
 
 .community-card-price {
@@ -1964,6 +2323,13 @@ button.link-button:hover { color: var(--accent-hover); }
 .community-comments .comment-date {
     color: var(--text-muted);
     font-size: 0.9em;
+}
+
+.community-comment-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
 .community-add-comment {
@@ -2231,6 +2597,62 @@ button.link-button:hover { color: var(--accent-hover); }
 
 .guide-content li {
     margin: 0.35em 0;
+}
+
+/* Numbered build steps (text-only learning guides) */
+.guide-content .guide-lead {
+    margin: 0 0 1.25rem 0;
+    font-size: 1.05rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+.guide-content ol.guide-step-list {
+    list-style: decimal;
+    padding-left: 1.75em;
+    margin: 0.5rem 0 0 0;
+}
+
+.guide-content ol.guide-step-list > li {
+    margin: 0 0 2rem 0;
+    padding-left: 0.35em;
+}
+
+.guide-content ol.guide-step-list > li:last-child {
+    margin-bottom: 0;
+}
+
+.guide-content .guide-step-heading {
+    margin: 0 0 0.65rem 0;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--text);
+    display: block;
+}
+
+.guide-content ol.guide-step-list h3.guide-step-heading {
+    margin-top: 0;
+    margin-bottom: 0.65rem;
+}
+
+.guide-content p.guide-warn {
+    margin: 0.7em 0 0 0;
+    padding: 0.65em 0.85em;
+    border-left: 3px solid #c45858;
+    background: rgba(196, 88, 88, 0.09);
+    border-radius: 0 6px 6px 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.guide-content p.guide-tip {
+    margin: 0.7em 0 0 0;
+    padding: 0.65em 0.85em;
+    border-left: 3px solid var(--accent);
+    background: var(--accent-dim);
+    border-radius: 0 6px 6px 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
 }
 
 .guide-content strong {
@@ -3775,6 +4197,15 @@ main hr {
 .button.danger:hover {
     filter: brightness(1.1);
 }
+
+.button.success {
+    background: var(--success, #16a34a);
+    color: #fff;
+}
+
+.button.success:hover {
+    filter: brightness(1.1);
+}
 .form-block {
     margin-bottom: 1.25em;
 }
@@ -4215,6 +4646,18 @@ main hr {
 .auth-links { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); text-align: center; font-size: 0.9rem; color: var(--text-muted); }
 .auth-links a { color: var(--accent); text-decoration: none; font-weight: 500; }
 .auth-links a:hover { text-decoration: underline; }
+.auth-alert {
+    margin: 0 0 20px 0;
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    line-height: 1.45;
+}
+.auth-alert--warn {
+    background: #fffbeb;
+    border: 1px solid #fcd34d;
+    color: #92400e;
+}
 .hidden { display: none !important; }
 .auth-form .form-hint { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; display: block; }
 .auth-form select {

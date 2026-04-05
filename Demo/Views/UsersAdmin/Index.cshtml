@@ -1,0 +1,78 @@
+@model List<User>
+@{
+    ViewBag.Title = "Admin | Users";
+    var currentName = ViewBag.CurrentUsername as string;
+}
+
+<h2>User accounts</h2>
+<p class="admin-hint">View registered users. Blocked users cannot sign in and are signed out immediately.</p>
+
+@if (Model == null || !Model.Any())
+{
+    <p>No users found.</p>
+}
+else
+{
+    <table class="table admin-hardware-table users-admin-table">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var u in Model)
+            {
+                var isSelf = string.Equals(u.Username, currentName, StringComparison.Ordinal);
+                <tr class="@(u.IsBlocked ? "users-admin-row-blocked" : "")">
+                    <td>
+                        @u.Username
+                        @if (u.IsRootAdmin)
+                        {
+                            <span class="users-admin-badge users-admin-badge--root">Root</span>
+                        }
+                    </td>
+                    <td>@u.Email</td>
+                    <td>@u.Role</td>
+                    <td>
+                        @if (u.IsBlocked)
+                        {
+                            <span class="users-admin-status users-admin-status--blocked">Blocked</span>
+                        }
+                        else
+                        {
+                            <span class="users-admin-status users-admin-status--active">Active</span>
+                        }
+                    </td>
+                    <td class="admin-hardware-actions">
+                        @if (u.IsRootAdmin || isSelf)
+                        {
+                            <span class="users-admin-muted">—</span>
+                        }
+                        else if (u.IsBlocked)
+                        {
+                            <form asp-action="SetBlocked" method="post" class="users-admin-form">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@u.UserId" />
+                                <input type="hidden" name="blocked" value="false" />
+                                <button type="submit" class="button small">Unblock</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form asp-action="SetBlocked" method="post" class="users-admin-form" onsubmit="return confirm('Block this user? They will be signed out and cannot log in until unblocked.');">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@u.UserId" />
+                                <input type="hidden" name="blocked" value="true" />
+                                <button type="submit" class="button small button-danger">Block</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

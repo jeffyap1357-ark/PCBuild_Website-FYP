@@ -173,9 +173,8 @@ C:\Users\User\Desktop\new_origin\Demo\Demo\obj\Debug\net9.0\Demo.genruntimeconfi
 C:\Users\User\Desktop\new_origin\Demo\Demo\obj\Debug\net9.0\ref\Demo.dll
 C:\Users\User\Desktop\new_origin\Demo\Demo\obj\Debug\net9.0\compressed\7ws6osq9ig-b6gzs38fza.gz
 C:\Users\User\Desktop\new_origin\Demo\Demo\obj\Debug\net9.0\compressed\ch7szu10ds-jmvtfo1j4r.gz
-C:\Users\User\Desktop\new_origin\Demo\Demo\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt
 C:\Users\User\Desktop\new_origin\Demo\Demo\bin\Debug\net9.0\BouncyCastle.Cryptography.dll
 C:\Users\User\Desktop\new_origin\Demo\Demo\bin\Debug\net9.0\MailKit.dll
 C:\Users\User\Desktop\new_origin\Demo\Demo\bin\Debug\net9.0\MimeKit.dll
-C:\Users\User\Desktop\new_origin\Demo\Demo\obj\Debug\net9.0\compressed\moxlhvdfuc-x93ox77i89.gz
 C:\Users\User\Desktop\new_origin\Demo\Demo\obj\Debug\net9.0\compressed\hri6o2ucms-rk3n4johe9.gz
+C:\Users\User\Desktop\new_origin\Demo\Demo\obj\Debug\net9.0\compressed\moxlhvdfuc-48ow9mzo3q.gz

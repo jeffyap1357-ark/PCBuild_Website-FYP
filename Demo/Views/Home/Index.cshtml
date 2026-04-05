@@ -1,4 +1,4 @@
-@inject Demo.Helper Helper
+@using System.Collections.Generic
 @{
     ViewBag.Title = "PC Build | Home";
 }
@@ -10,41 +10,45 @@
     </div>
 </section>
 
+<section class="home-learn-more" aria-label="Learn more">
+    <div class="home-learn-more-inner">
+        <h2 class="home-learn-more-title">Learn more</h2>
+        <p class="home-learn-more-kicker">Newest fact</p>
+        <div class="home-learn-more-grid" role="list">
+            <a class="home-learn-more-box" role="listitem" href="https://www.wikihow.com/Install-a-Graphics-Card" target="_blank" rel="noopener noreferrer">
+                <span class="home-learn-more-box-text">PC build install</span>
+            </a>
+            <a class="home-learn-more-box" role="listitem" href="https://www.allithypermarket.com.my/collections/pc-computer-parts?srsltid=AfmBOorfpkdAGT8zZzCZ_v46JPkv4gusLTKJ9xyzCiCX97CCmR904-Ps" target="_blank" rel="noopener noreferrer">
+                <span class="home-learn-more-box-text">PC hardware seller</span>
+            </a>
+            <a class="home-learn-more-box" role="listitem" href="https://www.coursera.org/courses?query=computer%20hardware&amp;utm_medium=sem&amp;utm_source=gg&amp;utm_campaign=b2c_apac_x_multi_ftcof_career-academy_cx_dr_bau_gg_pmax_pr_s3_en_m_hyb_25-04_desktop&amp;campaignid=22420706570&amp;adgroupid=&amp;device=c&amp;keyword=&amp;matchtype=&amp;network=x&amp;devicemodel=&amp;creativeid=&amp;assetgroupid=6566453505&amp;targetid=&amp;extensionid=&amp;placement=&amp;gad_source=1&amp;gad_campaignid=22424263906&amp;gbraid=0AAAAADdKX6Zs0YJm552EgBTP4458NX9Y9&amp;gclid=Cj0KCQjwkMjOBhC5ARIsADIdb3dgrSEHsU_dKVEoSCp0W0elEUnP3qeXXqhitM_hXTV9UCN3QdGyIVIaAluOEALw_wcB" target="_blank" rel="noopener noreferrer">
+                <span class="home-learn-more-box-text">PC learning</span>
+            </a>
+        </div>
+    </div>
+</section>
+
 <section class="home-rated-bar" aria-label="Higher rated hardware">
     <div class="home-rated-bar-inner">
+        @{
+            var list = ViewBag.TopRatedHardware as IList<Demo.Models.Hardware>;
+            var categories = ViewBag.Categories as IList<Demo.Models.Category>;
+        }
         <h2 class="home-rated-bar-title">The Higher Rated Hardware</h2>
-        <div class="home-rated-grid">
-            @{
-                var list = ViewBag.TopRatedHardware as IList<Demo.Models.Hardware>;
-            }
-            @if (list != null && list.Any())
-            {
-                @for (var i = 0; i < list.Count; i++)
+        <nav class="home-rated-nav" aria-label="Filter by category">
+            <div class="home-rated-cat-buttons" role="group" aria-label="Choose hardware category">
+                <button type="button" class="home-rated-cat-btn is-active" data-category-id="" aria-pressed="true">All</button>
+                @if (categories != null)
                 {
-                    var h = list[i];
-                    var imgFile = Helper.GetHardwareImagePath(h.Picture, h.Name);
-                    <a href="/Hardware/Detail/@h.HardwareId" class="home-rated-card" title="@h.Name">
-                        <div class="home-rated-card-image-wrap">
-                            @if (!string.IsNullOrEmpty(imgFile))
-                            {
-                                <img src="/hardware/@imgFile" alt="@h.Name" loading="lazy" />
-                            }
-                            else
-                            {
-                                <span class="home-rated-card-noimg">No image</span>
-                            }
-                        </div>
-                        <div class="home-rated-card-body">
-                            <span class="home-rated-card-name">@h.Name</span>
-                            <span class="home-rated-card-price">@h.Price.ToString("N2")</span>
-                            @if (h.Rating.HasValue)
-                            {
-                                <span class="home-rated-card-rating">★ @h.Rating</span>
-                            }
-                        </div>
-                    </a>
+                    foreach (var c in categories)
+                    {
+                        <button type="button" class="home-rated-cat-btn" data-category-id="@c.CategoryId" aria-pressed="false">@c.Type</button>
+                    }
                 }
-            }
+            </div>
+        </nav>
+        <div id="home-top-rated-panel" class="home-top-rated-panel">
+            @await Html.PartialAsync("_HomeTopRatedGrid", list ?? new List<Hardware>())
         </div>
     </div>
 </section>
@@ -101,3 +105,35 @@
         </div>
     </div>
 </section>
+
+@section foot {
+<script>
+(function () {
+    var wrap = document.querySelector('.home-rated-cat-buttons');
+    var panel = document.getElementById('home-top-rated-panel');
+    if (!wrap || !panel) return;
+    function loadGrid(categoryId) {
+        var url = '/Home/TopRatedGrid' + (categoryId ? '?categoryId=' + encodeURIComponent(categoryId) : '');
+        panel.setAttribute('aria-busy', 'true');
+        fetch(url, { credentials: 'same-origin', headers: { 'Accept': 'text/html', 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(function (r) { if (!r.ok) throw new Error(); return r.text(); })
+            .then(function (html) { panel.innerHTML = html; })
+            .catch(function () {
+                panel.innerHTML = '<p class="home-rated-empty">Could not load hardware. Please try again.</p>';
+            })
+            .finally(function () { panel.removeAttribute('aria-busy'); });
+    }
+    wrap.addEventListener('click', function (e) {
+        var btn = e.target.closest('.home-rated-cat-btn');
+        if (!btn || !wrap.contains(btn)) return;
+        var id = btn.getAttribute('data-category-id') || '';
+        wrap.querySelectorAll('.home-rated-cat-btn').forEach(function (b) {
+            var on = b === btn;
+            b.classList.toggle('is-active', on);
+            b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        });
+        loadGrid(id);
+    });
+})();
+</script>
+}

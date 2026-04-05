@@ -1,43 +1,93 @@
 @inject Demo.Helper Helper
 
 @{
-    ViewBag.Title = "Hardware | Compare";
     var h1 = ViewBag.Hardware1 as Hardware;
     var h2 = ViewBag.Hardware2 as Hardware;
     var sameCategory = ViewBag.SameCategoryHardware as List<Hardware> ?? new List<Hardware>();
     var categoryName = ViewBag.CategoryName as string ?? "Hardware";
+    var allCategories = ViewBag.Categories as IList<Category> ?? new List<Category>();
 }
 
 <div class="hardware-compare">
-    <h2 class="hardware-compare-title">Compare @categoryName</h2>
-
-    @if (h2 == null)
+    @if (h1 != null && allCategories.Count > 0)
     {
-        @* Picker mode: dropdown to select second item (same category only) *@
-        <div class="hardware-compare-dropdown-row">
-            <div class="hardware-compare-dropdown-cell">
-                <span class="hardware-compare-dropdown-label">Compare</span>
-                <strong>@(h1?.Name)</strong>
-            </div>
-            <div class="hardware-compare-dropdown-cell">
-                <span class="hardware-compare-dropdown-label">with</span>
-                <select class="hardware-compare-select" onchange="if(this.value){window.location='/Hardware/Compare?id1=@(h1?.HardwareId)&id2='+this.value;}">
-                    <option value="">— Select @categoryName —</option>
-                    @foreach (var o in sameCategory.Where(x => x.HardwareId != h1?.HardwareId))
+        <div class="hardware-compare-category-row">
+            <label for="compare-category-select" class="hardware-compare-category-label">Category</label>
+            <select id="compare-category-select" class="hardware-compare-category-select" aria-label="Switch compare category" onchange="if (this.value) window.location.href = this.value;">
+                @foreach (var cat in allCategories)
+                {
+                    if (cat.CategoryId == h1.CategoryId)
                     {
-                        <option value="@o.HardwareId">@o.Name — @o.Price.ToString("C")</option>
+                        <option value="@Url.Action("Compare", new { categoryId = cat.CategoryId })" selected>@cat.Type</option>
+                    }
+                    else
+                    {
+                        <option value="@Url.Action("Compare", new { categoryId = cat.CategoryId })">@cat.Type</option>
+                    }
+                }
+            </select>
+        </div>
+    }
+
+    @if (h1 != null && h2 == null)
+    {
+        @* Picker mode: same header layout as full compare; second column empty until user picks *@
+        <div class="hardware-compare-header">
+            <div class="hardware-compare-thumb">
+                <div class="hardware-compare-thumb-img">
+                    @{
+                        var img1Picker = Helper.GetHardwareImagePath(h1.Picture, h1.Name);
+                    }
+                    @if (!string.IsNullOrEmpty(img1Picker))
+                    {
+                        <img src="/hardware/@img1Picker" alt="@h1.Name" onerror="this.onerror=null;this.style.display='none';var p=this.nextElementSibling;if(p)p.style.display='flex';">
+                        <span class="hardware-compare-placeholder" style="display:none">No image</span>
+                    }
+                    else
+                    {
+                        <span class="hardware-compare-placeholder">No image</span>
+                    }
+                </div>
+                <select class="hardware-compare-select hardware-compare-name-select" onchange="if(this.value){window.location='/Hardware/Compare?id1='+this.value;}">
+                    @foreach (var o in sameCategory)
+                    {
+                        @if (o.HardwareId == h1.HardwareId)
+                        {
+                            <option value="@o.HardwareId" selected>@o.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@o.HardwareId">@o.Name</option>
+                        }
                     }
                 </select>
+                <a href="@Url.Action("Detail", new { id = h1.HardwareId })" class="button secondary hardware-compare-view-btn">View Details</a>
+            </div>
+            <div class="hardware-compare-vs">VS</div>
+            <div class="hardware-compare-thumb hardware-compare-thumb--empty">
+                <div class="hardware-compare-thumb-img hardware-compare-thumb-img--empty">
+                    <span class="hardware-compare-placeholder">No hardware selected</span>
+                </div>
+                @if (sameCategory.Any(x => x.HardwareId != h1.HardwareId))
+                {
+                    <select class="hardware-compare-select hardware-compare-name-select" aria-label="Select second item to compare" onchange="if(this.value){window.location='/Hardware/Compare?id1=@h1.HardwareId&id2='+this.value;}">
+                        <option value="">— Select @categoryName —</option>
+                        @foreach (var o in sameCategory.Where(x => x.HardwareId != h1.HardwareId))
+                        {
+                            <option value="@o.HardwareId">@o.Name — @o.Price.ToString("C")</option>
+                        }
+                    </select>
+                }
+                else
+                {
+                    <p class="hardware-compare-empty-inline">No other @categoryName in this category.</p>
+                }
+                <button type="button" class="button secondary hardware-compare-view-btn" disabled>View Details</button>
             </div>
         </div>
-        @if (!sameCategory.Any(x => x.HardwareId != h1?.HardwareId))
-        {
-            <p class="hardware-compare-empty">No other @categoryName found to compare.</p>
-        }
     }
-    else
+    else if (h1 != null && h2 != null)
     {
-        @* Full compare: dropdowns in name place, user can change directly *@
         <div class="hardware-compare-header">
             <div class="hardware-compare-thumb">
                 <div class="hardware-compare-thumb-img">
@@ -67,6 +117,7 @@
                         }
                     }
                 </select>
+                <a href="@Url.Action("Detail", new { id = h1.HardwareId })" class="button secondary hardware-compare-view-btn">View Details</a>
             </div>
             <div class="hardware-compare-vs">VS</div>
             <div class="hardware-compare-thumb">
@@ -97,67 +148,84 @@
                         }
                     }
                 </select>
+                <a href="@Url.Action("Detail", new { id = h2.HardwareId })" class="button secondary hardware-compare-view-btn">View Details</a>
             </div>
         </div>
+    }
 
-        <table class="hardware-compare-table">
-            <thead>
-                <tr>
-                    <th>Specification</th>
-                    <th>@h1.Name</th>
-                    <th>@h2.Name</th>
-                </tr>
-            </thead>
-            <tbody>
-                @{
-                    var rows = new List<(string Label, string V1, string V2)>();
-                    rows.Add(("Name", h1.Name, h2.Name));
-                    rows.Add(("Category", h1.Category?.Type ?? "—", h2.Category?.Type ?? "—"));
-                    rows.Add(("Brand", h1.Brand ?? "—", h2.Brand ?? "—"));
-                    rows.Add(("Price", h1.Price.ToString("C"), h2.Price.ToString("C")));
-                    if (!string.IsNullOrEmpty(h1.Socket) || !string.IsNullOrEmpty(h2.Socket))
-                        rows.Add(("Socket", h1.Socket ?? "—", h2.Socket ?? "—"));
-                    if (!string.IsNullOrEmpty(h1.DdrType) || !string.IsNullOrEmpty(h2.DdrType))
-                        rows.Add(("DDR Type", h1.DdrType ?? "—", h2.DdrType ?? "—"));
-                    if (!string.IsNullOrEmpty(h1.FormFactor) || !string.IsNullOrEmpty(h2.FormFactor))
-                        rows.Add(("Form Factor", h1.FormFactor ?? "—", h2.FormFactor ?? "—"));
-                    if (h1.RamSlots.HasValue || h2.RamSlots.HasValue)
-                        rows.Add(("RAM Slots", h1.RamSlots?.ToString() ?? "—", h2.RamSlots?.ToString() ?? "—"));
-                    if (h1.ReleaseYear.HasValue || h2.ReleaseYear.HasValue)
-                        rows.Add(("Release Year", h1.ReleaseYear?.ToString() ?? "—", h2.ReleaseYear?.ToString() ?? "—"));
-                    if (h1.Rating.HasValue || h2.Rating.HasValue)
-                        rows.Add(("Rating", (h1.Rating?.ToString() ?? "—") + "/5", (h2.Rating?.ToString() ?? "—") + "/5"));
-                    if (h1.PowerConsumption.HasValue || h2.PowerConsumption.HasValue)
-                        rows.Add(("Power (W)", h1.PowerConsumption?.ToString() ?? "—", h2.PowerConsumption?.ToString() ?? "—"));
-                    if (h1.GamingScore.HasValue || h2.GamingScore.HasValue)
-                        rows.Add(("Gaming", (h1.GamingScore?.ToString() ?? "—") + "/10", (h2.GamingScore?.ToString() ?? "—") + "/10"));
-                    if (h1.OfficeScore.HasValue || h2.OfficeScore.HasValue)
-                        rows.Add(("Office", (h1.OfficeScore?.ToString() ?? "—") + "/10", (h2.OfficeScore?.ToString() ?? "—") + "/10"));
-                    if (h1.EditingScore.HasValue || h2.EditingScore.HasValue)
-                        rows.Add(("Editing", (h1.EditingScore?.ToString() ?? "—") + "/10", (h2.EditingScore?.ToString() ?? "—") + "/10"));
-                    if (h1.Special.HasValue || h2.Special.HasValue)
-                        rows.Add(("Special", h1.Special?.ToString() ?? "—", h2.Special?.ToString() ?? "—"));
-                    rows.Add(("Description", h1.Detail ?? "No description available.", h2.Detail ?? "No description available."));
-                }
-                @foreach (var row in rows)
-                {
-                    var diff = row.V1 != row.V2;
-                    <tr class="@(diff ? "hardware-compare-diff" : "")">
-                        <td class="hardware-compare-label">@row.Label</td>
-                        <td class="hardware-compare-val">@row.V1</td>
-                        <td class="hardware-compare-val">@row.V2</td>
+    @if (h1 != null)
+    {
+        var rows = BuildCompareRows(h1, h2);
+        <div class="hardware-compare-table-wrap">
+            <table class="hardware-compare-table">
+                <colgroup>
+                    <col class="hardware-compare-col-spec" />
+                    <col class="hardware-compare-col-a" />
+                    <col class="hardware-compare-col-b" />
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>Specification</th>
+                        <th>@h1.Name</th>
+                        <th class="hardware-compare-col-empty">@(h2 == null ? "Not selected" : h2.Name)</th>
                     </tr>
-                }
-            </tbody>
-        </table>
-
-        <p class="hardware-compare-links">
-            <a href="@Url.Action("Detail", new { id = h1.HardwareId })" class="button secondary">View @h1.Name</a>
-            <a href="@Url.Action("Detail", new { id = h2.HardwareId })" class="button secondary">View @h2.Name</a>
-        </p>
+                </thead>
+                <tbody>
+                    @foreach (var row in rows)
+                    {
+                        var diff = h2 != null && row.V1 != row.V2;
+                        <tr class="@(diff ? "hardware-compare-diff" : "")">
+                            <td class="hardware-compare-label">@row.Label</td>
+                            <td class="hardware-compare-val hardware-compare-val-a">@row.V1</td>
+                            <td class="hardware-compare-val hardware-compare-val-b @(h2 == null ? "hardware-compare-val--empty" : "")">@row.V2</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     }
 
     <p class="hardware-compare-back">
         <a href="@Url.Action("List")" class="button">← Back to Hardware List</a>
     </p>
 </div>
+
+@functions {
+    private static List<(string Label, string V1, string V2)> BuildCompareRows(Hardware h1, Hardware? h2)
+    {
+        var rows = new List<(string Label, string V1, string V2)>();
+        string E2(string? v) => h2 == null ? "—" : (v ?? "—");
+
+        rows.Add(("Name", h1.Name, E2(h2?.Name)));
+        rows.Add(("Category", h1.Category?.Type ?? "—", E2(h2?.Category?.Type)));
+        rows.Add(("Brand", h1.Brand ?? "—", E2(h2?.Brand)));
+        rows.Add(("Price", h1.Price.ToString("C"), h2 == null ? "—" : h2.Price.ToString("C")));
+
+        if (!string.IsNullOrEmpty(h1.Socket) || (h2 != null && !string.IsNullOrEmpty(h2.Socket)))
+            rows.Add(("Socket", h1.Socket ?? "—", E2(h2?.Socket)));
+        if (!string.IsNullOrEmpty(h1.DdrType) || (h2 != null && !string.IsNullOrEmpty(h2.DdrType)))
+            rows.Add(("DDR Type", h1.DdrType ?? "—", E2(h2?.DdrType)));
+        if (!string.IsNullOrEmpty(h1.FormFactor) || (h2 != null && !string.IsNullOrEmpty(h2.FormFactor)))
+            rows.Add(("Form Factor", h1.FormFactor ?? "—", E2(h2?.FormFactor)));
+        if (h1.RamSlots.HasValue || (h2?.RamSlots.HasValue ?? false))
+            rows.Add(("RAM Slots", h1.RamSlots?.ToString() ?? "—", E2(h2?.RamSlots?.ToString())));
+        if (h1.ReleaseYear.HasValue || (h2?.ReleaseYear.HasValue ?? false))
+            rows.Add(("Release Year", h1.ReleaseYear?.ToString() ?? "—", E2(h2?.ReleaseYear?.ToString())));
+        if (h1.Rating.HasValue || (h2?.Rating.HasValue ?? false))
+            rows.Add(("Rating", (h1.Rating?.ToString() ?? "—") + "/5", h2 == null ? "—" : (h2.Rating?.ToString() ?? "—") + "/5"));
+        if (h1.PowerConsumption.HasValue || (h2?.PowerConsumption.HasValue ?? false))
+            rows.Add(("Power (W)", h1.PowerConsumption?.ToString() ?? "—", E2(h2?.PowerConsumption?.ToString())));
+        if (h1.GamingScore.HasValue || (h2?.GamingScore.HasValue ?? false))
+            rows.Add(("Gaming", (h1.GamingScore?.ToString() ?? "—") + "/10", h2 == null ? "—" : (h2.GamingScore?.ToString() ?? "—") + "/10"));
+        if (h1.OfficeScore.HasValue || (h2?.OfficeScore.HasValue ?? false))
+            rows.Add(("Office", (h1.OfficeScore?.ToString() ?? "—") + "/10", h2 == null ? "—" : (h2.OfficeScore?.ToString() ?? "—") + "/10"));
+        if (h1.EditingScore.HasValue || (h2?.EditingScore.HasValue ?? false))
+            rows.Add(("Editing", (h1.EditingScore?.ToString() ?? "—") + "/10", h2 == null ? "—" : (h2.EditingScore?.ToString() ?? "—") + "/10"));
+        if (h1.Special.HasValue || (h2?.Special.HasValue ?? false))
+            rows.Add(("Special", h1.Special?.ToString() ?? "—", E2(h2?.Special?.ToString())));
+
+        rows.Add(("Description", h1.Detail ?? "No description available.", h2 == null ? "—" : (h2.Detail ?? "No description available.")));
+
+        return rows;
+    }
+}

@@ -8,6 +8,10 @@
 <div class="auth-page">
     <div class="auth-card">
         <h2>Sign In</h2>
+        @if (Context.Request.Query["blocked"].ToString() == "1")
+        {
+            <p class="auth-alert auth-alert--warn">Your session ended because this account was blocked. Contact an administrator if you need help.</p>
+        }
         <form class="auth-form" method="post">
             <div asp-validation-summary="ModelOnly"></div>
 

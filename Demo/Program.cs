@@ -37,7 +37,7 @@ catch (Exception ex)
     logger.LogWarning(ex, "Migrations could not be applied. Run 'dotnet ef database update' if needed.");
 }
 
-// Users.Avatar / Gender ASAP after Migrate (login). Quiz Level/Explanation runs after Quiz table is ensured.
+// Users columns ASAP after Migrate (login / EF User entity on legacy DBs)
 try
 {
     using var scopeCompat = app.Services.CreateScope();
@@ -49,9 +49,11 @@ try
                 ALTER TABLE [Users] ADD [Avatar] nvarchar(100) NULL;
             IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(N'Users') AND name = N'Gender')
                 ALTER TABLE [Users] ADD [Gender] nvarchar(20) NULL;
+            IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(N'Users') AND name = N'IsBlocked')
+                ALTER TABLE [Users] ADD [IsBlocked] bit NOT NULL DEFAULT 0;
         END;
     ");
-    logger.LogInformation("Users table EF compatibility columns (Avatar, Gender) verified.");
+    logger.LogInformation("Users table EF compatibility columns (Avatar, Gender, IsBlocked) verified.");
 }
 catch (Exception ex)
 {
@@ -475,6 +477,30 @@ app.UseStaticFiles();
 app.UseRequestLocalization("en-MY");
 app.UseSession();
 app.UseAuthentication();
+app.Use(async (ctx, next) =>
+{
+    if (ctx.User.Identity?.IsAuthenticated == true)
+    {
+        var name = ctx.User.Identity.Name;
+        if (!string.IsNullOrEmpty(name))
+        {
+            await using var scope = ctx.RequestServices.CreateAsyncScope();
+            var db = scope.ServiceProvider.GetRequiredService<DB>();
+            var user = await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Username == name);
+            if (user != null && user.IsBlocked)
+            {
+                await ctx.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                var qs = "?blocked=1";
+                if (!ctx.Request.Path.StartsWithSegments("/Account/Login"))
+                {
+                    ctx.Response.Redirect("/Account/Login" + qs);
+                    return;
+                }
+            }
+        }
+    }
+    await next();
+});
 app.UseAuthorization();
 // Support /Hardware/5 as shorthand for /Hardware/Detail/5
 app.MapControllerRoute("HardwareById", "Hardware/{id:int}", new { controller = "Hardware", action = "Detail" });

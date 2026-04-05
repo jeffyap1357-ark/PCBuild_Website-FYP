@@ -708,6 +708,9 @@ namespace Demo.Migrations
                     b.Property<bool>("IsRootAdmin")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsBlocked")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasMaxLength(256)

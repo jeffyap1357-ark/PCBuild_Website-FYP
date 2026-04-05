@@ -33,6 +33,10 @@ public class AccountController : Controller
         {
             ModelState.AddModelError("", "Login credentials not matched.");
         }
+        else if (u.IsBlocked)
+        {
+            ModelState.AddModelError("", "This account has been blocked.");
+        }
 
         if (ModelState.IsValid)
         {
