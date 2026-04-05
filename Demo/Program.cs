@@ -1,6 +1,5 @@
 global using Demo.Models;
 global using Demo;
-global using Microsoft.AspNetCore.Authentication;
 global using Microsoft.AspNetCore.Authentication.Cookies;
 global using Microsoft.EntityFrameworkCore;
 
@@ -204,6 +203,23 @@ catch (Exception ex)
     logger.LogWarning(ex, "Could not ensure Quiz tables exist.");
 }
 
+// Ensure QuizQuestions has Level and Explanation (EF model / quiz seeds require these)
+try
+{
+    using var scopeQuizCols = app.Services.CreateScope();
+    var dbQuizCols = scopeQuizCols.ServiceProvider.GetRequiredService<DB>();
+    dbQuizCols.Database.ExecuteSqlRaw(@"
+        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('QuizQuestions') AND name = 'Level')
+            ALTER TABLE [QuizQuestions] ADD [Level] nvarchar(20) NULL;
+        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('QuizQuestions') AND name = 'Explanation')
+            ALTER TABLE [QuizQuestions] ADD [Explanation] nvarchar(1000) NULL;
+    ");
+}
+catch (Exception ex)
+{
+    logger.LogWarning(ex, "Could not ensure QuizQuestions Level/Explanation columns.");
+}
+
 // Seed Normal and Professional quiz questions if none exist
 try
 {
@@ -317,6 +333,10 @@ try
         BEGIN
             UPDATE [Users] SET [IsBlocked] = 0 WHERE [IsBlocked] IS NULL;
         END;
+        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Users') AND name = 'Avatar')
+            ALTER TABLE [Users] ADD [Avatar] nvarchar(100) NULL;
+        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Users') AND name = 'Gender')
+            ALTER TABLE [Users] ADD [Gender] nvarchar(20) NULL;
     ");
     var rootEmail = builder.Configuration["RootAdmin:Email"] ?? "admin@pcbuild.local";
     var rootPassword = builder.Configuration["RootAdmin:Password"] ?? "Admin@123";
