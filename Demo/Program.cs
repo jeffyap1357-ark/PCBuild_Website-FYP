@@ -1,5 +1,6 @@
 global using Demo.Models;
 global using Demo;
+global using Microsoft.AspNetCore.Authentication;
 global using Microsoft.AspNetCore.Authentication.Cookies;
 global using Microsoft.EntityFrameworkCore;
 
