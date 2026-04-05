@@ -507,5 +507,5 @@ app.UseAuthorization();
 app.MapControllerRoute("HardwareById", "Hardware/{id:int}", new { controller = "Hardware", action = "Detail" });
 app.MapDefaultControllerRoute();
 
-logger.LogInformation("Ready. Open http://localhost:5006 or https://localhost:7143 in your browser.");
+logger.LogInformation("Ready. See launchSettings.json (http profile:5070, https:7199).");
 app.Run();
