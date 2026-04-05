@@ -1,5 +1,6 @@
 global using Demo.Models;
 global using Demo;
+global using Microsoft.AspNetCore.Authentication;
 global using Microsoft.AspNetCore.Authentication.Cookies;
 global using Microsoft.EntityFrameworkCore;
 
@@ -308,6 +309,14 @@ try
         BEGIN
             UPDATE [Users] SET [IsRootAdmin] = 0 WHERE [IsRootAdmin] IS NULL;
         END;
+        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Users') AND name = 'IsBlocked')
+        BEGIN
+            ALTER TABLE [Users] ADD [IsBlocked] bit NOT NULL DEFAULT 0;
+        END
+        ELSE
+        BEGIN
+            UPDATE [Users] SET [IsBlocked] = 0 WHERE [IsBlocked] IS NULL;
+        END;
     ");
     var rootEmail = builder.Configuration["RootAdmin:Email"] ?? "admin@pcbuild.local";
     var rootPassword = builder.Configuration["RootAdmin:Password"] ?? "Admin@123";
@@ -434,6 +443,30 @@ app.UseStaticFiles();
 app.UseRequestLocalization("en-MY");
 app.UseSession();
 app.UseAuthentication();
+app.Use(async (ctx, next) =>
+{
+    if (ctx.User.Identity?.IsAuthenticated == true)
+    {
+        var name = ctx.User.Identity.Name;
+        if (!string.IsNullOrEmpty(name))
+        {
+            await using var scope = ctx.RequestServices.CreateAsyncScope();
+            var db = scope.ServiceProvider.GetRequiredService<DB>();
+            var user = await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Username == name);
+            if (user != null && user.IsBlocked)
+            {
+                await ctx.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                var qs = "?blocked=1";
+                if (!ctx.Request.Path.StartsWithSegments("/Account/Login"))
+                {
+                    ctx.Response.Redirect("/Account/Login" + qs);
+                    return;
+                }
+            }
+        }
+    }
+    await next();
+});
 app.UseAuthorization();
 // Support /Hardware/5 as shorthand for /Hardware/Detail/5
 app.MapControllerRoute("HardwareById", "Hardware/{id:int}", new { controller = "Hardware", action = "Detail" });

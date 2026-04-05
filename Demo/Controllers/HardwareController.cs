@@ -82,8 +82,31 @@ public class HardwareController : Controller
     }
 
     // GET: Hardware/Compare?id1=1 or Compare?id1=1&id2=2 - Compare two hardware items of the same category
-    public IActionResult Compare(int id1, int id2 = 0)
+    //     Compare?categoryId=3 - Jump to first item in that category (picker mode)
+    public IActionResult Compare(int id1 = 0, int id2 = 0, int? categoryId = null)
     {
+        if (categoryId.HasValue)
+        {
+            var firstInCat = db.Hardware
+                .Where(h => h.CategoryId == categoryId.Value)
+                .OrderBy(h => h.Name)
+                .Select(h => h.HardwareId)
+                .FirstOrDefault();
+            if (firstInCat == 0)
+            {
+                TempData["Info"] = "No hardware in this category.";
+                return RedirectToAction(nameof(List));
+            }
+
+            return RedirectToAction(nameof(Compare), new { id1 = firstInCat, id2 = 0 });
+        }
+
+        if (id1 <= 0)
+        {
+            TempData["Info"] = "Select hardware to compare.";
+            return RedirectToAction(nameof(List));
+        }
+
         var h1 = db.Hardware.Include(x => x.Category).FirstOrDefault(x => x.HardwareId == id1);
         if (h1 == null)
         {
@@ -96,12 +119,17 @@ public class HardwareController : Controller
             .OrderBy(h => h.Name)
             .ToList();
 
+        var categoryName = h1.Category?.Type ?? "Hardware";
+        ViewBag.Title = $"Compare {categoryName}";
+        ViewBag.Categories = db.Categories.OrderBy(c => c.Type).ToList();
+        ViewBag.SelectedCategoryId = h1.CategoryId;
+        ViewBag.CategoryName = categoryName;
+
         if (id2 <= 0)
         {
             ViewBag.Hardware1 = h1;
             ViewBag.Hardware2 = (Hardware?)null;
             ViewBag.SameCategoryHardware = sameCategory;
-            ViewBag.CategoryName = h1.Category?.Type ?? "Hardware";
             return View();
         }
 
@@ -127,7 +155,6 @@ public class HardwareController : Controller
         ViewBag.Hardware1 = h1;
         ViewBag.Hardware2 = h2;
         ViewBag.SameCategoryHardware = sameCategory;
-        ViewBag.CategoryName = h1.Category?.Type ?? "Hardware";
         return View();
     }
 }

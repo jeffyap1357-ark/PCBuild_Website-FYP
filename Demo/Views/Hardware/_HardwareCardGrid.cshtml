@@ -19,18 +19,9 @@ else
                     }
                     @if (!string.IsNullOrEmpty(imgFile))
                     {
-                        @if (!string.IsNullOrWhiteSpace(h.Reference))
-                        {
-                            <a href="@h.Reference" target="_blank" rel="noopener noreferrer" class="hardware-card-image-link">
-                                <img src="/hardware/@imgFile" alt="@h.Name" onerror="this.onerror=null;this.style.display='none';var p=this.nextElementSibling;if(p)p.style.display='flex';">
-                            </a>
-                        }
-                        else
-                        {
-                            <a href="@Url.Action("Detail", new { id = h.HardwareId })" class="hardware-card-image-link">
-                                <img src="/hardware/@imgFile" alt="@h.Name" onerror="this.onerror=null;this.style.display='none';var p=this.nextElementSibling;if(p)p.style.display='flex';">
-                            </a>
-                        }
+                        <a href="@Url.Action("Detail", new { id = h.HardwareId })" class="hardware-card-image-link">
+                            <img src="/hardware/@imgFile" alt="@h.Name" onerror="this.onerror=null;this.style.display='none';var p=this.nextElementSibling;if(p)p.style.display='flex';">
+                        </a>
                         <span class="hardware-card-placeholder" style="display:none">No image</span>
                     }
                     else
@@ -46,7 +37,7 @@ else
             </div>
             @if (!string.IsNullOrWhiteSpace(h.Reference))
             {
-                <a href="@h.Reference" target="_blank" rel="noopener noreferrer" class="hardware-card-reference" onclick="event.stopPropagation()">View at Store</a>
+                <a href="@h.Reference" target="_blank" rel="noopener noreferrer" class="hardware-card-reference">View at Store</a>
             }
             </div>
         }

@@ -53,11 +53,11 @@ else
                     <td>@(h.Category?.Type ?? "")</td>
                     <td>@h.Price.ToString("N2")</td>
                     <td>@(h.Rating?.ToString() ?? "—")</td>
-                    <td>
-                        <a href="@Url.Action("Edit", new { id = h.HardwareId })">Edit</a>
+                    <td class="admin-hardware-actions">
+                        <a href="@Url.Action("Edit", new { id = h.HardwareId })" class="button small success">Edit</a>
                         <form method="post" action="@Url.Action("Delete", new { id = h.HardwareId })" style="display:inline;" onsubmit="return confirm('Delete this hardware?');">
                             @Html.AntiForgeryToken()
-                            <button type="submit" class="link-button">Delete</button>
+                            <button type="submit" class="button small danger">Delete</button>
                         </form>
                     </td>
                 </tr>

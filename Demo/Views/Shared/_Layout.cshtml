@@ -19,7 +19,8 @@
         path.StartsWith("/LearningAdmin", StringComparison.OrdinalIgnoreCase) ||
         path.StartsWith("/QuizAdmin", StringComparison.OrdinalIgnoreCase) ||
         path.StartsWith("/FeedbackAdmin", StringComparison.OrdinalIgnoreCase) ||
-        path.StartsWith("/AdminAccount", StringComparison.OrdinalIgnoreCase));
+        path.StartsWith("/AdminAccount", StringComparison.OrdinalIgnoreCase) ||
+        path.StartsWith("/UsersAdmin", StringComparison.OrdinalIgnoreCase));
 }
 <body class="@(isAdminSite ? "body-admin-site" : "") @(User.Identity?.IsAuthenticated == true ? "chatbot-logged-in" : "")">
     <div class="info">@Html.Raw(TempData["Info"])</div>
@@ -52,6 +53,7 @@
             <a href="/QuizAdmin/Index" title="Quiz admin" aria-label="Quiz admin">Quiz</a>
             <a href="/FeedbackAdmin/Index" title="Feedback admin" aria-label="Feedback admin">Feedback</a>
             <a href="/AdminAccount/Index" title="Admin accounts" aria-label="Admin accounts">Admin Accounts</a>
+            <a href="/UsersAdmin" title="User accounts" aria-label="User accounts">Users</a>
             <div class="nav-spacer"></div>
             <a href="/" class="nav-site-switch" title="Back to user site">User site</a>
         }

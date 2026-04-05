@@ -18,14 +18,27 @@ public class HomeController : Controller
     {
         ViewBag.HideMainTitle = true;
         ViewBag.IsHomePage = true;
-        // Higher rated hardware: 2 rows x 5 = 10 items for section two
-        var topRated = db.Hardware
-            .Include(h => h.Category)
+        ViewBag.Categories = db.Categories.OrderBy(c => c.Type).ToList();
+        ViewBag.TopRatedHardware = GetTopRatedHardwareQuery(null).ToList();
+        return View();
+    }
+
+    /// <summary>Partial HTML for home "Higher rated hardware" grid (AJAX refresh).</summary>
+    [HttpGet]
+    public IActionResult TopRatedGrid(int? categoryId)
+    {
+        var list = GetTopRatedHardwareQuery(categoryId).ToList();
+        return PartialView("_HomeTopRatedGrid", list);
+    }
+
+    private IQueryable<Hardware> GetTopRatedHardwareQuery(int? categoryId)
+    {
+        var query = db.Hardware.Include(h => h.Category).AsQueryable();
+        if (categoryId.HasValue)
+            query = query.Where(h => h.CategoryId == categoryId.Value);
+        return query
             .OrderByDescending(h => h.Rating ?? 0)
             .ThenByDescending(h => h.PerformanceScore ?? 0)
-            .Take(10)
-            .ToList();
-        ViewBag.TopRatedHardware = topRated;
-        return View();
+            .Take(10);
     }
 }

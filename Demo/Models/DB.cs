@@ -62,6 +62,9 @@ public class User
     /// <summary>Root admin cannot be deleted or have role changed by others.</summary>
     public bool IsRootAdmin { get; set; }
 
+    /// <summary>When true, user cannot sign in; active sessions are ended.</summary>
+    public bool IsBlocked { get; set; }
+
     [MaxLength(100)]
     public string? Avatar { get; set; }
 

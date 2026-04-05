@@ -58,13 +58,31 @@ else
         @foreach (var c in Model)
         {
             var imgSrc = !string.IsNullOrEmpty(c.Image) ? "/images/community/" + c.Image : "/images/default.png";
+            var authorAvatar = !string.IsNullOrWhiteSpace(c.User?.Avatar) ? "/avatars/" + c.User.Avatar : null;
+            var authorInitial = (c.User?.Username is { Length: > 0 } n ? n[0].ToString().ToUpperInvariant() : "?");
             <a href="@Url.Action("Detail", new { id = c.CommunityId })" class="community-card">
                 <div class="community-card-image">
                     <img src="@imgSrc" alt="@c.BuildName" onerror="this.onerror=null;this.src='/images/default.png';">
                 </div>
                 <div class="community-card-body">
                     <div class="community-card-name">@c.BuildName</div>
-                    <div class="community-card-meta">by @c.User.Username</div>
+                    <div class="community-card-meta">
+                        <span class="community-user-chip">
+                            @if (!string.IsNullOrEmpty(authorAvatar))
+                            {
+                                <img src="@authorAvatar" alt="@c.User?.Username avatar" class="community-user-chip-avatar" />
+                            }
+                            else
+                            {
+                                <span class="community-user-chip-fallback" aria-hidden="true">@authorInitial</span>
+                            }
+                            <span>by @c.User?.Username</span>
+                            @if (!string.IsNullOrWhiteSpace(c.User?.Gender))
+                            {
+                                <span class="community-user-gender">(@c.User.Gender)</span>
+                            }
+                        </span>
+                    </div>
                     <div class="community-card-price">@c.TotalPrice.ToString("C")</div>
                     @if (c.AverageRating.HasValue)
                     {
