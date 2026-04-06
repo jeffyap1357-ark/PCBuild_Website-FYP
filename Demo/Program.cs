@@ -38,6 +38,29 @@ catch (Exception ex)
     logger.LogWarning(ex, "Migrations could not be applied. Run 'dotnet ef database update' if needed.");
 }
 
+// Users columns ASAP after Migrate (login / EF User entity on legacy DBs)
+try
+{
+    using var scopeCompat = app.Services.CreateScope();
+    var dbCompat = scopeCompat.ServiceProvider.GetRequiredService<DB>();
+    dbCompat.Database.ExecuteSqlRaw(@"
+        IF OBJECT_ID(N'dbo.Users', N'U') IS NOT NULL
+        BEGIN
+            IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(N'Users') AND name = N'Avatar')
+                ALTER TABLE [Users] ADD [Avatar] nvarchar(100) NULL;
+            IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(N'Users') AND name = N'Gender')
+                ALTER TABLE [Users] ADD [Gender] nvarchar(20) NULL;
+            IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(N'Users') AND name = N'IsBlocked')
+                ALTER TABLE [Users] ADD [IsBlocked] bit NOT NULL DEFAULT 0;
+        END;
+    ");
+    logger.LogInformation("Users table EF compatibility columns (Avatar, Gender, IsBlocked) verified.");
+}
+catch (Exception ex)
+{
+    logger.LogWarning(ex, "Could not apply Users compatibility columns.");
+}
+
 // Ensure Guide table exists (fallback if migrations failed or DB was created manually)
 try
 {
@@ -204,16 +227,19 @@ catch (Exception ex)
     logger.LogWarning(ex, "Could not ensure Quiz tables exist.");
 }
 
-// Ensure QuizQuestions has Level and Explanation (EF model / quiz seeds require these)
+// QuizQuestions Level/Explanation (after table exists from migration or fallback SQL above)
 try
 {
     using var scopeQuizCols = app.Services.CreateScope();
     var dbQuizCols = scopeQuizCols.ServiceProvider.GetRequiredService<DB>();
     dbQuizCols.Database.ExecuteSqlRaw(@"
-        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('QuizQuestions') AND name = 'Level')
-            ALTER TABLE [QuizQuestions] ADD [Level] nvarchar(20) NULL;
-        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('QuizQuestions') AND name = 'Explanation')
-            ALTER TABLE [QuizQuestions] ADD [Explanation] nvarchar(1000) NULL;
+        IF OBJECT_ID(N'dbo.QuizQuestions', N'U') IS NOT NULL
+        BEGIN
+            IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(N'QuizQuestions') AND name = N'Level')
+                ALTER TABLE [QuizQuestions] ADD [Level] nvarchar(20) NULL;
+            IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(N'QuizQuestions') AND name = N'Explanation')
+                ALTER TABLE [QuizQuestions] ADD [Explanation] nvarchar(1000) NULL;
+        END;
     ");
 }
 catch (Exception ex)
@@ -326,18 +352,6 @@ try
         BEGIN
             UPDATE [Users] SET [IsRootAdmin] = 0 WHERE [IsRootAdmin] IS NULL;
         END;
-        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Users') AND name = 'IsBlocked')
-        BEGIN
-            ALTER TABLE [Users] ADD [IsBlocked] bit NOT NULL DEFAULT 0;
-        END
-        ELSE
-        BEGIN
-            UPDATE [Users] SET [IsBlocked] = 0 WHERE [IsBlocked] IS NULL;
-        END;
-        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Users') AND name = 'Avatar')
-            ALTER TABLE [Users] ADD [Avatar] nvarchar(100) NULL;
-        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Users') AND name = 'Gender')
-            ALTER TABLE [Users] ADD [Gender] nvarchar(20) NULL;
     ");
     var rootEmail = builder.Configuration["RootAdmin:Email"] ?? "admin@pcbuild.local";
     var rootPassword = builder.Configuration["RootAdmin:Password"] ?? "Admin@123";
@@ -493,5 +507,5 @@ app.UseAuthorization();
 app.MapControllerRoute("HardwareById", "Hardware/{id:int}", new { controller = "Hardware", action = "Detail" });
 app.MapDefaultControllerRoute();
 
-logger.LogInformation("Ready. Open http://localhost:5006 or https://localhost:7143 in your browser.");
+logger.LogInformation("Ready. See launchSettings.json (http profile:5070, https:7199).");
 app.Run();
