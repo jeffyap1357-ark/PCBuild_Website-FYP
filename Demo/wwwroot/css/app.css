@@ -4576,6 +4576,16 @@ main hr {
 
 /* Chatbot: floating help widget */
 .chatbot-wrap { position: fixed; bottom: 24px; right: 24px; z-index: 9999; font-family: inherit; }
+.chatbot-fab-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+}
+/* Lift panel when logged-in has Feedback ! + Help ? stacked FABs */
+.chatbot-wrap--logged-in .chatbot-panel {
+    bottom: 122px;
+}
 .chatbot-panel {
     position: absolute; bottom: 56px; right: 0;
     width: 360px; max-width: calc(100vw - 48px); max-height: 480px;
@@ -4624,6 +4634,19 @@ main hr {
     background: var(--accent); color: var(--text-on-accent); cursor: pointer;
 }
 .chatbot-send:hover { background: var(--accent-hover); }
+/* Manual feedback trigger (above chatbot) */
+.feedback-manual-trigger {
+    width: 52px; height: 52px; border-radius: 50%; border: none; cursor: pointer;
+    background: linear-gradient(135deg, #c2410c 0%, #f97316 100%); color: #fff;
+    box-shadow: 0 4px 16px rgba(249, 115, 22, 0.45);
+    font-size: 1.5rem; font-weight: 900; line-height: 1; padding: 0;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.feedback-manual-trigger:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(249, 115, 22, 0.55);
+}
+
 .chatbot-toggle {
     width: 52px; height: 52px; border-radius: 50%; border: none; cursor: pointer;
     background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: #fff;
@@ -4714,7 +4737,7 @@ main hr {
 
 /* Feedback prompt: centered modal for logged-in users */
 .feedback-modal-wrap {
-    position: fixed; inset: 0; z-index: 9999;
+    position: fixed; inset: 0; z-index: 10050;
     display: flex; align-items: center; justify-content: center;
     padding: 20px; box-sizing: border-box;
 }

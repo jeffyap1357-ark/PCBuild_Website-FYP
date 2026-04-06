@@ -46,28 +46,47 @@
 
 <script>
 (function () {
-    if (!window.localStorage) return;
     var wrap = document.getElementById('feedback-panel-wrap');
     if (!wrap) return;
+
+    function bindCloseOnce() {
+        var laterBtn = document.getElementById('feedback-later');
+        var backdrop = document.getElementById('feedback-backdrop');
+        if (laterBtn && !laterBtn.dataset.fbCloseBound) {
+            laterBtn.dataset.fbCloseBound = '1';
+            laterBtn.addEventListener('click', function () {
+                wrap.style.display = 'none';
+            });
+        }
+        if (backdrop && !backdrop.dataset.fbCloseBound) {
+            backdrop.dataset.fbCloseBound = '1';
+            backdrop.addEventListener('click', function () {
+                wrap.style.display = 'none';
+            });
+        }
+    }
+
+    function openFeedbackPanel() {
+        bindCloseOnce();
+        wrap.style.display = 'flex';
+    }
+    window.openFeedbackPanel = openFeedbackPanel;
+
+    var manualBtn = document.getElementById('feedback-manual-trigger');
+    if (manualBtn) {
+        manualBtn.addEventListener('click', function () {
+            openFeedbackPanel();
+        });
+    }
+
+    if (!window.localStorage) return;
     if (wrap.getAttribute('data-trigger') !== '1') return;
     var userKey = wrap.getAttribute('data-user') || 'guest';
     var storageKey = 'feedbackLastShownDate_' + userKey;
     var today = new Date().toISOString().slice(0, 10);
     if (localStorage.getItem(storageKey) === today) return;
     localStorage.setItem(storageKey, today);
-    wrap.style.display = 'flex';
-    var laterBtn = document.getElementById('feedback-later');
-    if (laterBtn) {
-        laterBtn.addEventListener('click', function () {
-            wrap.style.display = 'none';
-        });
-    }
-    var backdrop = document.getElementById('feedback-backdrop');
-    if (backdrop) {
-        backdrop.addEventListener('click', function () {
-            wrap.style.display = 'none';
-        });
-    }
+    openFeedbackPanel();
 })();
 </script>
 

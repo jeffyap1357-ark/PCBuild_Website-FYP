@@ -1,5 +1,5 @@
 @* Chatbot: keyword-based help, introduces all webpage features *@
-<div id="chatbot-wrap" class="chatbot-wrap" aria-hidden="true">
+<div id="chatbot-wrap" class="chatbot-wrap @(User.Identity?.IsAuthenticated == true ? "chatbot-wrap--logged-in" : "")" aria-hidden="true">
     <div class="chatbot-panel" id="chatbot-panel">
         <div class="chatbot-header">
             <h3>PC Build Help</h3>
@@ -24,8 +24,14 @@
             <button type="button" class="chatbot-send" id="chatbot-send" aria-label="Send">Send</button>
         </div>
     </div>
-    <button type="button" class="chatbot-toggle" id="chatbot-toggle" aria-label="Open help chat" title="Help">
-        <span class="chatbot-toggle-icon">?</span>
-    </button>
+    <div class="chatbot-fab-stack">
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <button type="button" class="feedback-manual-trigger" id="feedback-manual-trigger" aria-label="Give feedback" title="Feedback">!</button>
+        }
+        <button type="button" class="chatbot-toggle" id="chatbot-toggle" aria-label="Open help chat" title="Help">
+            <span class="chatbot-toggle-icon">?</span>
+        </button>
+    </div>
 </div>
 <script src="/js/chatbot.js" asp-append-version="true"></script>
