@@ -120,7 +120,7 @@ public class HardwareController : Controller
             .ToList();
 
         var categoryName = h1.Category?.Type ?? "Hardware";
-        ViewBag.Title = $"Compare {categoryName}";
+        ViewBag.Title = "Compare";
         ViewBag.Categories = db.Categories.OrderBy(c => c.Type).ToList();
         ViewBag.SelectedCategoryId = h1.CategoryId;
         ViewBag.CategoryName = categoryName;

@@ -121,12 +121,18 @@ public class Helper
         ["Kingston 32GB DDR5 6000MHz"] = "kingston32.png", ["Samsung 970 EVO 1TB"] = "samsung970.png",
         ["WD SN770 1TB"] = "wdsn850x.png", ["Samsung 980 PRO 2TB"] = "980pro.png",
         ["Corsair 650W 80+ Bronze"] = "650consair.png", ["Cooler Master 750W 80+ Gold"] = "cm750.png",
-        ["Seasonic 850W 80+ Gold"] = "sea850.png", ["NZXT H5 Flow"] = "h5flow.png", ["Cooler Master TD300"] = "cttd300.png"
+        ["Seasonic 850W 80+ Gold"] = "sea850.png", ["NZXT H5 Flow"] = "h5flow.png", ["Cooler Master TD300"] = "cttd300.png",
+        ["be quiet! Dark Rock Pro 4"] = "dark980.jpg"
     };
 
     public string GetHardwareImagePath(string? picture, string name)
     {
         var folder = Path.Combine(en.WebRootPath, "hardware");
+        // Catalog image for this cooler (overrides stale Picture in DB)
+        if (name.Contains("Dark Rock Pro 4", StringComparison.OrdinalIgnoreCase) &&
+            System.IO.File.Exists(Path.Combine(folder, "dark980.jpg")))
+            return "dark980.jpg";
+
         if (!string.IsNullOrEmpty(picture) && File.Exists(Path.Combine(folder, picture)))
             return picture;
         if (HardwareImageMap.TryGetValue(name.Trim(), out var mapped))
@@ -150,6 +156,14 @@ public class Helper
 
         var hardwareFile = GetHardwareImagePath(picture, name);
         var hardwarePath = string.IsNullOrWhiteSpace(hardwareFile) ? "" : $"hardware/{hardwareFile}";
+
+        // Configurator: use hardware/dark980.jpg, do not substitute a different implant image
+        if (!string.IsNullOrWhiteSpace(name) && name.Contains("Dark Rock Pro 4", StringComparison.OrdinalIgnoreCase))
+        {
+            var darkPath = Path.Combine(en.WebRootPath, "hardware", "dark980.jpg");
+            if (System.IO.File.Exists(darkPath))
+                return "hardware/dark980.jpg";
+        }
 
         if (!Directory.Exists(implantFolder))
             return hardwarePath;

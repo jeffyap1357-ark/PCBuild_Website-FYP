@@ -195,7 +195,7 @@
             </div>
             <div class="build-sidebar-section">
                 <h3 class="build-sidebar-title"><span class="build-accent"></span>Estimated Total</h3>
-                <div class="build-total" id="build-total">@Model.Categories.Sum(c => c.Items.FirstOrDefault(i => i.HardwareId == c.SelectedHardwareId)?.Price ?? 0).ToString("C")</div>
+                <div class="build-total" id="build-total">@(Model.Categories.Sum(c => c.Items.FirstOrDefault(i => i.HardwareId == c.SelectedHardwareId)?.Price ?? 0).ToString("C"))</div>
             </div>
         </aside>
     </div>

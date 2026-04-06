@@ -177,4 +177,4 @@ C:\Users\User\Desktop\new_origin\Demo\Demo\bin\Debug\net9.0\BouncyCastle.Cryptog
 C:\Users\User\Desktop\new_origin\Demo\Demo\bin\Debug\net9.0\MailKit.dll
 C:\Users\User\Desktop\new_origin\Demo\Demo\bin\Debug\net9.0\MimeKit.dll
 C:\Users\User\Desktop\new_origin\Demo\Demo\obj\Debug\net9.0\compressed\hri6o2ucms-rk3n4johe9.gz
-C:\Users\User\Desktop\new_origin\Demo\Demo\obj\Debug\net9.0\compressed\moxlhvdfuc-48ow9mzo3q.gz
+C:\Users\User\Desktop\new_origin\Demo\Demo\obj\Debug\net9.0\compressed\moxlhvdfuc-qyq62yv179.gz

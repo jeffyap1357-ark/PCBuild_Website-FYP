@@ -36,7 +36,7 @@
     <p class="community-author-comment">@Model.AuthorComment</p>
 }
 
-<table class="table">
+<table class="table table-build-detail">
     <thead>
         <tr>
             <th>Category</th>
@@ -50,7 +50,7 @@
             <tr>
                 <td>@bd.Hardware?.Category?.Type</td>
                 <td><a href="/Hardware/Detail/@bd.HardwareId">@bd.Hardware?.Name</a></td>
-                <td>@((bd.Hardware?.Price ?? 0) * bd.Quantity).ToString("C")</td>
+                <td>@(((bd.Hardware?.Price ?? 0) * bd.Quantity).ToString("C"))</td>
             </tr>
         }
     </tbody>

@@ -972,6 +972,22 @@ main a:hover {
     color: var(--accent-hover);
 }
 
+/* PC build / community component list: black text (not accent) */
+.table.table-build-detail th {
+    color: #111827;
+}
+.table.table-build-detail td {
+    color: #111827;
+}
+.table.table-build-detail td a {
+    color: #111827;
+    font-weight: 600;
+}
+.table.table-build-detail td a:hover {
+    color: #000;
+    text-decoration: underline;
+}
+
 .detail th {
     text-align: left;
 }
